@@ -41,15 +41,30 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	{
 		String strNativeName = "mc-dpifix-" + arch + ".dll";
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
+		//load the natives if they do not exist
 		InputStream in = null;
 		FileOutputStream out = null;
 		if (!fnative.exists()) 
 		{
-			fnative.getParentFile().mkdirs();
-			in = DpiFix.class.getClassLoader().getResourceAsStream("natives/jredfox/" + strNativeName);
-			out = new FileOutputStream(fnative);
-			copy(in, out);
+			try
+			{
+				fnative.getParentFile().mkdirs();
+				in = DpiFix.class.getClassLoader().getResourceAsStream("natives/jredfox/" + strNativeName);
+				out = new FileOutputStream(fnative);
+				copy(in, out);
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
+			}
+			finally
+			{
+				closeQuietly(in);
+				closeQuietly(out);
+				System.out.println("finally closing resources:" + pass);
+			}
 		}
+		
 		try
 		{
 			System.load(fnative.getPath());
@@ -65,11 +80,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			{
 				t.printStackTrace();
 			}
-		}
-		finally
-		{
-			closeQuietly(in);
-			closeQuietly(out);
 		}
 	}
 
