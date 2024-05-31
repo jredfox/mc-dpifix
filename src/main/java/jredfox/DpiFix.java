@@ -88,7 +88,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	public void loadNatives(ARCH arch, int pass) throws IOException 
 	{
-		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : "");
+		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : isMacOs ? ".dylib" : ".so");
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
 		//load the natives if they do not exist
 		InputStream in = null;
@@ -140,10 +140,11 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	 */
 	public native void setHighPriority();
 	
-	public static boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
-	public static boolean isMacOs;
-	public static boolean isLinux;
-	public static boolean isChromeOs;
+	public static String osName = System.getProperty("os.name").toLowerCase();
+	public static boolean isWindows = osName.startsWith("windows");
+	public static boolean isLinux = osName.contains("linux") || osName.contains("nux") || osName.contains("aix");
+	public static boolean isMacOs = !isLinux && (osName.contains("mac") || osName.contains("osx") || osName.contains("darwin"));
+//	public static boolean isChromeOs = osName.contains("google") || osName.contains("chromeos") || osName.contains("pixelbook");;
 	
 	public static boolean isWindows7()
 	{
