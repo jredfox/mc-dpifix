@@ -40,6 +40,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		try 
 		{
 			ARCH arch = getARCH();
+			System.out.println(arch);
 			this.loadConfig();
 			this.loadNatives(arch, 0);
 			this.fixDPI();
@@ -135,7 +136,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	 */
 	public native void fixDPI();
 	/**
-	 * automatically sets minecraft's proccess to high priority
+	 * automatically sets minecraft's process to high priority
 	 */
 	public native void setHighPriority();
 
@@ -183,35 +184,29 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		UNSUPPORTED
 	}
 
-	// JUNK CODE We are simply using forge as a high jack hack to load the DPI
+	// JUNK CODE We are simply using forge as a hijack hack to load the DPI
 	// fix before the game app is visible
 	@Override
 	public String[] getASMTransformerClass() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getModContainerClass() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getSetupClass() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void injectData(Map<String, Object> data) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public String getAccessTransformerClass() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
