@@ -1,11 +1,22 @@
 package jredfox;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
@@ -18,6 +29,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
  */
 public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 
+	public boolean highPriority;
 	public DpiFix()
 	{
 		this.load();
@@ -28,18 +40,54 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		try 
 		{
 			ARCH arch = getARCH();
+			this.loadConfig();
 			this.loadNatives(arch, 0);
 			this.fixDPI();
-		} 
+			if(this.highPriority)
+				this.setHighPriority();
+		}
 		catch (Throwable t)
 		{
 			t.printStackTrace();
 		}
 	}
 
+	//shit ASM config
+	public void loadConfig() throws IOException 
+	{
+		long ms = System.currentTimeMillis();
+		File file = new File("config", "DpiFix.cfg");
+		if(!file.exists())
+		{
+			file.getParentFile().mkdirs();
+			ArrayList l = new ArrayList();
+			l.add("setHighPriority:true");
+			saveFileLines(l, file, true);
+		}
+		
+		List<String> lines = file.exists() ? getFileLines(file, true) : Collections.EMPTY_LIST;
+		boolean found = false;
+		for(String s : lines)
+		{
+			String l = s.trim();
+			if(l.startsWith("setHighPriority:"))
+			{
+				this.highPriority = l.substring("setHighPriority:".length(), l.length()).toLowerCase().equals("true");
+				found = true;
+				break;
+			}
+		}
+		if(!found)
+		{
+			file.delete();
+			this.highPriority = true;
+		}
+		System.out.println("DpiFix.cfg took:" + (System.currentTimeMillis() - ms));
+	}
+
 	public void loadNatives(ARCH arch, int pass) throws IOException 
 	{
-		String strNativeName = "mc-dpifix-" + arch + ".dll";
+		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + ".dll";
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
 		//load the natives if they do not exist
 		InputStream in = null;
@@ -61,7 +109,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			{
 				closeQuietly(in);
 				closeQuietly(out);
-				System.out.println("finally closing resources:" + pass);
 			}
 		}
 		
@@ -83,7 +130,14 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 	}
 
+	/**
+	 * fix High DPI Issues
+	 */
 	public native void fixDPI();
+	/**
+	 * automatically sets minecraft's proccess to high priority
+	 */
+	public native void setHighPriority();
 
 	/**
 	 * gets the real arch based on the string. STOP MAKING ABIGUOUS NAMES FOR
@@ -120,8 +174,13 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		return ARCH.UNSUPPORTED;
 	}
 
-	public static enum ARCH {
-		X64, X86, ARM32, ARM64, UNSUPPORTED
+	public static enum ARCH 
+	{
+		X64, 
+		X86, 
+		ARM32, 
+		ARM64, 
+		UNSUPPORTED
 	}
 
 	// JUNK CODE We are simply using forge as a high jack hack to load the DPI
@@ -130,11 +189,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public String[] getASMTransformerClass() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	private static boolean rtrue() {
-		// TODO Auto-generated method stub
-		return true;
 	}
 
 	@Override
@@ -195,6 +249,104 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		catch (IOException e)
 		{
 			
+		}
+	}
+	
+	/**
+	 * Equivalent to Files.readAllLines() but, works way faster
+	 */
+	public static List<String> getFileLines(File f,boolean utf8)
+	{
+		BufferedReader reader = null;
+		List<String> list = null;
+		try
+		{
+			if(!utf8)
+			{
+				reader = new BufferedReader(new FileReader(f));//says it's utf-8 but, the jvm actually specifies it even though the lang settings in a game might be different
+			}
+			else
+			{
+				reader = new BufferedReader(new InputStreamReader(new FileInputStream(f),StandardCharsets.UTF_8) );
+			}
+			
+			list = new ArrayList();
+			String s = reader.readLine();
+			
+			if(s != null)
+			{
+				list.add(s);
+			}
+			
+			while(s != null)
+			{
+				s = reader.readLine();
+				if(s != null)
+				{
+					list.add(s);
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if(reader != null)
+			{
+				try 
+				{
+					reader.close();
+				} catch (IOException e) 
+				{
+					System.out.println("Unable to Close InputStream this is bad");
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Overwrites entire file default behavior no per line modification removal/addition
+	 */
+	public static void saveFileLines(List<String> list,File f,boolean utf8)
+	{
+		BufferedWriter writer = null;
+		try
+		{
+			if(!utf8)
+			{
+				writer = new BufferedWriter(new FileWriter(f));
+			}
+			else
+			{
+				writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f),StandardCharsets.UTF_8 ) );
+			}
+			
+			for(String s : list)
+			{
+				writer.write(s + "\r\n");
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if(writer != null)
+			{
+				try
+				{
+					writer.close();
+				}
+				catch(Exception e)
+				{
+					System.out.println("Unable to Close OutputStream this is bad");
+				}
+			}
 		}
 	}
 
