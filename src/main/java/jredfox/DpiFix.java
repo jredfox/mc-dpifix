@@ -88,7 +88,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	public void loadNatives(ARCH arch, int pass) throws IOException 
 	{
-		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + ".dll";
+		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : "");
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
 		//load the natives if they do not exist
 		InputStream in = null;
@@ -139,6 +139,22 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	 * automatically sets minecraft's process to high priority
 	 */
 	public native void setHighPriority();
+	
+	public static boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+	public static boolean isMacOs;
+	public static boolean isLinux;
+	public static boolean isChromeOs;
+	
+	public static boolean isWindows7()
+	{
+		try
+		{
+			return isWindows && Double.parseDouble(System.getProperty("os.version")) <= 6.1D;
+		}
+		catch(Exception e) {}
+		
+		return false;
+	}
 
 	/**
 	 * gets the real arch based on the string. STOP MAKING ABIGUOUS NAMES FOR
