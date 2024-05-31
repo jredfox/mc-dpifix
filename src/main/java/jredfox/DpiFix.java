@@ -22,7 +22,7 @@ import java.util.Map;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 /**
- * TODO: get x86 and arm64 natives on windows
+ * TODO: x86 and x64 on windows 7
  * TODO: macos intel(x64) and silicon (arm64)
  * TODO: linux ubuntu / mint x86, x64, arm64
  * NOTE: ARM32 looks to not be supported by java so they would be running x86 on windows and who knows what on linux / android
