@@ -22,25 +22,34 @@ import java.util.Map;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 /**
- * TODO: x86 and x64 on windows 7
  * TODO: macos intel(x64) and silicon (arm64)
  * TODO: linux ubuntu / mint x86, x64, arm64
  * NOTE: ARM32 looks to not be supported by java so they would be running x86 on windows and who knows what on linux / android
  */
+//1.6.4-1.7.10 forge's annotations
+@IFMLLoadingPlugin.Name("mc-dpifix")
+@IFMLLoadingPlugin.SortingIndex(1001)
+@IFMLLoadingPlugin.TransformerExclusions("jredfox.DpiFix")
+//newer minecraft forge's annotations
+@net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name("mc-dpifix")
+@net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.SortingIndex(1001)
+@net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions("jredfox.DpiFix")
 public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 
 	public boolean highPriority;
 	public DpiFix()
 	{
-		this.load();
+		//only load the mod if it hasn't been loaded by the javaagent already
+		if(!Boolean.parseBoolean(System.getProperty("gamemodelib.agent", "false")))
+			this.loadMod();
 	}
 
-	public void load()
+	public void loadMod()
 	{
 		try 
 		{
 			ARCH arch = getARCH();
-			System.out.println(arch);
+			System.out.println("Dpi-Fix Loading Natives:" + arch);
 			this.loadConfig();
 			this.loadNatives(arch, 0);
 			this.fixDPI();
@@ -52,11 +61,24 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			t.printStackTrace();
 		}
 	}
+	
+	public static void load()
+	{
+		try 
+		{
+			ARCH arch = getARCH();
+			System.out.println("GamemodeLib Loading Natives:" + arch);
+			loadNatives(arch, 0);
+		}
+		catch (Throwable t)
+		{
+			t.printStackTrace();
+		}
+	}
 
 	//shit ASM config
 	public void loadConfig() throws IOException 
 	{
-		long ms = System.currentTimeMillis();
 		File file = new File("config", "DpiFix.cfg");
 		if(!file.exists())
 		{
@@ -83,10 +105,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			file.delete();
 			this.highPriority = true;
 		}
-		System.out.println("DpiFix.cfg took:" + (System.currentTimeMillis() - ms));
 	}
 
-	public void loadNatives(ARCH arch, int pass) throws IOException 
+	public static void loadNatives(ARCH arch, int pass) throws IOException 
 	{
 		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : isMacOs ? ".dylib" : ".so");
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
@@ -122,7 +143,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			if (pass == 0) 
 			{
 				fnative.delete();
-				this.loadNatives(arch, 1);
+				loadNatives(arch, 1);
 			} 
 			else
 			{
@@ -134,11 +155,11 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	/**
 	 * fix High DPI Issues
 	 */
-	public native void fixDPI();
+	public native static void fixDPI();
 	/**
 	 * automatically sets minecraft's process to high priority
 	 */
-	public native void setHighPriority();
+	public native static void setHighPriority();
 	
 	public static String osName = System.getProperty("os.name").toLowerCase();
 	public static boolean isWindows = osName.startsWith("windows");
@@ -170,7 +191,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			System.err.println("ERROR os.arch IS UNSET ASSUMING x64!");
 			return ARCH.X64;
 		}
-		arc = arc.toLowerCase();
+		arc = arc.trim().toLowerCase();
 		if (arc.equals("x64") || arc.equals("amd64") || arc.equals("x86_64"))
 		{
 			return ARCH.X64;
@@ -201,13 +222,13 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		UNSUPPORTED
 	}
 
-	// JUNK CODE We are simply using forge as a hijack hack to load the DPI
-	// fix before the game app is visible
 	@Override
 	public String[] getASMTransformerClass() {
-		return null;
+		return new String[]{"jredfox.DpiFixTransformer"};
 	}
 
+	// JUNK CODE We are simply using forge as a hijack hack to load the DPI
+	// fix before the game app is visible
 	@Override
 	public String getModContainerClass() {
 		return null;
@@ -219,13 +240,16 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 
 	@Override
-	public void injectData(Map<String, Object> data) {
-	}
-
-	@Override
 	public String getAccessTransformerClass() {
 		return null;
 	}
+	
+    public static boolean isObf = true;
+	@Override
+    public void injectData(Map<String, Object> data)
+    {
+    	isObf = (Boolean) data.get("runtimeDeobfuscationEnabled");
+    }
 	
 	//_______________________________________________START IOUTILS METHODS REQUIRED______________________________\\
 	public static final int BUFFER_SIZE = 1048576/2;
