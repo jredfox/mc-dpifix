@@ -84,13 +84,14 @@ public class DpiFixTransformer implements IClassTransformer {
 					m2.instructions.insert(prevLabelNode(spot), list);
 				}
 			}
-		}
+		} 
 		
 		/*
 		 * Fixes MC-68754
 		 * if(!this.fullscreen)
 		 * {
-		 * 		Display.setResizable(false);
+		 * 		if(!isMac)
+		 * 			Display.setResizable(false);
 		 * 		Display.setResizable(true);
 		 * }
 		 */
@@ -104,10 +105,13 @@ public class DpiFixTransformer implements IClassTransformer {
 		li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("fullscreen", "field_71431_Q").toString(), "Z"));
 		LabelNode l26 = new LabelNode();
 		li.add(new JumpInsnNode(Opcodes.IFNE, l26));
-		LabelNode l27 = new LabelNode();
-		li.add(l27);
-		li.add(new InsnNode(Opcodes.ICONST_0));
-		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+		if(!DpiFix.isMacOs)
+		{
+			LabelNode l27 = new LabelNode();
+			li.add(l27);
+			li.add(new InsnNode(Opcodes.ICONST_0));
+			li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+		}
 		LabelNode l28 = new LabelNode();
 		li.add(l28);
 		li.add(new InsnNode(Opcodes.ICONST_1));
@@ -117,6 +121,7 @@ public class DpiFixTransformer implements IClassTransformer {
 		li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
 		
 		m.instructions.insert(getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
+		
 	}
 	
 	public static LineNumberNode prevLabelNode(AbstractInsnNode spot) 

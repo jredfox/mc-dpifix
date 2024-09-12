@@ -109,7 +109,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	public static void loadNatives(ARCH arch, int pass) throws IOException 
 	{
-		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : isMacOs ? ".dylib" : ".so");
+		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : isMacOs ? ".jnilib" : ".so");
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
 		//load the natives if they do not exist
 		InputStream in = null;
@@ -120,6 +120,11 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			{
 				fnative.getParentFile().mkdirs();
 				in = DpiFix.class.getClassLoader().getResourceAsStream("natives/jredfox/" + strNativeName);
+				if(in == null)
+				{
+					System.err.println("Error Missing Natives:" + strNativeName + " ISA:" + arch);
+					return;
+				}
 				out = new FileOutputStream(fnative);
 				copy(in, out);
 			}
@@ -384,6 +389,11 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				}
 			}
 		}
+	}
+
+	@Override
+	public String[] getLibraryRequestClass() {
+		return null;
 	}
 
 }
