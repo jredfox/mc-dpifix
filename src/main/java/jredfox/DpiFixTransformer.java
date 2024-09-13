@@ -102,17 +102,22 @@ public class DpiFixTransformer implements IClassTransformer {
 		 * 		Display.setResizable(true);
 		 * }
 		 */
-		//detect if it's already been patched by forge and patch their patch if on macOS
+		//Disable all instances of Forge's / Optifine's Fullscreen "Fix"
 		MethodInsnNode startResize = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
 		if(startResize != null)
 		{
-			System.err.println("FullScreen Already Patched!");
-			if(DpiFix.isMacOs) 
+			System.err.println("Disabling Forge's \"FIX\" for Fullscreen!");
+			MethodInsnNode resizeInsn = newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+			AbstractInsnNode ab = startResize;
+			while(ab != null)
 			{
-				System.err.println("Patching Forge's \"FIX\" for macOS");
-				startResize.owner = "jredfox/DpiFixTransformer";
+				if(ab instanceof MethodInsnNode && equals(resizeInsn, (MethodInsnNode) ab))
+				{
+					MethodInsnNode minsn = (MethodInsnNode)ab;
+					minsn.owner = "jredfox/DpiFixTransformer";
+				}
+				ab = ab.getNext();
 			}
-			return;
 		}
 		
 		InsnList li = new InsnList();

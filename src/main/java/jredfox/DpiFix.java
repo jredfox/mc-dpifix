@@ -28,7 +28,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
  */
 //1.6.4-1.7.10 forge's annotations
 @IFMLLoadingPlugin.Name("mc-dpifix")
-@IFMLLoadingPlugin.SortingIndex(1001)
+@IFMLLoadingPlugin.SortingIndex(1005)
 @IFMLLoadingPlugin.TransformerExclusions("jredfox.DpiFix")
 //newer minecraft forge's annotations
 @net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name("mc-dpifix")
