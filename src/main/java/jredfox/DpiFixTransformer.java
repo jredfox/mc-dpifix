@@ -43,7 +43,8 @@ public class DpiFixTransformer implements IClassTransformer {
 	            classNode.accept(classWriter);
 	            
 	            byte[] bytes = classWriter.toByteArray();
-//	            dumpFile(transformedName, bytes);
+	            if(Boolean.parseBoolean(System.getProperty("asm.dump", "false")))
+	            	dumpFile(transformedName, bytes);
 	            
 	            return bytes;
 			}
@@ -84,7 +85,7 @@ public class DpiFixTransformer implements IClassTransformer {
 					m2.instructions.insert(prevLabelNode(spot), list);
 				}
 			}
-		} 
+		}
 		
 		/*
 		 * Fixes MC-68754
@@ -95,12 +96,20 @@ public class DpiFixTransformer implements IClassTransformer {
 		 * 		Display.setResizable(true);
 		 * }
 		 */
-		InsnList li = new InsnList();
-		if(getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false) != null)
+		//detect if it's already been patched by forge and patch their patch if on macOS
+		MethodInsnNode startResize = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+		if(startResize != null)
 		{
-			System.err.println("Full Screen Already Patched!");
+			System.err.println("FullScreen Already Patched!");
+			if(DpiFix.isMacOs) 
+			{
+				System.err.println("Patching Forge's \"FIX\" for macOS");
+				startResize.owner = "jredfox/DpiFixTransformer";
+			}
 			return;
 		}
+		
+		InsnList li = new InsnList();
 		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("fullscreen", "field_71431_Q").toString(), "Z"));
 		LabelNode l26 = new LabelNode();
@@ -123,7 +132,7 @@ public class DpiFixTransformer implements IClassTransformer {
 		m.instructions.insert(getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
 		
 	}
-	
+
 	public static LineNumberNode prevLabelNode(AbstractInsnNode spot) 
 	{
 		AbstractInsnNode n = spot;
@@ -219,6 +228,11 @@ public class DpiFixTransformer implements IClassTransformer {
 	{
 		return false;
 	}
+
+	/**
+	 * Dummy Method to stop forge from breaking on macOS
+	 */
+	public static void setResizable(boolean resizeable) {}
 	
 
 }

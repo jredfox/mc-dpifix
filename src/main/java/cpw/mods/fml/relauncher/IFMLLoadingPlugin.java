@@ -69,6 +69,12 @@ public interface IFMLLoadingPlugin
      * @return the name of an access transformer class or null if none is provided
      */
     String getAccessTransformerClass();
+    
+    /**
+     * @jredfox comment
+     * Add forge's older depreciated method getLibraryRequestClass() for 1.6.4
+     */
+	public String[] getLibraryRequestClass();
 
     /**
      * Annotate your load plugin with a list of package prefixes that will *not* be
