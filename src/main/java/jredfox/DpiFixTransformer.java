@@ -192,8 +192,9 @@ public class DpiFixTransformer implements IClassTransformer {
 	
 	public static MethodNode getMethodNode(ClassNode classNode, String method_name, String method_desc) 
 	{
-		for (MethodNode method : classNode.methods)
+		for (Object method_ : classNode.methods)
 		{
+			MethodNode method = (MethodNode) method_;
 			if (method.name.equals(method_name) && method.desc.equals(method_desc))
 			{
 				return method;
