@@ -2,6 +2,8 @@ package jredfox;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.ClassReader;
@@ -142,6 +144,19 @@ public class DpiFixTransformer implements IClassTransformer {
 		
 		m.instructions.insert(getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
 		
+		//DpiFixTransformer.patchSplash(this.mcDataDir);
+		if(ForgeVersion.getMajorVersion() >= 10 && ForgeVersion.getBuildVersion() >= 1389)
+		{
+			MethodNode in = getMethodNode(classNode, getObfString("init", "func_71384_a"), "()V");
+			if(in == null)
+				in = getMethodNode(classNode, "startGame", "()V");
+			
+			InsnList ilist = new InsnList();
+			ilist.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			ilist.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("mcDataDir", "field_71412_D"), "Ljava/io/File;"));
+			ilist.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "patchSplash", "(Ljava/io/File;)V", false));
+			in.instructions.insert(nextLabelNode(in.instructions.getFirst()), ilist);
+		}
 	}
 
 	public static LineNumberNode prevLabelNode(AbstractInsnNode spot) 
@@ -150,6 +165,18 @@ public class DpiFixTransformer implements IClassTransformer {
 		while(n != null)
 		{
 			n = n.getPrevious();
+			if(n instanceof LineNumberNode)
+				return (LineNumberNode) n;
+		}
+		return null;
+	}
+	
+	public static LineNumberNode nextLabelNode(AbstractInsnNode spot) 
+	{
+		AbstractInsnNode n = spot;
+		while(n != null)
+		{
+			n = n.getNext();
 			if(n instanceof LineNumberNode)
 				return (LineNumberNode) n;
 		}
@@ -245,6 +272,48 @@ public class DpiFixTransformer implements IClassTransformer {
 	 * Dummy Method to stop forge from breaking on macOS
 	 */
 	public static void setResizable(boolean resizeable) {}
+
+	public static void patchSplash(File mcDataDir)
+	{
+		if(DpiFix.isMacOs && !(new File(mcDataDir, "config/splash.properties.patched").exists()))
+		{
+			//create configuration dir
+			File cfgdir = new File(mcDataDir, "config");
+			if(!cfgdir.exists())
+				cfgdir.mkdirs();
+			
+			List<String> li = new ArrayList();
+			String nl = System.lineSeparator();
+			li.add("#Splash screen properties" + nl +
+					"background=0xFFFFFF" + nl +
+					"memoryGood=0x78CB34\r\n" + nl +
+					"font=0x0\r\n" + nl +
+					"barBackground=0xFFFFFF" + nl +
+					"barBorder=0xC0C0C0" + nl +
+					"memoryLow=0xE42F2F" + nl +
+					"rotate=false" + nl +
+					"memoryWarn=0xE6E84A" + nl +
+					"showMemory=true" + nl +
+					"bar=0xCB3D35" + nl +
+					"enabled=false" + nl +
+					"resourcePackPath=resources" + nl +
+					"logoOffset=0" + nl +
+					"forgeTexture=fml\\:textures/gui/forge.png" + nl +
+					"fontTexture=textures/font/ascii.png"
+					);
+			
+			DpiFix.saveFileLines(li, new File(cfgdir, "splash.properties"), true);
+			
+			try
+			{
+				new File(cfgdir, "splash.properties.patched").createNewFile();
+			}
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
+		}
+	}
 	
 
 }
