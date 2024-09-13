@@ -22,8 +22,14 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixTransformer implements IClassTransformer {
+	
+	/**
+	 * check if notch names should be used without loading any minecraft classes
+	 */
+	public static boolean onesixnotch = ForgeVersion.getMajorVersion() < 9 || ForgeVersion.getMajorVersion() == 9 && ForgeVersion.getMinorVersion() <= 11 && ForgeVersion.getBuildVersion() < 937;
 	
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
@@ -37,7 +43,7 @@ public class DpiFixTransformer implements IClassTransformer {
 	            ClassReader classReader = new ClassReader(basicClass);
 	            classReader.accept(classNode, 0);
 	            
-	            patchFullScreen(classNode);
+	            patchFullScreen(name, classNode);
 	            
 	            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 	            classNode.accept(classWriter);
@@ -59,10 +65,10 @@ public class DpiFixTransformer implements IClassTransformer {
 	/**
 	 * patches fullscreen for versions of forge that hasn't patched in in 1.12.2
 	 */
-	public static void patchFullScreen(ClassNode classNode) 
+	public static void patchFullScreen(String notch_mc, ClassNode classNode) 
 	{
 		//fix MC-111419 by injecting DpiFixTransformer#syncFullScreen
-		String toggleFullscreen = getObfString("toggleFullscreen", "func_71352_k");
+		String toggleFullscreen = getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k");
 		MethodNode m = getMethodNode(classNode, toggleFullscreen, "()V");
 		InsnList l = new InsnList();
 		l.add(new LabelNode());
@@ -70,8 +76,8 @@ public class DpiFixTransformer implements IClassTransformer {
 		m.instructions.insert(l);
 		
 		//fix MC-160054 tabbing out or showing desktop results in minimized MC < 1.8
-		MethodNode m2 = getMethodNode(classNode, getObfString("runGameLoop", "func_71411_J"), "()V");
-		if(getMethodInsnNode(m2, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/Minecraft", toggleFullscreen, "()V", false) != null)
+		MethodNode m2 = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
+		if(getMethodInsnNode(m2, Opcodes.INVOKEVIRTUAL, onesixnotch ? notch_mc : "net/minecraft/client/Minecraft", toggleFullscreen, "()V", false) != null)
 		{
 			MethodInsnNode spot = getMethodInsnNode(m2, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "isActive", "()Z", false);
 			if(spot != null)
