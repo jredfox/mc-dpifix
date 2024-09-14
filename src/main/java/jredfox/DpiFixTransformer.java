@@ -252,7 +252,17 @@ public class DpiFixTransformer implements IClassTransformer {
     	f.getParentFile().mkdirs();
     	FileUtils.writeByteArrayToFile(f, bytes);
 	}
-
+	
+	//##############################  START Functions  ##############################\\
+	//Minecraft
+	
+	public static boolean rfalse() { return false; }
+	
+	/**
+	 * Dummy Method to stop forge from breaking on macOS
+	 */
+	public static void setResizable(boolean resizeable) {}
+	
 	/**
 	 * called right before the fullscreen boolean gets toggled
 	 */
@@ -262,16 +272,6 @@ public class DpiFixTransformer implements IClassTransformer {
 		mc.gameSettings.fullScreen = !mc.isFullScreen();//1.6.4 doesn't have AT's so use the getter method and hope it's not overriden
 		mc.gameSettings.saveOptions();
 	}
-
-	public static boolean rfalse() 
-	{
-		return false;
-	}
-
-	/**
-	 * Dummy Method to stop forge from breaking on macOS
-	 */
-	public static void setResizable(boolean resizeable) {}
 
 	public static void patchSplash(File mcDataDir)
 	{
@@ -314,6 +314,8 @@ public class DpiFixTransformer implements IClassTransformer {
 			}
 		}
 	}
+	
+	//##############################  End Functions  ##############################\\
 	
 
 }
