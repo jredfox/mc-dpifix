@@ -99,7 +99,7 @@ public class DpiFixTransformer implements IClassTransformer {
 		 * Fixes MC-68754
 		 * if(!this.fullscreen)
 		 * {
-		 * 		if(!isMac)
+		 * 		if(DpiFix.isWindows)
 		 * 			Display.setResizable(false);
 		 * 		Display.setResizable(true);
 		 * }
@@ -127,7 +127,7 @@ public class DpiFixTransformer implements IClassTransformer {
 		li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("fullscreen", "field_71431_Q").toString(), "Z"));
 		LabelNode l26 = new LabelNode();
 		li.add(new JumpInsnNode(Opcodes.IFNE, l26));
-		if(!DpiFix.isMacOs)
+		if(DpiFix.isWindows)
 		{
 			LabelNode l27 = new LabelNode();
 			li.add(l27);
