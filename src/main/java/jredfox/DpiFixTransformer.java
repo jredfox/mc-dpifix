@@ -157,7 +157,7 @@ public class DpiFixTransformer implements IClassTransformer {
 			InsnList ilist = new InsnList();
 			ilist.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			ilist.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("mcDataDir", "field_71412_D"), "Ljava/io/File;"));
-			ilist.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "patchSplash", "(Ljava/io/File;)V", false));
+			ilist.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "patchSplash", "(Ljava/io/File;)V", false));
 			in.instructions.insert(nextLabelNode(in.instructions.getFirst()), ilist);
 		}
 		
@@ -169,7 +169,7 @@ public class DpiFixTransformer implements IClassTransformer {
 			MethodInsnNode vsync = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setVSyncEnabled", "(Z)V", false);
 			InsnList fspre = new InsnList();
 			fspre.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			fspre.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePre", "(Lnet/minecraft/client/Minecraft;)V", false));
+			fspre.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePre", "(Lnet/minecraft/client/Minecraft;)V", false));
 			m.instructions.insert(vsync, fspre);
 			
 			/**
@@ -179,7 +179,7 @@ public class DpiFixTransformer implements IClassTransformer {
 			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", "func_71411_J"), "()V");
 			InsnList fspost = new InsnList();
 			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			fspost.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
+			fspost.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
 			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/profiler/Profiler", getObfString("endSection", "func_76319_b"), "()V", false);
 			runGame.instructions.insert(spot, fspost);
 		}
