@@ -164,6 +164,7 @@ public class DpiFixTransformer implements IClassTransformer {
 		
 		if(DpiFix.isLinux) 
 		{
+			//make leftClickCounter public without Universal At from 1.6 - 1.12.2
 			for(FieldNode f : classNode.fields)
 			{
 				if(f.name.equals(getObfString("leftClickCounter", "field_71429_W")))//TODO: Notch name this
@@ -182,14 +183,13 @@ public class DpiFixTransformer implements IClassTransformer {
 			m.instructions.insert(vsync, fspre);
 			
 			/**
-			 * TODO: support 1.6.1 - 1.6.4 notch names
 			 * DpiFixTransformer.fsMousePost(this);
 			 */
-			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", "func_71411_J"), "()V");//TODO Notchname this
+			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");//TODO Notchname this
 			InsnList fspost = new InsnList();
 			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			fspost.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
-			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/profiler/Profiler", getObfString("endSection", "func_76319_b"), "()V", false);//TODO NotchName this
+			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "lv" : ForgeVersion.getMinorVersion() == 10 ? "lu" : "ls") : "net/minecraft/profiler/Profiler", getObfString("endSection", onesixnotch ? "b" : "func_76319_b"), "()V", false);//TODO NotchName this
 			runGame.instructions.insert(spot, fspost);
 		}
 	}
@@ -415,7 +415,10 @@ public class DpiFixTransformer implements IClassTransformer {
         {
             mc.inGameHasFocus = true;
             mc.mouseHelper.grabMouseCursor();
-            mc.displayGuiScreen((GuiScreen)null);
+            if(ForgeVersion.getMajorVersion() < 10)
+            	mc.func_71373_a((GuiScreen)null);
+            else
+            	mc.displayGuiScreen((GuiScreen)null);
             mc.leftClickCounter = 10000;
         }
     }
