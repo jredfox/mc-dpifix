@@ -165,7 +165,7 @@ public class DpiFixTransformer implements IClassTransformer {
 			//make leftClickCounter public without Universal At from 1.6 - 1.12.2
 			for(FieldNode f : classNode.fields)
 			{
-				if(f.name.equals(getObfString("leftClickCounter", "field_71429_W")))//TODO: Notch name this
+				if(f.name.equals(getObfString("leftClickCounter", "field_71429_W")))
 				{
 					f.access = Opcodes.ACC_PUBLIC;
 				}
@@ -183,11 +183,11 @@ public class DpiFixTransformer implements IClassTransformer {
 			/**
 			 * DpiFixTransformer.fsMousePost(this);
 			 */
-			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");//TODO Notchname this
+			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
 			InsnList fspost = new InsnList();
 			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			fspost.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
-			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "lv" : ForgeVersion.getMinorVersion() == 10 ? "lu" : "ls") : "net/minecraft/profiler/Profiler", getObfString("endSection", onesixnotch ? "b" : "func_76319_b"), "()V", false);//TODO NotchName this
+			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "lv" : ForgeVersion.getMinorVersion() == 10 ? "lu" : "ls") : "net/minecraft/profiler/Profiler", getObfString("endSection", onesixnotch ? "b" : "func_76319_b"), "()V", false);
 			runGame.instructions.insert(spot, fspost);
 		}
 	}
