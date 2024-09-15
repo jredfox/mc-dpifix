@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.lwjgl.opengl.Display;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -23,6 +24,8 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.common.ForgeVersion;
 
@@ -157,6 +160,55 @@ public class DpiFixTransformer implements IClassTransformer {
 			ilist.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "patchSplash", "(Ljava/io/File;)V", false));
 			in.instructions.insert(nextLabelNode(in.instructions.getFirst()), ilist);
 		}
+		
+		if(DpiFix.isLinux) 
+		{
+			/**
+			 * DpiFixTransformer.fsMousePre(this);
+			 */
+			MethodInsnNode vsync = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setVSyncEnabled", "(Z)V", false);
+			InsnList fspre = new InsnList();
+			fspre.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			fspre.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePre", "(Lnet/minecraft/client/Minecraft;)V", false));
+			m.instructions.insert(vsync, fspre);
+			
+			/**
+			 * TODO: support 1.6.1 - 1.6.4 notch names
+			 * DpiFixTransformer.fsMousePost(this);
+			 */
+			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", "func_71411_J"), "()V");
+			InsnList fspost = new InsnList();
+			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			fspost.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
+			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/profiler/Profiler", getObfString("endSection", "func_76319_b"), "()V", false);
+			runGame.instructions.insert(spot, fspost);
+		}
+	}
+	
+	/**
+	 * getting the first instanceof of this will usually tell you where the initial injection point should be after
+	 */
+	public static LineNumberNode getFirstInstruction(MethodNode method) 
+	{
+		for(AbstractInsnNode obj : method.instructions.toArray())
+			if(obj instanceof LineNumberNode)
+				return (LineNumberNode) obj;
+		return null;
+	}
+	
+	public static MethodInsnNode getLastMethodInsn(MethodNode node, int opcode, String owner, String name, String desc, boolean isInterface) 
+	{
+		MethodInsnNode compare = newMethodInsnNode(opcode,owner,name,desc,isInterface);
+		AbstractInsnNode[] list = node.instructions.toArray();
+		for(int i=list.length-1;i>=0;i--)
+		{
+			AbstractInsnNode ab = list[i];
+			if(ab.getOpcode() == opcode && ab instanceof MethodInsnNode && equals(compare, (MethodInsnNode)ab) )
+			{
+				return (MethodInsnNode)ab;
+			}
+		}
+		return null;
 	}
 
 	public static LineNumberNode prevLabelNode(AbstractInsnNode spot) 
@@ -314,6 +366,59 @@ public class DpiFixTransformer implements IClassTransformer {
 			}
 		}
 	}
+
+	public static volatile Object lock = new Object();
+	public static volatile boolean mouseFlag;
+	public static void fsMousePre(Minecraft mc) 
+	{
+		synchronized (lock) 
+		{
+	        if(mc.inGameHasFocus)
+	        {
+	        	setIngameNotInFocus(mc);
+	        	mouseFlag = true;
+	        }
+		}
+	}
+
+	public static void fsMousePost(Minecraft mc) 
+	{
+		if(mouseFlag)
+		{
+			synchronized (lock)
+			{
+		        if(mouseFlag && Display.isActive())
+		        {
+		        	setIngameFocus(mc);
+		        	mouseFlag = false;
+		        }
+			}
+		}
+	}
+	
+    /**
+     * Will set the focus to ingame if the Minecraft window is the active with focus. Also clears any GUI screen
+     * currently displayed
+     */
+    public static void setIngameFocus(Minecraft mc)
+    {
+    	if (!mc.inGameHasFocus)
+        {
+            mc.inGameHasFocus = true;
+            mc.mouseHelper.grabMouseCursor();
+            mc.displayGuiScreen((GuiScreen)null);
+            mc.leftClickCounter = 10000;
+        }
+    }
+    
+    public static void setIngameNotInFocus(Minecraft mc)
+    {
+        if (mc.inGameHasFocus)
+        {
+            mc.inGameHasFocus = false;
+            mc.mouseHelper.ungrabMouseCursor();
+        }
+    }
 	
 	//##############################  End Functions  ##############################\\
 	
