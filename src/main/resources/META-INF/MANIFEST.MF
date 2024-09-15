@@ -4,4 +4,3 @@ Agent-Class: jml.gamemodelib.GameModeLibAgent
 FMLCorePluginContainsFMLMod: false
 FMLCorePlugin: jredfox.DpiFix
 
-
