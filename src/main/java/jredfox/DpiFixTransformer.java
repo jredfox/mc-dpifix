@@ -361,7 +361,7 @@ public class DpiFixTransformer implements IClassTransformer {
 					"fontTexture=textures/font/ascii.png"
 					);
 			
-			DpiFix.saveFileLines(li, new File(cfgdir, "splash.properties"), true);
+			DpiFix.saveFileLines(li, new File(cfgdir, "splash.properties"));
 			
 			try
 			{

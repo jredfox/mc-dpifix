@@ -36,7 +36,8 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 @net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions("jredfox.DpiFix")
 public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 
-	public boolean highPriority;
+	public boolean dpifix = true;
+	public boolean highPriority = true;
 	public DpiFix()
 	{
 		//only load the mod if it hasn't been loaded by the javaagent already
@@ -52,7 +53,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			System.out.println("Dpi-Fix Loading Natives:" + arch);
 			this.loadConfig();
 			this.loadNatives(arch, 0);
-			this.fixDPI();
+			if(this.dpifix)
+				this.fixDPI();
 			if(this.highPriority)
 				this.setHighPriority();
 		}
@@ -76,35 +78,31 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 	}
 
-	//shit ASM config
+	//ASM config
+	public boolean coremod;
+	public boolean fsSaveFix;
+	public boolean fsTabFix;
+	public boolean fsResizeableFix;
+	public boolean fsSplashFix;
+	public boolean fsMouseFixLinux;
+	public boolean fsMouseFixOther;
 	public void loadConfig() throws IOException 
 	{
-		File file = new File("config", "DpiFix.cfg");
-		if(!file.exists())
-		{
-			file.getParentFile().mkdirs();
-			ArrayList l = new ArrayList();
-			l.add("setHighPriority:true");
-			saveFileLines(l, file, true);
-		}
+		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
+		cfg.load();
 		
-		List<String> lines = file.exists() ? getFileLines(file, true) : Collections.EMPTY_LIST;
-		boolean found = false;
-		for(String s : lines)
-		{
-			String l = s.trim();
-			if(l.startsWith("setHighPriority:"))
-			{
-				this.highPriority = l.substring("setHighPriority:".length(), l.length()).toLowerCase().equals("true");
-				found = true;
-				break;
-			}
-		}
-		if(!found)
-		{
-			file.delete();
-			this.highPriority = true;
-		}
+		this.dpifix = cfg.get("Process.DpiFix");
+		this.highPriority = cfg.get("Process.HighPriority");
+		
+		this.coremod = cfg.get("CoreMod.Enabled");
+		this.fsSaveFix = cfg.get("Coremod.FullScreen.SaveFix");
+		this.fsTabFix = cfg.get("Coremod.FullScreen.TabFix");
+		this.fsResizeableFix = cfg.get("Coremod.FullScreen.ResizeableFix");
+		this.fsSplashFix = cfg.get("Coremod.FullScreen.SplashFix.MacOS");
+		this.fsMouseFixLinux = cfg.get("Coremod.FullScreen.MouseFix.Linux");
+		this.fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
+		
+		cfg.save();
 	}
 
 	public static void loadNatives(ARCH arch, int pass) throws IOException 
@@ -229,11 +227,10 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	@Override
 	public String[] getASMTransformerClass() {
-		return new String[]{"jredfox.DpiFixTransformer"};
+		return this.coremod ? new String[]{"jredfox.DpiFixTransformer"} : null;
 	}
 
-	// JUNK CODE We are simply using forge as a hijack hack to load the DPI
-	// fix before the game app is visible
+	//___________________________________________START Dummy Methods for IMPL of Coremod______________________________\\
 	@Override
 	public String getModContainerClass() {
 		return null;
@@ -255,6 +252,11 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
     {
     	isObf = (Boolean) data.get("runtimeDeobfuscationEnabled");
     }
+	
+	@Override
+	public String[] getLibraryRequestClass() {
+		return null;
+	}
 	
 	//_______________________________________________START IOUTILS METHODS REQUIRED______________________________\\
 	public static final int BUFFER_SIZE = 1048576/2;
@@ -294,82 +296,16 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 	
 	/**
-	 * Equivalent to Files.readAllLines() but, works way faster
-	 */
-	public static List<String> getFileLines(File f,boolean utf8)
-	{
-		BufferedReader reader = null;
-		List<String> list = null;
-		try
-		{
-			if(!utf8)
-			{
-				reader = new BufferedReader(new FileReader(f));//says it's utf-8 but, the jvm actually specifies it even though the lang settings in a game might be different
-			}
-			else
-			{
-				reader = new BufferedReader(new InputStreamReader(new FileInputStream(f),StandardCharsets.UTF_8) );
-			}
-			
-			list = new ArrayList();
-			String s = reader.readLine();
-			
-			if(s != null)
-			{
-				list.add(s);
-			}
-			
-			while(s != null)
-			{
-				s = reader.readLine();
-				if(s != null)
-				{
-					list.add(s);
-				}
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			if(reader != null)
-			{
-				try 
-				{
-					reader.close();
-				} catch (IOException e) 
-				{
-					System.out.println("Unable to Close InputStream this is bad");
-				}
-			}
-		}
-		
-		return list;
-	}
-	
-	/**
 	 * Overwrites entire file default behavior no per line modification removal/addition
 	 */
-	public static void saveFileLines(List<String> list,File f,boolean utf8)
+	public static void saveFileLines(List<String> list,File f)
 	{
 		BufferedWriter writer = null;
 		try
 		{
-			if(!utf8)
-			{
-				writer = new BufferedWriter(new FileWriter(f));
-			}
-			else
-			{
-				writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f),StandardCharsets.UTF_8 ) );
-			}
-			
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f),StandardCharsets.UTF_8 ) );
 			for(String s : list)
-			{
 				writer.write(s + "\r\n");
-			}
 		}
 		catch(Exception e)
 		{
@@ -377,23 +313,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 		finally
 		{
-			if(writer != null)
-			{
-				try
-				{
-					writer.close();
-				}
-				catch(Exception e)
-				{
-					System.out.println("Unable to Close OutputStream this is bad");
-				}
-			}
+			closeQuietly(writer);
 		}
-	}
-
-	@Override
-	public String[] getLibraryRequestClass() {
-		return null;
 	}
 
 }
