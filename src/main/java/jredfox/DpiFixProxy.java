@@ -6,6 +6,8 @@ import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixProxy {
 	
+	public static boolean oldGuiScreen = ForgeVersion.getMajorVersion() < 10;
+	
     /**
      * Will set the focus to ingame if the Minecraft window is the active with focus. Also clears any GUI screen
      * currently displayed
@@ -16,7 +18,7 @@ public class DpiFixProxy {
         {
             mc.inGameHasFocus = true;
             mc.mouseHelper.grabMouseCursor();
-            if(ForgeVersion.getMajorVersion() < 10)
+            if(oldGuiScreen)
             	mc.func_71373_a((GuiScreen)null);
             else
             	mc.displayGuiScreen((GuiScreen)null);
