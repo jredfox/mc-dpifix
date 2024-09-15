@@ -13,6 +13,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -163,6 +164,14 @@ public class DpiFixTransformer implements IClassTransformer {
 		
 		if(DpiFix.isLinux) 
 		{
+			for(FieldNode f : classNode.fields)
+			{
+				if(f.name.equals(getObfString("leftClickCounter", "field_71429_W")))//TODO: Notch name this
+				{
+					f.access = Opcodes.ACC_PUBLIC;
+				}
+			}
+			
 			/**
 			 * DpiFixTransformer.fsMousePre(this);
 			 */
@@ -176,11 +185,11 @@ public class DpiFixTransformer implements IClassTransformer {
 			 * TODO: support 1.6.1 - 1.6.4 notch names
 			 * DpiFixTransformer.fsMousePost(this);
 			 */
-			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", "func_71411_J"), "()V");
+			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", "func_71411_J"), "()V");//TODO Notchname this
 			InsnList fspost = new InsnList();
 			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			fspost.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
-			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/profiler/Profiler", getObfString("endSection", "func_76319_b"), "()V", false);
+			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/profiler/Profiler", getObfString("endSection", "func_76319_b"), "()V", false);//TODO NotchName this
 			runGame.instructions.insert(spot, fspost);
 		}
 	}
