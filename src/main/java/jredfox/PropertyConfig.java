@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 public class PropertyConfig
 {
@@ -51,7 +52,7 @@ public class PropertyConfig
 		try
 		{
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.property_file),StandardCharsets.UTF_8 ) );
-			for(Map.Entry<Object, Object> entry : this.properties.entrySet())
+			for(Map.Entry<Object, Object> entry : new TreeMap<Object, Object>(this.properties).entrySet())
 			{
 				writer.write(sb.append((String)entry.getKey()).append("=").append(entry.getValue()).append("\r\n").toString());
 				sb.setLength(0);

@@ -74,25 +74,31 @@ public class DpiFixTransformer implements IClassTransformer {
 		//fix MC-111419 by injecting DpiFixTransformer#syncFullScreen
 		String toggleFullscreen = getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k");
 		MethodNode m = getMethodNode(classNode, toggleFullscreen, "()V");
-		InsnList l = new InsnList();
-		l.add(new LabelNode());
-		l.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "syncFullScreen", "()V", false));
-		m.instructions.insert(l);
+		if(DpiFix.fsSaveFix)
+		{
+			InsnList l = new InsnList();
+			l.add(new LabelNode());
+			l.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "syncFullScreen", "()V", false));
+			m.instructions.insert(l);
+		}
 		
 		//fix MC-160054 tabbing out or showing desktop results in minimized MC < 1.8
-		MethodNode m2 = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
-		if(getMethodInsnNode(m2, Opcodes.INVOKEVIRTUAL, onesixnotch ? notch_mc : "net/minecraft/client/Minecraft", toggleFullscreen, "()V", false) != null)
+		if(DpiFix.fsTabFix)
 		{
-			MethodInsnNode spot = getMethodInsnNode(m2, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "isActive", "()Z", false);
-			if(spot != null)
+			MethodNode m2 = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
+			if(getMethodInsnNode(m2, Opcodes.INVOKEVIRTUAL, onesixnotch ? notch_mc : "net/minecraft/client/Minecraft", toggleFullscreen, "()V", false) != null)
 			{
-				JumpInsnNode jump = nextJumpInsnNode(spot);
-				if(jump != null)
+				MethodInsnNode spot = getMethodInsnNode(m2, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "isActive", "()Z", false);
+				if(spot != null)
 				{
-					InsnList list = new InsnList();
-					list.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "rfalse", "()Z", false));
-					list.add(new JumpInsnNode(Opcodes.IFEQ, jump.label));
-					m2.instructions.insert(prevLabelNode(spot), list);
+					JumpInsnNode jump = nextJumpInsnNode(spot);
+					if(jump != null)
+					{
+						InsnList list = new InsnList();
+						list.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "rfalse", "()Z", false));
+						list.add(new JumpInsnNode(Opcodes.IFEQ, jump.label));
+						m2.instructions.insert(prevLabelNode(spot), list);
+					}
 				}
 			}
 		}
@@ -106,48 +112,51 @@ public class DpiFixTransformer implements IClassTransformer {
 		 * 		Display.setResizable(true);
 		 * }
 		 */
-		//Disable all instances of Forge's / Optifine's Fullscreen "Fix"
-		MethodInsnNode startResize = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
-		if(startResize != null)
+		if(DpiFix.fsResizeableFix)
 		{
-			System.err.println("Disabling Forge's \"FIX\" for Fullscreen!");
-			MethodInsnNode resizeInsn = newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
-			AbstractInsnNode ab = startResize;
-			while(ab != null)
+			//Disable all instances of Forge's / Optifine's Fullscreen "Fix"
+			MethodInsnNode startResize = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+			if(startResize != null)
 			{
-				if(ab instanceof MethodInsnNode && equals(resizeInsn, (MethodInsnNode) ab))
+				System.err.println("Disabling Forge's \"FIX\" for Fullscreen!");
+				MethodInsnNode resizeInsn = newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+				AbstractInsnNode ab = startResize;
+				while(ab != null)
 				{
-					MethodInsnNode minsn = (MethodInsnNode)ab;
-					minsn.owner = "jredfox/DpiFixTransformer";
+					if(ab instanceof MethodInsnNode && equals(resizeInsn, (MethodInsnNode) ab))
+					{
+						MethodInsnNode minsn = (MethodInsnNode)ab;
+						minsn.owner = "jredfox/DpiFixTransformer";
+					}
+					ab = ab.getNext();
 				}
-				ab = ab.getNext();
 			}
-		}
-		
-		InsnList li = new InsnList();
-		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("fullscreen", "field_71431_Q").toString(), "Z"));
-		LabelNode l26 = new LabelNode();
-		li.add(new JumpInsnNode(Opcodes.IFNE, l26));
-		if(DpiFix.isWindows)
-		{
-			LabelNode l27 = new LabelNode();
-			li.add(l27);
-			li.add(new InsnNode(Opcodes.ICONST_0));
+			
+			InsnList li = new InsnList();
+			li.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("fullscreen", "field_71431_Q").toString(), "Z"));
+			LabelNode l26 = new LabelNode();
+			li.add(new JumpInsnNode(Opcodes.IFNE, l26));
+			if(DpiFix.isWindows)
+			{
+				LabelNode l27 = new LabelNode();
+				li.add(l27);
+				li.add(new InsnNode(Opcodes.ICONST_0));
+				li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+			}
+			LabelNode l28 = new LabelNode();
+			li.add(l28);
+			li.add(new InsnNode(Opcodes.ICONST_1));
 			li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+			li.add(l26);
+			//since we can't compute frames for mc 1.6.4 manually add the frame
+			li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+			
+			m.instructions.insert(getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
 		}
-		LabelNode l28 = new LabelNode();
-		li.add(l28);
-		li.add(new InsnNode(Opcodes.ICONST_1));
-		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
-		li.add(l26);
-		//since we can't compute frames for mc 1.6.4 manually add the frame
-		li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-		
-		m.instructions.insert(getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
 		
 		//DpiFixTransformer.patchSplash(this.mcDataDir);
-		if(ForgeVersion.getMajorVersion() >= 10 && ForgeVersion.getBuildVersion() >= 1389)
+		if(DpiFix.fsSplashFix && ForgeVersion.getMajorVersion() >= 10 && ForgeVersion.getBuildVersion() >= 1389)
 		{
 			MethodNode in = getMethodNode(classNode, getObfString("init", "func_71384_a"), "()V");
 			if(in == null)
@@ -160,7 +169,7 @@ public class DpiFixTransformer implements IClassTransformer {
 			in.instructions.insert(nextLabelNode(in.instructions.getFirst()), ilist);
 		}
 		
-		if(DpiFix.isLinux) 
+		if(DpiFix.isLinux ? DpiFix.fsMouseFixLinux : DpiFix.fsMouseFixOther)
 		{
 			//make leftClickCounter public without Universal At from 1.6 - 1.12.2
 			for(FieldNode f : classNode.fields)

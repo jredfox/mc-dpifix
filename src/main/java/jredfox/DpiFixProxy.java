@@ -35,4 +35,11 @@ public class DpiFixProxy {
         }
     }
 
+	public static void syncFullScreen()
+	{
+		Minecraft mc = Minecraft.getMinecraft();
+		mc.gameSettings.fullScreen = !mc.isFullScreen();//1.6.4 doesn't have AT's so use the getter method and hope it's not overriden
+		mc.gameSettings.saveOptions();
+	}
+
 }

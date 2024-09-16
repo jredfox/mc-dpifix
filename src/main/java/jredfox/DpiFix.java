@@ -79,13 +79,13 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 
 	//ASM config
-	public boolean coremod;
-	public boolean fsSaveFix;
-	public boolean fsTabFix;
-	public boolean fsResizeableFix;
-	public boolean fsSplashFix;
-	public boolean fsMouseFixLinux;
-	public boolean fsMouseFixOther;
+	public static boolean coremod;
+	public static boolean fsSaveFix;
+	public static boolean fsTabFix;
+	public static boolean fsResizeableFix;
+	public static boolean fsSplashFix;
+	public static boolean fsMouseFixLinux;
+	public static boolean fsMouseFixOther;
 	public void loadConfig() throws IOException 
 	{
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
