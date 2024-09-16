@@ -226,11 +226,9 @@ public class DpiFixCoreMod implements IClassTransformer {
 		String mcClass = onesixnotch ? notch_mc : "net/minecraft/client/Minecraft";
 		
 		//DpiFixCoreMod#tickDisplay(this);
-		String loadingScreenName = getObfString("loadScreen", "func_71357_I");
-		MethodNode loadscreen = getMethodNode(classNode, loadingScreenName, "()V");//TODO: NotchNames
+		MethodNode loadscreen = getMethodNode(classNode, getObfString("loadScreen", "func_71357_I"), "()V");//TODO: NotchNames
 		MethodInsnNode updateInsn = getLastMethodInsn(loadscreen, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
-		if(updateInsn != null)
-			loadscreen.instructions.remove(updateInsn);
+		disableDisplayUpdate(loadscreen);
 		InsnList lslist = new InsnList();
 		lslist.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		lslist.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
@@ -284,7 +282,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		InsnList fsli = new InsnList();
 		fsli.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		fsli.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
-		fullscreen.instructions.insert(getLastMethodInsn(fullscreen, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setVSyncEnabled", "(Z)V", false), fsli);
+		fullscreen.instructions.insert(getLastMethodInsn(fullscreen, Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "disabled", "()V", false), fsli);
 		
 		
 		MethodNode resize = getMethodNode(classNode, getObfString("resize", "func_71370_a"), "(II)V");//TODO: NotchNames
@@ -294,7 +292,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		InsnList viewport = new InsnList();
 		viewport.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		viewport.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resize.instructions.insert(getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, "displayHeight", "I"), viewport);
+		resize.instructions.insert(getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, getObfString("displayHeight", "field_71440_d"), "I"), viewport);//TODO:NotchNames
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
 		InsnList resizeList = new InsnList();
