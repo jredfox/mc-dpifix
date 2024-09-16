@@ -72,6 +72,19 @@ public class DpiFixTransformer implements IClassTransformer {
 	 */
 	public static void patchFullScreen(String notch_mc, ClassNode classNode) 
 	{
+		//Universal AT 1.6 - 1.12.2
+		//TODO: fix notchnames
+		int count = 0;
+		for(FieldNode f : classNode.fields)
+		{
+			if(f.name.equals(getObfString("leftClickCounter", "field_71429_W")) || f.name.equals(getObfString("fullscreen", "field_71431_Q")) )
+			{
+				f.access = Opcodes.ACC_PUBLIC;
+				count++;
+			}
+		}
+		System.out.println("count ACC_PUBLIC:" + count);
+		
 		//fix MC-111419 by injecting DpiFixTransformer#syncFullScreen
 		String toggleFullscreen = getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k");
 		MethodNode m = getMethodNode(classNode, toggleFullscreen, "()V");
@@ -171,16 +184,7 @@ public class DpiFixTransformer implements IClassTransformer {
 		}
 		
 		if(DpiFix.isLinux ? DpiFix.fsMouseFixLinux : DpiFix.fsMouseFixOther)
-		{
-			//make leftClickCounter public without Universal At from 1.6 - 1.12.2
-			for(FieldNode f : classNode.fields)
-			{
-				if(f.name.equals(getObfString("leftClickCounter", "field_71429_W")))
-				{
-					f.access = Opcodes.ACC_PUBLIC;
-				}
-			}
-			
+		{	
 			/**
 			 * DpiFixTransformer.fsMousePre(this);
 			 */
@@ -338,7 +342,7 @@ public class DpiFixTransformer implements IClassTransformer {
 	public static void syncFullScreen()
 	{
 		Minecraft mc = Minecraft.getMinecraft();
-		mc.gameSettings.fullScreen = !mc.isFullScreen();//1.6.4 doesn't have AT's so use the getter method and hope it's not overriden
+		mc.gameSettings.fullScreen = !mc.fullscreen;//1.6.4 doesn't have AT's so use the getter method and hope it's not overriden
 		mc.gameSettings.saveOptions();
 	}
 
