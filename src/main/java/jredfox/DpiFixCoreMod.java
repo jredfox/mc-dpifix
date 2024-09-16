@@ -226,7 +226,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		String mcClass = onesixnotch ? notch_mc : "net/minecraft/client/Minecraft";
 		
 		//DpiFixCoreMod#tickDisplay(this);
-		MethodNode loadscreen = getMethodNode(classNode, getObfString("loadScreen", "func_71357_I"), "()V");//TODO: NotchNames
+		MethodNode loadscreen = getMethodNode(classNode, getObfString("loadScreen", onesixnotch ? "R" : "func_71357_I"), "()V");
 		MethodInsnNode updateInsn = getLastMethodInsn(loadscreen, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
 		disableDisplayUpdate(loadscreen);
 		InsnList lslist = new InsnList();
@@ -285,14 +285,14 @@ public class DpiFixCoreMod implements IClassTransformer {
 		fullscreen.instructions.insert(getLastMethodInsn(fullscreen, Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "disabled", "()V", false), fsli);
 		
 		
-		MethodNode resize = getMethodNode(classNode, getObfString("resize", "func_71370_a"), "(II)V");//TODO: NotchNames
+		MethodNode resize = getMethodNode(classNode, getObfString("resize", onesixnotch ? "a" : "func_71370_a"), "(II)V");
 		resize.access = Opcodes.ACC_PUBLIC;//Make the method public
 		
 		//DpiFixCoreMod#updateViewPort
 		InsnList viewport = new InsnList();
 		viewport.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		viewport.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resize.instructions.insert(getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, getObfString("displayHeight", "field_71440_d"), "I"), viewport);//TODO:NotchNames
+		resize.instructions.insert(getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, getObfString("displayHeight", onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "e" : ForgeVersion.getMinorVersion() == 10 ? "e" : "d") : "field_71440_d"), "I"), viewport);
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
 		InsnList resizeList = new InsnList();
@@ -314,7 +314,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		System.out.println("Patching: LoadingScreenRenderer");
 		
 		String cname = onesixnotch ? name : "net/minecraft/client/gui/LoadingScreenRenderer";
-		MethodNode m = getMethodNode(classNode, getObfString("setLoadingProgress", "func_73718_a"), "(I)V");//TODO: notchnames
+		MethodNode m = getMethodNode(classNode, getObfString("setLoadingProgress", onesixnotch ? "a" : "func_73718_a"), "(I)V");
 		
 		//Disable all Display#update calls
 		disableDisplayUpdate(m);
