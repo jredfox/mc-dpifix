@@ -73,17 +73,15 @@ public class DpiFixTransformer implements IClassTransformer {
 	public static void patchFullScreen(String notch_mc, ClassNode classNode) 
 	{
 		//Universal AT 1.6 - 1.12.2
-		//TODO: fix notchnames
-		int count = 0;
+		String notch_leftClickCounter = (ForgeVersion.getMinorVersion() == 11 ? "W" : ForgeVersion.getMinorVersion() == 10 ? "W" : "V");
+		String notch_fullscreen = (ForgeVersion.getMinorVersion() == 11 ? "P" : ForgeVersion.getMinorVersion() == 10 ? "P" : "O");
 		for(FieldNode f : classNode.fields)
 		{
-			if(f.name.equals(getObfString("leftClickCounter", "field_71429_W")) || f.name.equals(getObfString("fullscreen", "field_71431_Q")) )
+			if(f.name.equals(getObfString("leftClickCounter", onesixnotch ? notch_leftClickCounter : "field_71429_W")) || f.name.equals(getObfString("fullscreen", onesixnotch ? notch_fullscreen : "field_71431_Q")) )
 			{
 				f.access = Opcodes.ACC_PUBLIC;
-				count++;
 			}
 		}
-		System.out.println("count ACC_PUBLIC:" + count);
 		
 		//fix MC-111419 by injecting DpiFixTransformer#syncFullScreen
 		String toggleFullscreen = getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k");
