@@ -81,6 +81,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean fsSplashFix;
 	public static boolean fsMouseFixLinux;
 	public static boolean fsMouseFixOther;
+	public static boolean maximizeFix;
 	
 	public void loadConfig() throws IOException 
 	{
@@ -97,7 +98,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		this.fsSplashFix = cfg.get("Coremod.FullScreen.SplashFix");
 		this.fsMouseFixLinux = cfg.get("Coremod.FullScreen.MouseFix.Linux");
 		this.fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
-		
+		this.maximizeFix = cfg.get("Coremod.MaximizeResFix");
 		cfg.save();
 	}
 
@@ -223,7 +224,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	@Override
 	public String[] getASMTransformerClass() {
-		return (this.coremod && isClient) ? new String[]{"jredfox.DpiFixTransformer"} : null;
+		return (this.coremod && isClient) ? new String[]{"jredfox.DpiFixCoreMod"} : null;
 	}
 
 	//___________________________________________START Dummy Methods for IMPL of Coremod______________________________\\

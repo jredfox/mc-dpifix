@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -26,10 +27,11 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.common.ForgeVersion;
 
-public class DpiFixTransformer implements IClassTransformer {
+public class DpiFixCoreMod implements IClassTransformer {
 	
 	/**
 	 * check if notch names should be used without loading any minecraft classes
@@ -49,6 +51,7 @@ public class DpiFixTransformer implements IClassTransformer {
 	            classReader.accept(classNode, 0);
 	            
 	            patchFullScreen(name, classNode);
+	            patchMaxResFix(name, classNode);
 	            
 	            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 	            classNode.accept(classWriter);
@@ -66,7 +69,7 @@ public class DpiFixTransformer implements IClassTransformer {
 		}
 		return basicClass;
 	}
-	
+
 	/**
 	 * patches fullscreen for versions of forge that hasn't patched in in 1.12.2
 	 */
@@ -83,14 +86,14 @@ public class DpiFixTransformer implements IClassTransformer {
 			}
 		}
 		
-		//fix MC-111419 by injecting DpiFixTransformer#syncFullScreen
+		//fix MC-111419 by injecting DpiFixCoreMod#syncFullScreen
 		String toggleFullscreen = getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k");
 		MethodNode m = getMethodNode(classNode, toggleFullscreen, "()V");
 		if(DpiFix.fsSaveFix)
 		{
 			InsnList l = new InsnList();
 			l.add(new LabelNode());
-			l.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "syncFullScreen", "()V", false));
+			l.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "syncFullScreen", "()V", false));
 			m.instructions.insert(l);
 		}
 		
@@ -107,7 +110,7 @@ public class DpiFixTransformer implements IClassTransformer {
 					if(jump != null)
 					{
 						InsnList list = new InsnList();
-						list.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "rfalse", "()Z", false));
+						list.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "rfalse", "()Z", false));
 						list.add(new JumpInsnNode(Opcodes.IFEQ, jump.label));
 						m2.instructions.insert(prevLabelNode(spot), list);
 					}
@@ -138,7 +141,7 @@ public class DpiFixTransformer implements IClassTransformer {
 					if(ab instanceof MethodInsnNode && equals(resizeInsn, (MethodInsnNode) ab))
 					{
 						MethodInsnNode minsn = (MethodInsnNode)ab;
-						minsn.owner = "jredfox/DpiFixTransformer";
+						minsn.owner = "jredfox/DpiFixCoreMod";
 					}
 					ab = ab.getNext();
 				}
@@ -167,7 +170,7 @@ public class DpiFixTransformer implements IClassTransformer {
 			m.instructions.insert(getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
 		}
 		
-		//DpiFixTransformer.patchSplash(this.mcDataDir);
+		//DpiFixCoreMod.patchSplash(this.mcDataDir);
 		if(DpiFix.fsSplashFix && ForgeVersion.getMajorVersion() >= 10 && ForgeVersion.getBuildVersion() >= 1389)
 		{
 			MethodNode in = getMethodNode(classNode, getObfString("init", "func_71384_a"), "()V");
@@ -177,31 +180,92 @@ public class DpiFixTransformer implements IClassTransformer {
 			InsnList ilist = new InsnList();
 			ilist.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			ilist.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("mcDataDir", "field_71412_D"), "Ljava/io/File;"));
-			ilist.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "patchSplash", "(Ljava/io/File;)V", false));
+			ilist.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "patchSplash", "(Ljava/io/File;)V", false));
 			in.instructions.insert(nextLabelNode(in.instructions.getFirst()), ilist);
 		}
 		
 		if(DpiFix.isLinux ? DpiFix.fsMouseFixLinux : DpiFix.fsMouseFixOther)
 		{	
 			/**
-			 * DpiFixTransformer.fsMousePre(this);
+			 * DpiFixCoreMod.fsMousePre(this);
 			 */
 			MethodInsnNode vsync = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setVSyncEnabled", "(Z)V", false);
 			InsnList fspre = new InsnList();
 			fspre.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			fspre.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePre", "(Lnet/minecraft/client/Minecraft;)V", false));
+			fspre.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePre", "(Lnet/minecraft/client/Minecraft;)V", false));
 			m.instructions.insert(vsync, fspre);
 			
 			/**
-			 * DpiFixTransformer.fsMousePost(this);
+			 * DpiFixCoreMod.fsMousePost(this);
 			 */
 			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
 			InsnList fspost = new InsnList();
 			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			fspost.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixTransformer", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
+			fspost.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
 			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "lv" : ForgeVersion.getMinorVersion() == 10 ? "lu" : "ls") : "net/minecraft/profiler/Profiler", getObfString("endSection", onesixnotch ? "b" : "func_76319_b"), "()V", false);
 			runGame.instructions.insert(spot, fspost);
 		}
+	}
+	
+	public void patchMaxResFix(String name, ClassNode classNode) 
+	{
+		if(!DpiFix.maximizeFix || ForgeVersion.getMajorVersion() >= 10)
+			return;
+		
+		//DpiFixCoreMod#tickDisplay(this);
+		MethodNode loadscreen = getMethodNode(classNode, getObfString("loadScreen", "func_71357_I"), "()V");
+		MethodInsnNode screenInsn = getMethodInsnNode(loadscreen, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
+		loadscreen.instructions.remove(screenInsn);
+		InsnList lslist = new InsnList();
+		lslist.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		lslist.add(newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "jredfox/DpiFixCoreMod", "tickDisplay", "()V", false));
+	}
+	
+    public void tickDisplay(Minecraft mc) //LoadingScreenRenderer
+    {
+        Display.update();
+
+        if (!mc.fullscreen && Display.wasResized())
+        {
+            int i = mc.displayWidth;
+            int j = mc.displayHeight;
+            mc.displayWidth = Display.getWidth();
+            mc.displayHeight = Display.getHeight();
+
+            if (mc.displayWidth != i || mc.displayHeight != j)
+            {
+                if (mc.displayWidth <= 0)
+                {
+                	mc.displayWidth = 1;
+                }
+
+                if (mc.displayHeight <= 0)
+                {
+                	mc.displayHeight = 1;
+                }
+
+                mc.resize(mc.displayWidth, mc.displayHeight);
+            }
+        }
+    }
+    
+    public void updateViewPort(Minecraft mc) 
+    {
+        ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glLoadIdentity();
+        GL11.glOrtho(0.0D, scaledresolution.getScaledWidth_double(), scaledresolution.getScaledHeight_double(), 0.0D, 1000.0D, 3000.0D);
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glLoadIdentity();
+        GL11.glTranslatef(0.0F, 0.0F, -2000.0F);
+        GL11.glViewport(0, 0, mc.displayWidth, mc.displayHeight);
+        GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_FOG);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
 	}
 	
 	/**
