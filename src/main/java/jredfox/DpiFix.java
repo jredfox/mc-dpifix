@@ -98,7 +98,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		this.fsSaveFix = cfg.get("Coremod.FullScreen.SaveFix");
 		this.fsTabFix = cfg.get("Coremod.FullScreen.TabFix");
 		this.fsResizeableFix = cfg.get("Coremod.FullScreen.ResizeableFix");
-		this.fsSplashFix = cfg.get("Coremod.FullScreen.SplashFix.MacOS");
+		this.fsSplashFix = cfg.get("Coremod.FullScreen.SplashFix");
 		this.fsMouseFixLinux = cfg.get("Coremod.FullScreen.MouseFix.Linux");
 		this.fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
 		
