@@ -322,7 +322,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		//DpiFixCoreMod.tickDisplay(this.mc);
 		InsnList li = new InsnList();
 		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		li.add(new FieldInsnNode(Opcodes.GETFIELD, cname, "mc", "Lnet/minecraft/client/Minecraft;"));
+		li.add(new FieldInsnNode(Opcodes.GETFIELD, cname, getObfString("mc", "field_73725_b"), "Lnet/minecraft/client/Minecraft;"));
 		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
 		m.instructions.insertBefore(getLastMethodInsn(m, Opcodes.INVOKESTATIC, "java/lang/Thread", "yield", "()V", false), li);
 	}
