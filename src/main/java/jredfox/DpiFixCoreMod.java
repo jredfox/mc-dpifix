@@ -218,10 +218,11 @@ public class DpiFixCoreMod implements IClassTransformer {
 		loadscreen.instructions.remove(screenInsn);
 		InsnList lslist = new InsnList();
 		lslist.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		lslist.add(newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "jredfox/DpiFixCoreMod", "tickDisplay", "()V", false));
+		lslist.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
+		
 	}
 	
-    public void tickDisplay(Minecraft mc) //LoadingScreenRenderer
+    public static void tickDisplay(Minecraft mc) //LoadingScreenRenderer
     {
         Display.update();
 
@@ -249,7 +250,7 @@ public class DpiFixCoreMod implements IClassTransformer {
         }
     }
     
-    public void updateViewPort(Minecraft mc) 
+    public static void updateViewPort(Minecraft mc) 
     {
         ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
