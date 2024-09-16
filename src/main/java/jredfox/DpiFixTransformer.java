@@ -25,6 +25,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.common.ForgeVersion;
 
@@ -391,7 +392,7 @@ public class DpiFixTransformer implements IClassTransformer {
 		{
 	        if(mc.inGameHasFocus)
 	        {
-	        	DpiFixProxy.setIngameNotInFocus(mc);
+	        	setIngameNotInFocus(mc);
 	        	mouseFlag = true;
 	        }
 		}
@@ -405,12 +406,41 @@ public class DpiFixTransformer implements IClassTransformer {
 			{
 		        if(mouseFlag && Display.isActive())
 		        {
-		        	DpiFixProxy.setIngameFocus(mc);
+		        	setIngameFocus(mc);
 		        	mouseFlag = false;
 		        }
 			}
 		}
 	}
+	
+	public static boolean oldGuiScreen = ForgeVersion.getMajorVersion() < 10;
+	
+    /**
+     * Will set the focus to ingame if the Minecraft window is the active with focus. Also clears any GUI screen
+     * currently displayed
+     */
+    public static void setIngameFocus(Minecraft mc)
+    {
+    	if (!mc.inGameHasFocus)
+        {
+            mc.inGameHasFocus = true;
+            mc.mouseHelper.grabMouseCursor();
+            if(oldGuiScreen)
+            	mc.func_71373_a((GuiScreen)null);
+            else
+            	mc.displayGuiScreen((GuiScreen)null);
+            mc.leftClickCounter = 10000;
+        }
+    }
+    
+    public static void setIngameNotInFocus(Minecraft mc)
+    {
+        if (mc.inGameHasFocus)
+        {
+            mc.inGameHasFocus = false;
+            mc.mouseHelper.ungrabMouseCursor();
+        }
+    }
 	
 	//##############################  End Functions  ##############################\\
 	

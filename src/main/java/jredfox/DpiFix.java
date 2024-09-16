@@ -1,21 +1,14 @@
 package jredfox;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +31,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	public boolean dpifix = true;
 	public boolean highPriority = true;
+	
 	public DpiFix()
 	{
 		//only load the mod if it hasn't been loaded by the javaagent already
@@ -79,6 +73,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 
 	//ASM config
+	public static final boolean isClient = DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null;
 	public static boolean coremod;
 	public static boolean fsSaveFix;
 	public static boolean fsTabFix;
@@ -86,6 +81,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean fsSplashFix;
 	public static boolean fsMouseFixLinux;
 	public static boolean fsMouseFixOther;
+	
 	public void loadConfig() throws IOException 
 	{
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
@@ -227,7 +223,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	@Override
 	public String[] getASMTransformerClass() {
-		return this.coremod ? new String[]{"jredfox.DpiFixTransformer"} : null;
+		return (this.coremod && isClient) ? new String[]{"jredfox.DpiFixTransformer"} : null;
 	}
 
 	//___________________________________________START Dummy Methods for IMPL of Coremod______________________________\\
