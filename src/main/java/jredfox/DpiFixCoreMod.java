@@ -48,13 +48,13 @@ public class DpiFixCoreMod implements IClassTransformer {
 		{
 			try
 			{
-				System.out.println("Transforming: Patching Minecraft Fullscreen to fix MC-68754, MC-111419, MC-160054");
 				ClassNode classNode = new ClassNode();
 	            ClassReader classReader = new ClassReader(basicClass);
 	            classReader.accept(classNode, 0);
 	            
 	            if(mc)
 	            {
+	            	System.out.println("Patching: Minecraft Fullscreen to fix MC-68754, MC-111419, MC-160054");
 	            	patchFullScreen(name.replace(".", "/"), classNode);
 	            	patchMaxResFix( name.replace(".", "/"), classNode);
 	            }
