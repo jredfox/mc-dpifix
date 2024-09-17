@@ -275,15 +275,12 @@ public class DpiFixCoreMod implements IClassTransformer {
 		}
 		
 		MethodNode fullscreen = getMethodNode(classNode, getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k"), "()V");
-		//Disable all calls of Display#update
-		disableDisplayUpdate(fullscreen);
-		
+		disableDisplayUpdate(fullscreen);//Disable all calls of Display#update
 		//DpiFixCoreMod#tickDisplay(this);
 		InsnList fsli = new InsnList();
 		fsli.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		fsli.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
 		fullscreen.instructions.insert(getLastMethodInsn(fullscreen, Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "disabled", "()V", false), fsli);
-		
 		
 		MethodNode resize = getMethodNode(classNode, getObfString("resize", onesixnotch ? "a" : "func_71370_a"), "(II)V");
 		resize.access = Opcodes.ACC_PUBLIC;//Make the method public
@@ -296,6 +293,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
 		InsnList resizeList = new InsnList();
+		resizeList.add(new LabelNode());
 		resizeList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		resizeList.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/client/gui/LoadingScreenRenderer"));//TODO: Check classname for 1.6.1 - 1.6.3
 		resizeList.add(new InsnNode(Opcodes.DUP));
