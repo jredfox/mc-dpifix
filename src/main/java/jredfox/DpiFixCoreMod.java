@@ -295,7 +295,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		InsnList resizeList = new InsnList();
 		resizeList.add(new LabelNode());
 		resizeList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		resizeList.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/client/gui/LoadingScreenRenderer"));//TODO: Check classname for 1.6.1 - 1.6.3
+		resizeList.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/client/gui/LoadingScreenRenderer"));
 		resizeList.add(new InsnNode(Opcodes.DUP));
 		resizeList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		resizeList.add(newMethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/LoadingScreenRenderer", "<init>", "(Lnet/minecraft/client/Minecraft;)V", false));
