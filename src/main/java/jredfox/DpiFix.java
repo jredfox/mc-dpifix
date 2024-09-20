@@ -195,8 +195,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 							"else" + nl +
 							"	sudo chown root:root /usr/local/bin/renicer # Make Root owner for linux" + nl +
 							"fi" + nl +
-							"sudo chmod u+s /usr/local/bin/renicer # Run as Root" + nl +
-							"sudo chmod 755 /usr/local/bin/renice  # Ensure executable for all users"
+							"sudo chmod 755 /usr/local/bin/renicer # Ensure executable for all users" + nl +
+							"sudo chmod u+s /usr/local/bin/renicer # Run as Root" + nl
 							);
 					DpiFix.saveFileLines(li, install_sh);
 					
@@ -239,7 +239,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			try
 			{
 				long pid = Long.parseLong(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
-				Runtime.getRuntime().exec(renicer.getPath() + " -10 -p " + pid);
+				Runtime.getRuntime().exec(renicer.getPath() + " -5 -p " + pid);//-5 is "high" for windows. Anything lower and it will be out of sync with the keyboard and mouse and graphics drivers causing input lag
 			}
 			catch (Throwable e)
 			{
