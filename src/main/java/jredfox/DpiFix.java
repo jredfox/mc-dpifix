@@ -32,6 +32,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	public boolean dpifix = true;
 	public boolean highPriority = true;
+	public static boolean hasNatives = true;
 	
 	public DpiFix()
 	{
@@ -88,7 +89,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	
 	public void loadConfig()
 	{
-		System.out.println("Loading DpiFix.cfg");
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
 		cfg.load();
 		
@@ -124,6 +124,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				if(in == null)
 				{
 					System.err.println("Error Missing Natives:" + strNativeName + " ISA:" + arch);
+					hasNatives = false;
 					return;
 				}
 				out = new FileOutputStream(fnative);
@@ -173,10 +174,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				{
 					System.err.println("renicer command not found! Please install it by running: sh " + install_sh);
 				}
-				else
-				{
-					System.out.println("renicer is installed!");
-				}
 				
 				//create renicer-install.sh
 				if(!install_sh.exists() || !uninstall_sh.exists())
@@ -224,7 +221,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	
 	public static void fixProcessDPI()
 	{
-		if(DpiFix.isWindows)
+		if(DpiFix.hasNatives)
 			DpiFix.fixDPI();
 	}
 	
@@ -238,7 +235,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		{
 			try
 			{
-				long pid = Long.parseLong(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+				System.out.print("Setting High Priority" + System.lineSeparator());
+				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];//keep pid as string as we don't have unsigned long in java
 				Runtime.getRuntime().exec(renicer.getPath() + " -5 -p " + pid);//-5 is "high" for windows. Anything lower and it will be out of sync with the keyboard and mouse and graphics drivers causing input lag
 			}
 			catch (Throwable e)
