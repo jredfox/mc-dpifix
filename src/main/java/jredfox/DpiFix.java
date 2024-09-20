@@ -163,13 +163,14 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean hasRenicer;
 	public static void loadReNicer()
 	{
-		hasRenicer = renicer.exists();
-		File install_sh = new File(  "config/renicer-install.sh").getAbsoluteFile();
-		File uninstall_sh = new File("config/renicer-uninstall.sh").getAbsoluteFile();
 		if(!isWindows)
 		{
 			try
 			{
+				hasRenicer = renicer.exists();
+				File install_sh = new File(  "config/renicer-install.sh").getAbsoluteFile();
+				File uninstall_sh = new File("config/renicer-uninstall.sh").getAbsoluteFile();
+				
 				if(!hasRenicer)
 				{
 					System.err.println("renicer command not found! Please install it by running: sh " + install_sh);
