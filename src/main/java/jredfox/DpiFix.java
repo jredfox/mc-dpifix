@@ -109,7 +109,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static void loadNatives(ARCH arch, int pass) throws IOException 
 	{
 		if(pass == 0)
-			loadReNicer();
+			DpiFix.loadReNicer();
 		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : isMacOs ? ".jnilib" : ".so");
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
 		//load the natives if they do not exist
@@ -225,7 +225,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static void fixProcessDPI()
 	{
 		if(DpiFix.isWindows)
-			fixDPI();
+			DpiFix.fixDPI();
 	}
 	
 	public static void setHighProcessPriority()
