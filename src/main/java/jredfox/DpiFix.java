@@ -37,6 +37,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		//only load the mod if it hasn't been loaded by the javaagent already
 		if(!Boolean.parseBoolean(System.getProperty("gamemodelib.agent", "false")))
 			this.loadMod();
+		else
+			this.loadConfig(); //If we are still in the mods folder load the coremod fixes without the Process fixes as they have already been applied manually
 	}
 
 	public void loadMod()
@@ -83,8 +85,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean fsMouseFixOther;
 	public static boolean maximizeFix;
 	
-	public void loadConfig() throws IOException 
+	public void loadConfig()
 	{
+		System.out.println("Loading DpiFix.cfg");
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
 		cfg.load();
 		
