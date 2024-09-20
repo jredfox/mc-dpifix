@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +19,6 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 /**
  * TODO: macos intel(x64) and silicon (arm64)
  * TODO: linux ubuntu / mint x86, x64, arm64
- * NOTE: ARM32 looks to not be supported by java so they would be running x86 on windows and who knows what on linux / android
  */
 //1.6.4-1.7.10 forge's annotations
 @IFMLLoadingPlugin.Name("mc-dpifix")
@@ -50,9 +51,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			this.loadConfig();
 			this.loadNatives(arch, 0);
 			if(this.dpifix)
-				this.fixDPI();
+				this.fixProcessDPI();
 			if(this.highPriority)
-				this.setHighPriority();
+				this.setHighProcessPriority();
 		}
 		catch (Throwable t)
 		{
@@ -62,7 +63,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	
 	public static void load()
 	{
-		try 
+		try
 		{
 			ARCH arch = getARCH();
 			System.out.println("GamemodeLib Loading Natives:" + arch);
@@ -107,6 +108,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	public static void loadNatives(ARCH arch, int pass) throws IOException 
 	{
+		if(pass == 0)
+			loadReNicer();
 		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : isMacOs ? ".jnilib" : ".so");
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
 		//load the natives if they do not exist
@@ -154,6 +157,61 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			}
 		}
 	}
+	
+	public static File renicer = new File("/usr/local/bin/renicer");
+	public static boolean hasRenicer;
+	public static void loadReNicer()
+	{
+		hasRenicer = renicer.exists();
+		File install_sh = new File(  "scripts/renicer-install.sh").getAbsoluteFile();
+		File uninstall_sh = new File("scripts/renicer-uninstall.sh").getAbsoluteFile();
+		if(!isWindows)
+		{
+			try
+			{
+				if(!hasRenicer)
+				{
+					System.err.println("renicer command not found! Please install it by running: sh " + install_sh);
+				}
+				else
+				{
+					System.out.println("renicer is installed! To Uninstall running: sh " + uninstall_sh);
+				}
+				
+				//create renicer-install.sh
+				if(!install_sh.exists() || !uninstall_sh.exists())
+				{
+					//enforce that the config directory exists
+					install_sh.getParentFile().mkdirs();
+					
+					List<String> li = new ArrayList();
+					String nl = System.lineSeparator();
+					li.add("#!/bin/sh" + nl +
+							"echo \"Installing renicer\"" + nl +
+							"sudo mkdir -p /usr/local/bin" + nl +
+							"sudo cp /usr/bin/renice /usr/local/bin/renicer #Copy renice" + nl +
+							"if [ \"$(uname | tr '[:upper:]' '[:lower:]')\" = \"darwin\" ]; then" + nl +
+							"	sudo chown root:wheel /usr/local/bin/renicer # Make Root Owner for macOS" + nl +
+							"else" + nl +
+							"	sudo chown root:root /usr/local/bin/renicer # Make Root owner for linux" + nl +
+							"fi" + nl +
+							"sudo chmod u+s /usr/local/bin/renicer # Run as Root" + nl +
+							"sudo chmod 755 /usr/local/bin/renice  # Ensure executable for all users"
+							);
+					DpiFix.saveFileLines(li, install_sh);
+					
+					//Create renicer-uninstall.sh
+					List<String> li2 = new ArrayList();
+					li2.add("sudo rm -f /usr/local/bin/renicer");
+					DpiFix.saveFileLines(li2, uninstall_sh);
+				}
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
+			}
+		}
+	}
 
 	/**
 	 * fix High DPI Issues
@@ -163,6 +221,32 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	 * automatically sets minecraft's process to high priority
 	 */
 	public native static void setHighPriority();
+	
+	public static void fixProcessDPI()
+	{
+		if(DpiFix.isWindows)
+			fixDPI();
+	}
+	
+	public static void setHighProcessPriority()
+	{
+		if(DpiFix.isWindows)
+		{
+			DpiFix.setHighPriority();
+		}
+		else if(DpiFix.hasRenicer)
+		{
+			try
+			{
+				long pid = Long.parseLong(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+				Runtime.getRuntime().exec(renicer.getPath() + " -10 -p " + pid);
+			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	public static String osName = System.getProperty("os.name").toLowerCase();
 	public static boolean isWindows = osName.startsWith("windows");
@@ -305,7 +389,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		{
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f),StandardCharsets.UTF_8 ) );
 			for(String s : list)
-				writer.write(s + "\r\n");
+				writer.write(s + System.lineSeparator());
 		}
 		catch(Exception e)
 		{

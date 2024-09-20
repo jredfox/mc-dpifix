@@ -11,12 +11,12 @@ public class GameModeLib {
 
 	public static void fixDPI()
 	{
-		DpiFix.fixDPI();
+		DpiFix.fixProcessDPI();
 	}
 
 	public static void setHighPriority() 
 	{
-		DpiFix.setHighPriority();
+		DpiFix.setHighProcessPriority();
 	}
 
 }
