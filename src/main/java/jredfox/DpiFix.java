@@ -159,7 +159,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 	}
 	
-	public static File renicer = new File("/usr/local/bin/renicer");
+	public static File renicer = new File("/usr/local/bin/renicer/renicer");
 	public static boolean hasRenicer;
 	public static void loadReNicer()
 	{
@@ -173,7 +173,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				
 				if(!hasRenicer)
 				{
-					System.err.println("renicer command not found! Please install it by running: sh " + install_sh);
+					System.err.println("renicer command not found! Please install it by running: sh '" + install_sh + "'");
 				}
 				
 				//create renicer-install.sh
@@ -186,21 +186,23 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 					String nl = System.lineSeparator();
 					li.add("#!/bin/sh" + nl +
 							"echo \"Installing renicer\"" + nl +
-							"sudo mkdir -p /usr/local/bin" + nl +
-							"sudo cp /usr/bin/renice /usr/local/bin/renicer #Copy renice" + nl +
+							"sudo mkdir -p /usr/local/bin/renicer" + nl +
+							"sudo cp /usr/bin/renice /usr/local/bin/renicer/renicer #Copy renice" + nl +
 							"if [ \"$(uname | tr '[:upper:]' '[:lower:]')\" = \"darwin\" ]; then" + nl +
-							"	sudo chown root:wheel /usr/local/bin/renicer # Make Root Owner for macOS" + nl +
+							"	sudo chown root:wheel /usr/local/bin/renicer # Make Root owner for macOS" + nl +
 							"else" + nl +
 							"	sudo chown root:root /usr/local/bin/renicer # Make Root owner for linux" + nl +
 							"fi" + nl +
-							"sudo chmod 755 /usr/local/bin/renicer # Ensure executable for all users" + nl +
-							"sudo chmod u+s /usr/local/bin/renicer # Run as Root" + nl
+							"sudo chmod 755 /usr/local/bin/renicer # Ensure Executable for all users but not Editable" + nl +
+							"sudo chmod u+s /usr/local/bin/renicer/renicer # Run as Root"
 							);
 					DpiFix.saveFileLines(li, install_sh);
 					
 					//Create renicer-uninstall.sh
 					List<String> li2 = new ArrayList();
-					li2.add("sudo rm -f /usr/local/bin/renicer");
+					li2.add("echo \"Uninstalling renicer\"" + nl +
+							"sudo rm -rf /usr/local/bin/renicer"
+							);
 					DpiFix.saveFileLines(li2, uninstall_sh);
 				}
 			}
