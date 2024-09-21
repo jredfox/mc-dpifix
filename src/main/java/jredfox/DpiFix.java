@@ -89,7 +89,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	
 	public void loadConfig()
 	{
-		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
+		PropertyConfig cfg = new PropertyConfig(new File("config/DpiFix", "DpiFix.cfg"));
 		cfg.load();
 		
 		this.dpifix = cfg.get("Process.DpiFix");
@@ -168,8 +168,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			try
 			{
 				hasRenicer = renicer.exists();
-				File install_sh = new File(  "config/renicer-install.sh").getAbsoluteFile();
-				File uninstall_sh = new File("config/renicer-uninstall.sh").getAbsoluteFile();
+				File install_sh = new File(  "config/DpiFix/renicer-install.sh").getAbsoluteFile();
+				File uninstall_sh = new File("config/DpiFix/renicer-uninstall.sh").getAbsoluteFile();
 				
 				if(!hasRenicer)
 				{
