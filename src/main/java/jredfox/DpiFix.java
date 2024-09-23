@@ -161,9 +161,10 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	
 	public static File renicer = new File("/usr/local/bin/renicer/renicer");
 	public static boolean hasRenicer;
+	public static boolean hasChangeNiceness;
 	public static void loadReNicer()
 	{
-		if(!isWindows)
+		if(isLinux)
 		{
 			try
 			{
@@ -211,6 +212,14 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				t.printStackTrace();
 			}
 		}
+		else if(isMacOs)
+		{
+			hasChangeNiceness = new File("/usr/local/bin/change_niceness").exists();
+			if(!hasChangeNiceness)
+			{
+				System.err.println("change_niceness command not found! To get High Process Priority Please install it from https://github.com/jredfox/change_niceness/releases");
+			}
+		}
 	}
 
 	/**
@@ -245,6 +254,19 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			catch (Throwable e)
 			{
 				e.printStackTrace();
+			}
+		}
+		else if(DpiFix.hasChangeNiceness)
+		{
+			try
+			{
+				System.out.print("Setting High Priority" + System.lineSeparator());
+				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+				Runtime.getRuntime().exec("/usr/local/bin/change_niceness -5 " + pid);
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
 			}
 		}
 	}
