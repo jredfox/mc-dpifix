@@ -170,42 +170,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			try
 			{
 				hasRenicer = renicer.exists();
-				File install_sh = new File(  "config/DpiFix/renicer-install.sh").getAbsoluteFile();
-				File uninstall_sh = new File("config/DpiFix/renicer-uninstall.sh").getAbsoluteFile();
-				
 				if(!hasRenicer)
 				{
-					System.err.println("renicer command not found! To get High Process Priority Please install it by running: sh '" + install_sh + "'");
-				}
-				
-				//create renicer-install.sh
-				if(!install_sh.exists() || !uninstall_sh.exists())
-				{
-					//enforce that the config directory exists
-					install_sh.getParentFile().mkdirs();
-					
-					List<String> li = new ArrayList();
-					String nl = System.lineSeparator();
-					li.add("#!/bin/sh" + nl +
-							"echo \"Installing renicer\"" + nl +
-							"sudo mkdir -p /usr/local/bin/renicer_bin" + nl +
-							"sudo cp /usr/bin/renice /usr/local/bin/renicer_bin/renicer #Copy renice" + nl +
-							"sudo chown -R root:root /usr/local/bin/renicer_bin # Make Root owner" + nl +
-							"sudo chmod 755 /usr/local/bin/renicer_bin" + nl +
-							"sudo chmod 755 /usr/local/bin/renicer_bin/renicer # Ensure Executable for all users but not Editable" + nl +
-							"sudo chmod u+s /usr/local/bin/renicer_bin/renicer # Run as Root" + nl +
-							"sudo rm -f /usr/local/bin/renicer" + nl +
-							"sudo ln -s /usr/local/bin/renicer_bin/renicer /usr/local/bin/renicer # Make it findable in Terminal"
-							);
-					DpiFix.saveFileLines(li, install_sh);
-					
-					//Create renicer-uninstall.sh
-					List<String> li2 = new ArrayList();
-					li2.add("echo \"Uninstalling renicer\"" + nl +
-							"sudo rm -f /usr/local/bin/renicer" + nl +
-							"sudo rm -rf /usr/local/bin/renicer_bin"
-							);
-					DpiFix.saveFileLines(li2, uninstall_sh);
+					System.err.println("renicer command not found! To get High Process Priority Please install it from https://github.com/jredfox/renicer/releases");
 				}
 			}
 			catch(Throwable t)
