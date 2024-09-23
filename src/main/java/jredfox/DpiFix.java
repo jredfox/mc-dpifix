@@ -167,17 +167,10 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	{
 		if(isLinux)
 		{
-			try
+			hasRenicer = renicer.exists();
+			if(!hasRenicer)
 			{
-				hasRenicer = renicer.exists();
-				if(!hasRenicer)
-				{
-					System.err.println("renicer command not found! To get High Process Priority Please install it from https://github.com/jredfox/renicer/releases");
-				}
-			}
-			catch(Throwable t)
-			{
-				t.printStackTrace();
+				System.err.println("renicer command not found! To get High Process Priority Please install it from https://github.com/jredfox/renicer/releases");
 			}
 		}
 		else if(isMacOs)
