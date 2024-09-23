@@ -160,6 +160,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 	
 	public static File renicer = new File("/usr/local/bin/renicer/renicer");
+	public static File changeNiceness = new File("/usr/local/bin/change_niceness");
 	public static boolean hasRenicer;
 	public static boolean hasChangeNiceness;
 	public static void loadReNicer()
@@ -189,12 +190,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 							"echo \"Installing renicer\"" + nl +
 							"sudo mkdir -p /usr/local/bin/renicer" + nl +
 							"sudo cp /usr/bin/renice /usr/local/bin/renicer/renicer #Copy renice" + nl +
-							"if [ \"$(uname | tr '[:upper:]' '[:lower:]')\" = \"darwin\" ]; then" + nl +
-							"	sudo chown root:wheel /usr/local/bin/renicer # Make Root owner for macOS" + nl +
-							"else" + nl +
-							"	sudo chown root:root /usr/local/bin/renicer # Make Root owner for linux" + nl +
-							"fi" + nl +
-							"sudo chmod 755 /usr/local/bin/renicer # Ensure Executable for all users but not Editable" + nl +
+							"sudo chown -R root:root /usr/local/bin/renicer # Make Root owner" + nl +
+							"sudo chmod 755 /usr/local/bin/renicer" + nl +
+							"sudo chmod 755 /usr/local/bin/renicer/renicer # Ensure Executable for all users but not Editable" + nl +
 							"sudo chmod u+s /usr/local/bin/renicer/renicer # Run as Root"
 							);
 					DpiFix.saveFileLines(li, install_sh);
@@ -214,7 +212,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 		else if(isMacOs)
 		{
-			hasChangeNiceness = new File("/usr/local/bin/change_niceness").exists();
+			hasChangeNiceness = changeNiceness.exists();
 			if(!hasChangeNiceness)
 			{
 				System.err.println("change_niceness command not found! To get High Process Priority Please install it from https://github.com/jredfox/change_niceness/releases");
@@ -262,7 +260,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			{
 				System.out.print("Setting High Priority" + System.lineSeparator());
 				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
-				Runtime.getRuntime().exec("/usr/local/bin/change_niceness -5 " + pid);
+				Runtime.getRuntime().exec(changeNiceness.getPath() + " -5 " + pid);
 			}
 			catch(Throwable t)
 			{
