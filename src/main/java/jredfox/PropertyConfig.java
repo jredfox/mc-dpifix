@@ -84,7 +84,12 @@ public class PropertyConfig
 	
 	public boolean get(String key, boolean def)
 	{
-		return Boolean.parseBoolean(this.getKey(key, def ? "true" : "false"));
+		return Boolean.parseBoolean(this.getKey(key, def ? "true" : "false").toLowerCase());
+	}
+	
+	public int getInt(String key, int def) 
+	{
+		return Integer.parseInt(this.getKey(key, String.valueOf(def)));
 	}
 	
 	public String getStr(String key)

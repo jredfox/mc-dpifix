@@ -32,6 +32,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	public boolean dpifix = true;
 	public boolean highPriority = true;
+	public static int nicenessMac;
+	public static int nicenessLinux;
 	public static boolean hasNatives = true;
 	
 	public DpiFix()
@@ -94,15 +96,18 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		
 		this.dpifix = cfg.get("Process.DpiFix");
 		this.highPriority = cfg.get("Process.HighPriority");
+		nicenessMac = cfg.getInt("Process.HighPriority.Niceness.Mac", -5);
+		nicenessLinux = cfg.getInt("Process.HighPriority.Niceness.Linux", -5);
 		
-		this.coremod = cfg.get("CoreMod.Enabled");
-		this.fsSaveFix = cfg.get("Coremod.FullScreen.SaveFix");
-		this.fsTabFix = cfg.get("Coremod.FullScreen.TabFix");
-		this.fsResizeableFix = cfg.get("Coremod.FullScreen.ResizeableFix");
-		this.fsSplashFix = cfg.get("Coremod.FullScreen.SplashFix");
-		this.fsMouseFixLinux = cfg.get("Coremod.FullScreen.MouseFix.Linux");
-		this.fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
-		this.maximizeFix = cfg.get("Coremod.MaximizeResFix");
+		coremod = cfg.get("CoreMod.Enabled");
+		fsSaveFix = cfg.get("Coremod.FullScreen.SaveFix");
+		fsTabFix = cfg.get("Coremod.FullScreen.TabFix");
+		fsResizeableFix = cfg.get("Coremod.FullScreen.ResizeableFix");
+		fsSplashFix = cfg.get("Coremod.FullScreen.SplashFix");
+		fsMouseFixLinux = cfg.get("Coremod.FullScreen.MouseFix.Linux");
+		fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
+		maximizeFix = cfg.get("Coremod.MaximizeResFix");
+		
 		cfg.save();
 	}
 
@@ -204,30 +209,30 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		{
 			DpiFix.setHighPriority();
 		}
-		else if(DpiFix.hasRenicer)
-		{
-			try
-			{
-				System.out.print("Setting High Priority" + System.lineSeparator());
-				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];//keep pid as string as we don't have unsigned long in java
-				Runtime.getRuntime().exec(renicer.getPath() + " -5 -p " + pid);//-5 is "high" for windows. Anything lower and it will be out of sync with the keyboard and mouse and graphics drivers causing input lag
-			}
-			catch (Throwable e)
-			{
-				e.printStackTrace();
-			}
-		}
 		else if(DpiFix.hasChangeNiceness)
 		{
 			try
 			{
 				System.out.print("Setting High Priority" + System.lineSeparator());
 				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
-				Runtime.getRuntime().exec(changeNiceness.getPath() + " -5 " + pid);
+				Runtime.getRuntime().exec(changeNiceness.getPath() + " " + nicenessMac + " " + pid);
 			}
 			catch(Throwable t)
 			{
 				t.printStackTrace();
+			}
+		}
+		else if(DpiFix.hasRenicer)
+		{
+			try
+			{
+				System.out.print("Setting High Priority" + System.lineSeparator());
+				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];//keep pid as string as we don't have unsigned long in java
+				Runtime.getRuntime().exec(renicer.getPath() + " " + nicenessLinux + " -p " + pid);//-5 is "high" for windows. Anything lower and it will be out of sync with the keyboard and mouse and graphics drivers causing input lag
+			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
 			}
 		}
 	}
