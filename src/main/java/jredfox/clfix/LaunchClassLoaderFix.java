@@ -33,13 +33,14 @@ public class LaunchClassLoaderFix {
 			
 			//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
 			Class actualClassLoader = classLoader.getClass();
-			if(!clazzLoaderClazz.getName().equals(actualClassLoader.getName()))
+			while(!actualClassLoader.getName().equals(clazzLoaderClazz.getName()))
 			{
-				System.out.println("Fixing RAM Leak Shadow Variables:" + actualClassLoader.getName());
+				System.out.println("Fixing RAM Leak of LaunchClassLoader Shadow Variables: " + actualClassLoader.getName());
 				setDummyMap(classLoader, actualClassLoader, "cachedClasses");
 				setDummyMap(classLoader, actualClassLoader, "resourceCache");
 				setDummyMap(classLoader, actualClassLoader, "packageManifests");
 				setDummySet(classLoader, actualClassLoader, "negativeResourceCache");
+				actualClassLoader = actualClassLoader.getSuperclass();
 			}
 		}
 		catch(Throwable t)
