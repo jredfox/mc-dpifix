@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.lwjgl.opengl.Display;
@@ -27,13 +28,21 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import jredfox.clfix.LaunchClassLoaderFix;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixCoreMod implements IClassTransformer {
+	
+	static
+	{
+		LaunchClassLoaderFix.stopMemoryOverflow();
+	}
 	
 	/**
 	 * check if notch names should be used without loading any minecraft classes
