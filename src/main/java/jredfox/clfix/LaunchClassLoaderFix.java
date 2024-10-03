@@ -35,19 +35,6 @@ public class LaunchClassLoaderFix {
 			}
 			
 			Class clazzLoaderClazz = forName("net.minecraft.launchwrapper.LaunchClassLoader");
-			if(!instanceOf(clazzLoaderClazz, Thread.currentThread().getContextClassLoader()))
-			{
-				try
-				{
-					System.out.println("Patching Thread#getContextClassLoader");
-					Thread.currentThread().setContextClassLoader(classLoader);
-				}
-				catch(Throwable t)
-				{
-					t.printStackTrace();
-				}
-			}
-
 			setDummyMap(classLoader, clazzLoaderClazz, "cachedClasses");
 			setDummyMap(classLoader, clazzLoaderClazz, "resourceCache");
 			setDummyMap(classLoader, clazzLoaderClazz, "packageManifests");
