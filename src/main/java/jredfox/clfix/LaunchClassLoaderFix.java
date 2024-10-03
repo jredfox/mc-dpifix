@@ -6,12 +6,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Fix LaunchClassLoader Memory Leaks Supports Launch Class Loader 1.3 - 1.12
+ * Fix LaunchClassLoader Memory Leaks Supports launchwrapper 1.3 - 1.12
  * @author jredfox
  */
 public class LaunchClassLoaderFix {
 	
 	public static final String VERSION = "2.0.0";
+	public static ClassLoader legacyClassLoader = null;
 	
 	public static void stopMemoryOverflow()
 	{
@@ -23,9 +24,30 @@ public class LaunchClassLoaderFix {
 				System.err.println("LaunchWrapper is Missing!");
 				return;
 			}
+			
 			System.out.println("Fixing RAM Leak of LaunchClassLoader");
-			Object classLoader = getPrivate(launch, "classLoader");
+			ClassLoader classLoader = legacyClassLoader != null ? legacyClassLoader : (ClassLoader) getPrivate(null, launch, "classLoader", false);
+			if(classLoader == null)
+			{
+				System.err.println("Unable to Obtain LaunchClassLoader#classLoader we must be using launchwrapper 1.3 or lower!");
+				legacyClassLoader = LaunchClassLoaderFix.class.getClassLoader();
+				classLoader = legacyClassLoader;
+			}
+			
 			Class clazzLoaderClazz = forName("net.minecraft.launchwrapper.LaunchClassLoader");
+			if(!instanceOf(clazzLoaderClazz, Thread.currentThread().getContextClassLoader()))
+			{
+				try
+				{
+					System.out.println("Patching Thread#getContextClassLoader");
+					Thread.currentThread().setContextClassLoader(classLoader);
+				}
+				catch(Throwable t)
+				{
+					t.printStackTrace();
+				}
+			}
+
 			setDummyMap(classLoader, clazzLoaderClazz, "cachedClasses");
 			setDummyMap(classLoader, clazzLoaderClazz, "resourceCache");
 			setDummyMap(classLoader, clazzLoaderClazz, "packageManifests");
@@ -92,7 +114,11 @@ public class LaunchClassLoaderFix {
 		return getPrivate(null, clazz, field);
 	}
 	
-	private static Object getPrivate(Object instance, Class<?> clazz, String name)
+	private static Object getPrivate(Object instance, Class<?> clazz, String name) {
+		return getPrivate(instance, clazz, name, true);
+	}
+	
+	private static Object getPrivate(Object instance, Class<?> clazz, String name, boolean print)
 	{
 		try
 		{
@@ -107,7 +133,8 @@ public class LaunchClassLoaderFix {
 		}
 		catch(Throwable t)
 		{
-			t.printStackTrace();
+			if(print)
+				t.printStackTrace();
 		}
         return null;
 	}
@@ -146,6 +173,11 @@ public class LaunchClassLoaderFix {
     		t.printStackTrace();
     	}
     	return null;
+    }
+    
+    public static boolean instanceOf(Class base, Object obj)
+    {
+    	return base.isInstance(obj);
     }
 
 }

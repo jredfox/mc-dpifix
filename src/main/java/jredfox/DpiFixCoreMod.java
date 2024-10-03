@@ -1,12 +1,14 @@
 package jredfox;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.objectweb.asm.ClassReader;
@@ -33,8 +35,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixCoreMod implements IClassTransformer {
@@ -543,7 +543,23 @@ public class DpiFixCoreMod implements IClassTransformer {
     	name = name.replace('.', '/');
     	File f = new File(System.getProperty("user.dir") + "/asm/dumps/dpi-fix/" + name + ".class");
     	f.getParentFile().mkdirs();
-    	FileUtils.writeByteArrayToFile(f, bytes);
+    	InputStream in = null;
+    	OutputStream out = null;
+    	try
+    	{
+    		in = new ByteArrayInputStream(bytes);
+    		out = new FileOutputStream(f);
+    		DpiFix.copy(in, out);
+    	}
+    	catch(Throwable e)
+    	{
+    		e.printStackTrace();
+    	}
+    	finally
+    	{
+    		DpiFix.closeQuietly(in);
+    		DpiFix.closeQuietly(out);
+    	}
 	}
 	
 	//##############################  START Functions  ##############################\\
