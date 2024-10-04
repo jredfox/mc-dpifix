@@ -2,11 +2,14 @@ package jredfox.clfix;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Fix LaunchClassLoader Memory Leaks Supports launchwrapper 1.3 - 1.12
+ * V2.0.0 Is alot more robust then V1.0.0 In EvilNotchLib as it handles all possible ClassLoaders & Shadow Variables
+ * Does not Override FoamFix please Use EvilNotchLib for 1.12.2 if you plan to install FoamFix
  * @author jredfox
  */
 public class LaunchClassLoaderFix {
@@ -26,30 +29,32 @@ public class LaunchClassLoaderFix {
 			}
 			
 			System.out.println("Fixing RAM Leak of LaunchClassLoader");
-			ClassLoader classLoader = legacyClassLoader != null ? legacyClassLoader : (ClassLoader) getPrivate(null, launch, "classLoader", false);
-			if(classLoader == null)
-			{
-				System.err.println("Unable to Obtain LaunchClassLoader#classLoader we must be using launchwrapper 1.3 or lower!");
-				legacyClassLoader = LaunchClassLoaderFix.class.getClassLoader();
-				classLoader = legacyClassLoader;
-			}
+			ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
+			ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
+			ClassLoader contextLoader = getContextClassLoader();
+			if(legacyClassLoader == null)
+				legacyClassLoader = currentLoader;
 			
-			Class clazzLoaderClazz = forName("net.minecraft.launchwrapper.LaunchClassLoader");
-			setDummyMap(classLoader, clazzLoaderClazz, "cachedClasses");
-			setDummyMap(classLoader, clazzLoaderClazz, "resourceCache");
-			setDummyMap(classLoader, clazzLoaderClazz, "packageManifests");
-			setDummySet(classLoader, clazzLoaderClazz, "negativeResourceCache");
-			
-			//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
-			Class actualClassLoader = classLoader.getClass();
-			while(!actualClassLoader.getName().equals(clazzLoaderClazz.getName()))
+			Map<String, ClassLoader> loaders = new HashMap(5);
+			loaders.put(toNString(classLoader), classLoader);
+			loaders.put(toNString(legacyClassLoader), legacyClassLoader);
+			loaders.put(toNString(currentLoader), currentLoader);
+			loaders.put(toNString(contextLoader), contextLoader);
+			for(ClassLoader cl : loaders.values())
 			{
-				System.out.println("Fixing RAM Leak of LaunchClassLoader Shadow Variables: " + actualClassLoader.getName());
-				setDummyMap(classLoader, actualClassLoader, "cachedClasses");
-				setDummyMap(classLoader, actualClassLoader, "resourceCache");
-				setDummyMap(classLoader, actualClassLoader, "packageManifests");
-				setDummySet(classLoader, actualClassLoader, "negativeResourceCache");
-				actualClassLoader = actualClassLoader.getSuperclass();
+				if(cl == null)
+					continue;
+				
+				//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
+				Class actualClassLoader = cl.getClass();
+				while(!actualClassLoader.getName().startsWith("java."))
+				{
+					setDummyMap(cl, actualClassLoader, "cachedClasses");
+					setDummyMap(cl, actualClassLoader, "resourceCache");
+					setDummyMap(cl, actualClassLoader, "packageManifests");
+					setDummySet(cl, actualClassLoader, "negativeResourceCache");
+					actualClassLoader = actualClassLoader.getSuperclass();
+				}
 			}
 		}
 		catch(Throwable t)
@@ -57,6 +62,19 @@ public class LaunchClassLoaderFix {
 			System.err.println("FATAL ERROR HAS OCCURED PATCHING THE LaunchClassLoader Memory Leaks!");
 			t.printStackTrace();
 		}
+	}
+
+	private static ClassLoader getContextClassLoader() 
+	{
+		try
+		{
+			return Thread.currentThread().getContextClassLoader();
+		}
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
+		return null;
 	}
 
 	private static void setDummyMap(Object classLoader, Class clazzLoaderClazz, String mapName)
@@ -82,6 +100,10 @@ public class LaunchClassLoaderFix {
 		init.clear();
 		setPrivate(classLoader, new DummySet(), clazzLoaderClazz, setName);
 	}
+	
+    public static String toNString(Object o) {
+        return o == null ? "0" : (o.getClass().getName() + "@" + System.identityHashCode(o));
+    }
 	
 	public static Field modifiersField;
 	static
