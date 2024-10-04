@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Fix LaunchClassLoader Memory Leaks Supports launchwrapper 1.3 - 1.12
  * V2.0.0 Is alot more robust then V1.0.0 In EvilNotchLib as it handles all possible ClassLoaders & Shadow Variables
- * Does not Override FoamFix please Use EvilNotchLib for 1.12.2 if you plan to install FoamFix
+ * Does not Override FoamFix please Use EvilNotchLib for MC 1.12.2 if you plan to install FoamFix
  * @author jredfox
  */
 public class LaunchClassLoaderFix {
@@ -56,7 +56,7 @@ public class LaunchClassLoaderFix {
 					setDummyMap(cl, actualClassLoader, "packageManifests");
 					setDummySet(cl, actualClassLoader, "negativeResourceCache");
 					if(flag && actualClassLoader.getName().equals(clazzLoaderName))
-						break;//Regardless of what LaunchClassLoader extends break after done here
+						break;//Regardless of what LaunchClassLoader extends break after as we are done
 					actualClassLoader = actualClassLoader.getSuperclass();
 				}
 				while(flag ? true : !actualClassLoader.getName().startsWith("java.") );
