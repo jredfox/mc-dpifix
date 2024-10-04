@@ -47,7 +47,7 @@ public class LaunchClassLoaderFix {
 				
 				//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
 				Class actualClassLoader = cl.getClass();
-				while(!actualClassLoader.getName().startsWith("java."))
+				do
 				{
 					setDummyMap(cl, actualClassLoader, "cachedClasses");
 					setDummyMap(cl, actualClassLoader, "resourceCache");
@@ -55,6 +55,7 @@ public class LaunchClassLoaderFix {
 					setDummySet(cl, actualClassLoader, "negativeResourceCache");
 					actualClassLoader = actualClassLoader.getSuperclass();
 				}
+				while(!actualClassLoader.getName().startsWith("java."));
 			}
 		}
 		catch(Throwable t)
