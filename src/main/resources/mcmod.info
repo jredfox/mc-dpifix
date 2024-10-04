@@ -1,15 +1,15 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "",
+  "modid": "dpi-fix",
+  "name": "DPI-Fix",
+  "description": "Fixes DPI, FullScreen and Sets High Process Priority",
+  "version": "1.5.0",
+  "mcversion": "",
+  "url": "https://www.curseforge.com/minecraft/mc-mods/dpi-fix",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
-  "logoFile": "",
+  "authorList": ["jredfox"],
+  "credits": "jredfox",
+  "logoFile": "logo.png",
   "screenshots": [],
   "dependencies": []
 }

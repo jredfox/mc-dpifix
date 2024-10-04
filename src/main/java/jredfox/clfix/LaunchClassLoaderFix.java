@@ -199,4 +199,10 @@ public class LaunchClassLoaderFix {
     	return base.isInstance(obj);
     }
 
+	public static void stopMemoryOverflowFoamFix() 
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 }
