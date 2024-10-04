@@ -96,8 +96,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		
 		this.dpifix = cfg.get("Process.DpiFix");
 		this.highPriority = cfg.get("Process.HighPriority");
-		nicenessMac = cfg.getInt("Process.HighPriority.Niceness.Mac", -5);
-		nicenessLinux = cfg.getInt("Process.HighPriority.Niceness.Linux", -5);
+		nicenessMac = toNiceness(cfg.getInt("Process.HighPriority.Niceness.Mac", -5));
+		nicenessLinux = toNiceness(cfg.getInt("Process.HighPriority.Niceness.Linux", -5));
 		
 		coremod = cfg.get("CoreMod.Enabled");
 		fsSaveFix = cfg.get("Coremod.FullScreen.SaveFix");
@@ -235,6 +235,14 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * Allows values from 0 to -20. Do not allow users to troll and make minecraft slower then normal
+	 */
+	public int toNiceness(int val)
+	{
+		return Math.min(0, Math.max(-20, val));
 	}
 	
 	public static String osName = System.getProperty("os.name").toLowerCase();
