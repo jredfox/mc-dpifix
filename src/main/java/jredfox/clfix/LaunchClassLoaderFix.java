@@ -22,13 +22,15 @@ public class LaunchClassLoaderFix {
 		try
 		{
 			Class launch = forName("net.minecraft.launchwrapper.Launch");
-			if(launch == null) 
+			if(launch == null)
 			{
 				System.err.println("LaunchWrapper is Missing!");
 				return;
 			}
 			
 			System.out.println("Fixing RAM Leak of LaunchClassLoader");
+			String clazzLoaderName = "net.minecraft.launchwrapper.LaunchClassLoader";
+			Class clazzLoaderClazz = forName(clazzLoaderName);
 			ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
 			ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
 			ClassLoader contextLoader = getContextClassLoader();
@@ -44,18 +46,20 @@ public class LaunchClassLoaderFix {
 			{
 				if(cl == null)
 					continue;
-				
 				//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
 				Class actualClassLoader = cl.getClass();
+				boolean flag = instanceOf(clazzLoaderClazz, actualClassLoader);
 				do
 				{
 					setDummyMap(cl, actualClassLoader, "cachedClasses");
 					setDummyMap(cl, actualClassLoader, "resourceCache");
 					setDummyMap(cl, actualClassLoader, "packageManifests");
 					setDummySet(cl, actualClassLoader, "negativeResourceCache");
+					if(flag && actualClassLoader.getName().equals(clazzLoaderName))
+						break;//Regardless of what LaunchClassLoader extends break after done here
 					actualClassLoader = actualClassLoader.getSuperclass();
 				}
-				while(!actualClassLoader.getName().startsWith("java."));
+				while(flag ? true : !actualClassLoader.getName().startsWith("java.") );
 			}
 		}
 		catch(Throwable t)
@@ -183,6 +187,11 @@ public class LaunchClassLoaderFix {
     		t.printStackTrace();
     	}
     	return null;
+    }
+    
+    public static boolean instanceOf(Class base, Class compare)
+    {
+    	return base.isAssignableFrom(compare);
     }
     
     public static boolean instanceOf(Class base, Object obj)
