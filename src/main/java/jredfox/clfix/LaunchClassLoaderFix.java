@@ -1,8 +1,21 @@
 package jredfox.clfix;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +30,9 @@ public class LaunchClassLoaderFix {
 	public static final String VERSION = "2.0.0";
 	public static ClassLoader legacyClassLoader = null;
 	
+	/**
+	 * can be called at any time
+	 */
 	public static void stopMemoryOverflow()
 	{
 		try
@@ -67,6 +83,41 @@ public class LaunchClassLoaderFix {
 			System.err.println("FATAL ERROR HAS OCCURED PATCHING THE LaunchClassLoader Memory Leaks!");
 			t.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Must be called during preinit after foamfix has done their preinit or later after preinit
+	 */
+	public static void stopMemoryOverflowFoamFix()
+	{
+		Class foamCfgClazz = forName("pl.asie.foamfix.shared.FoamFixConfig");
+		File foamCfgFile = new File("config", "foamfix.cfg");
+		if(foamCfgClazz != null)
+		{
+			try
+			{
+				System.out.println("Disabling FoamFix's \"Fix\" for LaunchClassLoader!");
+				
+				//Forces foamfix.cfg to be created
+				Object instance = foamCfgClazz.newInstance();
+				Method init = foamCfgClazz.getDeclaredMethod("init", File.class, boolean.class);
+				init.setAccessible(true);
+				init.invoke(instance, foamCfgFile, true);
+				
+				//Disable their fix
+				Object[] lines = getFileLines(foamCfgFile, true).toArray();
+				for(int i=0;i<lines.length;i++)
+					lines[i] = ((String) lines[i]).replace("removePackageManifestMap=true", "removePackageManifestMap=false").replace("weakenResourceCache=true", "weakenResourceCache=false");
+				saveFileLines(lines, foamCfgFile);
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
+			}
+		}
+		
+		//StopMemoryOverflow just in case
+		stopMemoryOverflow();
 	}
 
 	private static ClassLoader getContextClassLoader() 
@@ -124,15 +175,15 @@ public class LaunchClassLoaderFix {
 		}
 	}
 
-	private static Object getPrivate(Class clazz, String field) {
+	public static Object getPrivate(Class clazz, String field) {
 		return getPrivate(null, clazz, field);
 	}
 	
-	private static Object getPrivate(Object instance, Class<?> clazz, String name) {
+	public static Object getPrivate(Object instance, Class<?> clazz, String name) {
 		return getPrivate(instance, clazz, name, true);
 	}
 	
-	private static Object getPrivate(Object instance, Class<?> clazz, String name, boolean print)
+	public static Object getPrivate(Object instance, Class<?> clazz, String name, boolean print)
 	{
 		try
 		{
@@ -198,11 +249,88 @@ public class LaunchClassLoaderFix {
     {
     	return base.isInstance(obj);
     }
-
-	public static void stopMemoryOverflowFoamFix() 
+    
+	public static void saveFileLines(Object[] list,File f)
 	{
-		// TODO Auto-generated method stub
+		BufferedWriter writer = null;
+		try
+		{
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f),StandardCharsets.UTF_8 ) );
+			for(Object s : list)
+				writer.write(s + System.lineSeparator());
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try 
+			{
+				if(writer != null)
+					writer.close();
+			}
+			catch (IOException e)
+			{
+				
+			}
+		}
+	}
+    
+	/**
+	 * Equivalent to Files.readAllLines() but, works way faster
+	 */
+	public static List<String> getFileLines(File f,boolean utf8)
+	{
+		BufferedReader reader = null;
+		List<String> list = null;
+		try
+		{
+			if(!utf8)
+			{
+				reader = new BufferedReader(new FileReader(f));//says it's utf-8 but, the jvm actually specifies it even though the lang settings in a game might be different
+			}
+			else
+			{
+				reader = new BufferedReader(new InputStreamReader(new FileInputStream(f),StandardCharsets.UTF_8) );
+			}
+			
+			list = new ArrayList();
+			String s = reader.readLine();
+			
+			if(s != null)
+			{
+				list.add(s);
+			}
+			
+			while(s != null)
+			{
+				s = reader.readLine();
+				if(s != null)
+				{
+					list.add(s);
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if(reader != null)
+			{
+				try 
+				{
+					reader.close();
+				} catch (IOException e) 
+				{
+					System.out.println("Unable to Close InputStream this is bad");
+				}
+			}
+		}
 		
+		return list;
 	}
 
 }
