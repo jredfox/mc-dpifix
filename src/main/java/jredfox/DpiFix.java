@@ -308,7 +308,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	@Override
 	public String[] getASMTransformerClass() {
-		return (this.coremod && isClient) ? new String[]{"jredfox.DpiFixCoreMod"} : null;
+		return (this.coremod && isClient) ? new String[]{"jredfox.DpiFixCoreMod"} : new String[] {"jredfox.DpiFixAnnotation"};
 	}
 
 	//___________________________________________START Dummy Methods for IMPL of Coremod______________________________\\
@@ -397,5 +397,12 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			closeQuietly(writer);
 		}
 	}
+
+    public static List<String> asStringList(String... arr) {
+        List li = new ArrayList(arr.length);
+        for(String s : arr)
+        	li.add(s);
+        return li;
+    }
 
 }

@@ -1,4 +1,4 @@
-package jredfox;
+package jredfox.dpimod;
 
 import jredfox.clfix.LaunchClassLoaderFix;
 

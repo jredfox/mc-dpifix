@@ -1,4 +1,4 @@
-package jredfox;
+package jredfox.dpimod;
 
 import cpw.mods.fml.common.Mod;
 
@@ -6,7 +6,8 @@ import cpw.mods.fml.common.Mod;
 		modid = "dpi-fix", 
 		name = "DPI-Fix", 
 		version = "1.5.0", 
-		acceptedMinecraftVersions = ""
+		acceptedMinecraftVersions = "",
+		acceptableRemoteVersions = "*"
 	)
 public class DpiFixModLegacy {
 	

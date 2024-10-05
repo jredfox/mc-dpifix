@@ -108,6 +108,8 @@ public class LaunchClassLoaderFix {
 				File foamCfgFile = new File("config", "foamfix.cfg");
 				Object instance = foamCfgClazz.newInstance();
 				Method init = foamCfgClazz.getDeclaredMethod("init", File.class, boolean.class);
+				if(init == null)
+					init = foamCfgClazz.getDeclaredMethod("init", File.class, Boolean.class);
 				init.setAccessible(true);
 				init.invoke(instance, foamCfgFile, true);
 				

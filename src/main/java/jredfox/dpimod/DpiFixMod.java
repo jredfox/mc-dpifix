@@ -1,4 +1,4 @@
-package jredfox;
+package jredfox.dpimod;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;

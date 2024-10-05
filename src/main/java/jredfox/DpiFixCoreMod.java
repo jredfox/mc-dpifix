@@ -15,6 +15,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
@@ -44,6 +45,12 @@ public class DpiFixCoreMod implements IClassTransformer {
 		LaunchClassLoaderFix.stopMemoryOverflow();
 	}
 	
+	public static List<String> cls = DpiFix.asStringList(new String[] {
+			"net.minecraft.client.Minecraft", 
+			"net.minecraft.client.gui.LoadingScreenRenderer", 
+			"jredfox.dpimod.DpiFixModLegacy"
+	});
+	
 	/**
 	 * check if notch names should be used without loading any minecraft classes
 	 */
@@ -52,8 +59,8 @@ public class DpiFixCoreMod implements IClassTransformer {
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
 	{
-		boolean mc = transformedName.equals("net.minecraft.client.Minecraft");
-		if(mc || transformedName.equals("net.minecraft.client.gui.LoadingScreenRenderer"))
+		int index = cls.indexOf(transformedName);
+		if(index != -1)
 		{
 			try
 			{
@@ -61,15 +68,19 @@ public class DpiFixCoreMod implements IClassTransformer {
 	            ClassReader classReader = new ClassReader(basicClass);
 	            classReader.accept(classNode, 0);
 	            
-	            if(mc)
+	            if(index == 0)
 	            {
 	            	System.out.println("Patching: Minecraft Fullscreen to fix MC-68754, MC-111419, MC-160054");
 	            	patchFullScreen(name.replace(".", "/"), classNode);
 	            	patchMaxResFix( name.replace(".", "/"), classNode);
 	            }
-	            else
+	            else if(index == 1)
 	            {
 	            	patchLoadingScreenRenderer(name, classNode);
+	            }
+	            else
+	            {
+	            	DpiFixAnnotation.patchAtMod(classNode);
 	            }
 	            
 	            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
