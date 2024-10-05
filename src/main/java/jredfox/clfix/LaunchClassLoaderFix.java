@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -96,11 +97,24 @@ public class LaunchClassLoaderFix {
 			try
 			{
 				System.out.println("Disabling FoamFix's \"Fix\" for LaunchClassLoader!");
-				foamShared.newInstance();//Force Class Initialization
-				Object instance = getPrivate(null, foamShared, "config");
+				Object finstance = getPrivate(null, foamShared, "config");
 				Class foamFixConfig = forName("pl.asie.foamfix.shared.FoamFixConfig");
-				setPrivate(instance, false, foamFixConfig, "lwWeakenResourceCache");
-				setPrivate(instance, false, foamFixConfig, "lwRemovePackageManifestMap");
+				setPrivate(finstance, false, foamFixConfig, "lwWeakenResourceCache");
+				setPrivate(finstance, false, foamFixConfig, "lwRemovePackageManifestMap");
+				
+				//Forces foamfix.cfg to be created
+				Class foamCfgClazz = forName("pl.asie.foamfix.shared.FoamFixConfig");
+				File foamCfgFile = new File("config", "foamfix.cfg");
+				Object instance = foamCfgClazz.newInstance();
+				Method init = foamCfgClazz.getDeclaredMethod("init", File.class, boolean.class);
+				init.setAccessible(true);
+				init.invoke(instance, foamCfgFile, true);
+				
+				//Disable their fix
+				Object[] lines = getFileLines(foamCfgFile, true).toArray();
+				for(int i=0;i<lines.length;i++)
+					lines[i] = ((String) lines[i]).replace("removePackageManifestMap=true", "removePackageManifestMap=false").replace("weakenResourceCache=true", "weakenResourceCache=false");
+				saveFileLines(lines, foamCfgFile);
 			}
 			catch(Throwable t)
 			{
