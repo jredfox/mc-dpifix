@@ -86,12 +86,13 @@ public class LaunchClassLoaderFix {
 	}
 	
 	/**
-	 * Must be called during preinit after foamfix has done their preinit or later after preinit
+	 * Disables FoamFix's Flawed Fix trying to Fix LaunchClassLoader RAM Leak
 	 */
 	public static void stopMemoryOverflowFoamFix()
 	{
 		//Disable FoamFix lwWeakenResourceCache & lwRemovePackageManifestMap for 1.8x - 1.12.2
 		Class foamShared = forName("pl.asie.foamfix.shared.FoamFixShared");
+		Class foamBF = forName("pl.asie.foamfix.bugfixmod.coremod.BugfixModClassTransformer");
 		if(foamShared != null)
 		{
 			try
@@ -121,9 +122,50 @@ public class LaunchClassLoaderFix {
 				t.printStackTrace();
 			}
 		}
+		//Support 1.7.10 FoamFix BS
+		else if(foamBF != null)
+		{
+			System.err.println("FoamFix for MC 1.7.10 has been found. FoamFix is not needed for 1.7.10 and actually causes graphical bugs. Please Use Optifine instead");
+			try
+			{
+				Field fieldInstance = null;
+				Field fieldSettings = null;
+				for(Field f : foamBF.getDeclaredFields())
+				{
+					String name = f.getName();
+					if(name.equalsIgnoreCase("instance"))
+						fieldInstance = f;
+					else if(name.equalsIgnoreCase("settings"))
+						fieldSettings = f;
+				}
+				fixFields(fieldInstance, fieldSettings);
+				
+				Object instance = fieldInstance.get(null);
+				Object settingsInstance = fieldSettings.get(instance);
+				Class settingsClazz = settingsInstance.getClass();
+				Field rc = settingsClazz.getDeclaredField("lwWeakenResourceCache");
+				Field pkg = settingsClazz.getDeclaredField("lwRemovePackageManifestMap");
+				fixFields(rc, pkg);
+				rc.set(settingsInstance, false);
+				pkg.set(settingsInstance, false);
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
+			}
+		}
 		
 		//StopMemoryOverflow just in case
 		stopMemoryOverflow();
+	}
+
+	private static void fixFields(Field... fields) throws IllegalArgumentException, IllegalAccessException
+	{
+		for(Field f : fields) 
+		{
+			f.setAccessible(true);
+			modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+		}
 	}
 
 	private static ClassLoader getContextClassLoader() 
