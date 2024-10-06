@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -80,14 +81,13 @@ public class DpiFixAnnotation implements IClassTransformer {
 			classNode.visibleAnnotations.add(atnet);
 		}
 		
-		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent) so 1.5.2 logo works
+		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent)
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{
-			System.out.println("Adding Annotation @Mod.PreInit to DpiFixModLegacy#preinit");
+			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.PreInit from DpiFixModLegacy#preinit");
 			MethodNode m = getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");
+			m.visibleAnnotations.remove(getAnnotation(m, "Lcpw/mods/fml/common/Mod$EventHandler;"));
 			AnnotationNode preinit = new AnnotationNode("Lcpw/mods/fml/common/Mod$PreInit;");
-			if(m.visibleAnnotations == null)
-				m.visibleAnnotations = new ArrayList();
 			m.visibleAnnotations.add(preinit);
 		}
 	}
@@ -107,13 +107,23 @@ public class DpiFixAnnotation implements IClassTransformer {
 	
 	public static AnnotationNode getAnnotation(ClassNode classNode, String... descs)
 	{
-		for(AnnotationNode a : classNode.visibleAnnotations)
+		return getAnnotation(classNode.visibleAnnotations, descs);
+	}
+	
+	public static AnnotationNode getAnnotation(MethodNode methodNode, String... descs)
+	{
+		return getAnnotation(methodNode.visibleAnnotations, descs);
+	}
+	
+	private static AnnotationNode getAnnotation(List<AnnotationNode> visibleAnnotations, String... descs) 
+	{
+		for(AnnotationNode a : visibleAnnotations)
 			for(String desc : descs)
 				if(a.desc.equals(desc))
 					return a;
 		return null;
 	}
-	
+
 	/**
 	 * dumps a file from memory
 	 * @throws IOException 

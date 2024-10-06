@@ -28,15 +28,15 @@ import java.util.Set;
 public class LaunchClassLoaderFix {
 	
 	public static final String VERSION = "2.0.0";
-	public static ClassLoader legacyClassLoader = null;
 	
 	/**
 	 * can be called at any time
 	 */
-	public static void stopMemoryOverflow()
+	public static void stopMemoryOverflow(ClassLoader clforge)
 	{
 		try
 		{
+			System.out.println(clforge != null ? ("clforge:" + clforge) : "null clforge");
 			Class launch = forName("net.minecraft.launchwrapper.Launch");
 			if(launch == null)
 			{
@@ -50,18 +50,17 @@ public class LaunchClassLoaderFix {
 			ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
 			ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
 			ClassLoader contextLoader = getContextClassLoader();
-			if(legacyClassLoader == null)
-				legacyClassLoader = currentLoader;
 			
 			Map<String, ClassLoader> loaders = new HashMap(5);
 			loaders.put(toNString(classLoader), classLoader);
-			loaders.put(toNString(legacyClassLoader), legacyClassLoader);
+			loaders.put(toNString(clforge), clforge);
 			loaders.put(toNString(currentLoader), currentLoader);
 			loaders.put(toNString(contextLoader), contextLoader);
 			for(ClassLoader cl : loaders.values())
 			{
 				if(cl == null)
 					continue;
+				System.out.println("Fixing RAM Leak:" + cl);
 				//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
 				Class actualClassLoader = cl.getClass();
 				boolean flag = instanceOf(clazzLoaderClazz, actualClassLoader);
@@ -88,7 +87,7 @@ public class LaunchClassLoaderFix {
 	/**
 	 * Disables FoamFix's Flawed Fix trying to Fix LaunchClassLoader RAM Leak
 	 */
-	public static void stopMemoryOverflowFoamFix()
+	public static void stopMemoryOverflowFoamFix(ClassLoader clforge)
 	{
 		//Disable FoamFix lwWeakenResourceCache & lwRemovePackageManifestMap for 1.8x - 1.12.2
 		Class foamShared = forName("pl.asie.foamfix.shared.FoamFixShared");
@@ -158,7 +157,7 @@ public class LaunchClassLoaderFix {
 		}
 		
 		//StopMemoryOverflow just in case
-		stopMemoryOverflow();
+		stopMemoryOverflow(clforge);
 	}
 
 	private static void fixFields(Field... fields) throws IllegalArgumentException, IllegalAccessException

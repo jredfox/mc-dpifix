@@ -16,14 +16,11 @@ import net.minecraftforge.common.ForgeVersion;
 	)
 public class DpiFixModLegacy {
 	
-	public DpiFixModLegacy()
-	{
-		DpiFixModProxy.modInit();
-	}
-	
 //	@PreInit //Is added at runtime dynamically if it's needed
+	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent pre)
 	{
+		DpiFixModProxy.modInit(this.getClass().getClassLoader());
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{
 			FMLModContainer container = (FMLModContainer) FMLCommonHandler.instance().findContainerFor(this);

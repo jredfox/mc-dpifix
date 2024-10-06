@@ -16,7 +16,7 @@ public class DpiFixMod {
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent e)
 	{
-		DpiFixModProxy.modInit();
+		DpiFixModProxy.modInit(this.getClass().getClassLoader());
 	}
 
 }

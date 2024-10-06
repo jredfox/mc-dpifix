@@ -41,7 +41,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 	
 	static
 	{
-		LaunchClassLoaderFix.stopMemoryOverflow();
+		LaunchClassLoaderFix.stopMemoryOverflow(null);
 	}
 	
 	public static List<String> cls = DpiFix.asStringList(new String[] {
