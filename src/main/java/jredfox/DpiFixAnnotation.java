@@ -83,6 +83,7 @@ public class DpiFixAnnotation implements IClassTransformer {
 		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent) so 1.5.2 logo works
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{
+			System.out.println("Adding Annotation @Mod.PreInit to DpiFixModLegacy#preinit");
 			MethodNode m = getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");
 			AnnotationNode preinit = new AnnotationNode("Lcpw/mods/fml/common/Mod$PreInit;");
 			if(m.visibleAnnotations == null)
