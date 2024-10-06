@@ -81,7 +81,7 @@ public class DpiFixAnnotation implements IClassTransformer {
 			classNode.visibleAnnotations.add(atnet);
 		}
 		
-		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent)
+		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent e)
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{
 			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.PreInit from DpiFixModLegacy#preinit");

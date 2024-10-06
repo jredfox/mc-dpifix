@@ -36,7 +36,6 @@ public class LaunchClassLoaderFix {
 	{
 		try
 		{
-			System.out.println(clforge != null ? ("clforge:" + clforge) : "null clforge");
 			Class launch = forName("net.minecraft.launchwrapper.Launch");
 			if(launch == null)
 			{
@@ -44,7 +43,6 @@ public class LaunchClassLoaderFix {
 				return;
 			}
 			
-			System.out.println("Fixing RAM Leak of LaunchClassLoader");
 			String clazzLoaderName = "net.minecraft.launchwrapper.LaunchClassLoader";
 			Class clazzLoaderClazz = forName(clazzLoaderName);
 			ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
@@ -60,7 +58,7 @@ public class LaunchClassLoaderFix {
 			{
 				if(cl == null)
 					continue;
-				System.out.println("Fixing RAM Leak:" + cl);
+				System.out.println("Fixing RAM Leak of:" + cl);
 				//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
 				Class actualClassLoader = cl.getClass();
 				boolean flag = instanceOf(clazzLoaderClazz, actualClassLoader);
