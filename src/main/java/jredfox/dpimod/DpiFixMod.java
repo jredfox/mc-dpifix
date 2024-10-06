@@ -4,9 +4,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 @Mod(
-		modid = "dpi-fix", 
-		name = "DPI-Fix", 
-		version = "1.5.0", 
+		modid = DpiFixModVars.MODID,
+		name =  DpiFixModVars.NAME,
+		version = DpiFixModVars.VERSION,
 		acceptedMinecraftVersions = "*",
 		acceptableRemoteVersions = "*",
 		dependencies = "before:foamfix"

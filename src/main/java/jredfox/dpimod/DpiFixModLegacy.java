@@ -8,9 +8,9 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.common.ForgeVersion;
 
 @Mod(
-		modid = "dpi-fix", 
-		name = "DPI-Fix", 
-		version = "1.5.0", 
+		modid = DpiFixModVars.MODID,
+		name =  DpiFixModVars.NAME,
+		version = DpiFixModVars.VERSION,
 		acceptedMinecraftVersions = "",
 		acceptableRemoteVersions = "*"
 	)
