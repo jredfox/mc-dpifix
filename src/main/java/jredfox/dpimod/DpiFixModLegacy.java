@@ -16,7 +16,7 @@ import net.minecraftforge.common.ForgeVersion;
 	)
 public class DpiFixModLegacy {
 	
-//	@PreInit //Is added at runtime dynamically if it's needed
+//	@PreInit replaces @EventHandler at runtime dynamically if it's needed
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent pre)
 	{
