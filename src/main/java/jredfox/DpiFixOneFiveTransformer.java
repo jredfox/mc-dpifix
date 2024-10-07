@@ -208,6 +208,12 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			runGameLoop.instructions.insert(CoreUtils.prevLabelNode(canvasInsn2), liResize);
 		}
 		
+		//Disable FMLReEntry from ever appearing
+		MethodNode fmlReEntry = CoreUtils.getMethodNode(classNode, "fmlReentry", "(Lcpw/mods/fml/relauncher/ArgsWrapper;)V");
+		MethodInsnNode fmlReEntryInsn = CoreUtils.getMethodInsnNode(fmlReEntry, Opcodes.INVOKEVIRTUAL, "java/awt/Frame", "setVisible", "(Z)V", false);
+		fmlReEntry.instructions.remove(fmlReEntryInsn.getPrevious());
+		fmlReEntry.instructions.insertBefore(fmlReEntryInsn, new InsnNode(Opcodes.ICONST_0));
+		
 		MethodNode m = CoreUtils.getMethodNode(classNode, toggleFullScreen, "()V");
 		m.access = Opcodes.ACC_PUBLIC;
 	}

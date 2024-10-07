@@ -76,7 +76,7 @@ public class DpiFixCoreMod implements IClassTransformer, cpw.mods.fml.relauncher
 	            byte[] arr = CoreUtils.toByteArray(cw, transformedName);
 	            if(index == 0) 
 	            {
-	            	System.exit(0);
+//	            	System.exit(0);
 	            }
 	            return arr;
 			}
