@@ -37,7 +37,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.common.ForgeVersion;
 
-public class DpiFixCoreMod implements IClassTransformer {
+public class DpiFixCoreMod implements IClassTransformer, cpw.mods.fml.relauncher.IClassTransformer {
 	
 	static
 	{
@@ -63,15 +63,15 @@ public class DpiFixCoreMod implements IClassTransformer {
 		{
 			try
 			{
-				ClassNode classNode = new ClassNode();
-	            ClassReader classReader = new ClassReader(basicClass);
-	            classReader.accept(classNode, 0);
+				name = name.replace(".", "/");
+				transformedName = transformedName.replace(".", "/");
+				ClassNode classNode = CoreUtils.getClassNode(basicClass);
 	            
 	            if(index == 0)
 	            {
 	            	System.out.println("Patching: Minecraft Fullscreen to fix MC-68754, MC-111419, MC-160054");
-	            	patchFullScreen(name.replace(".", "/"), classNode);
-	            	patchMaxResFix( name.replace(".", "/"), classNode);
+	            	patchFullScreen(name, classNode);
+	            	patchMaxResFix( name, classNode);
 	            }
 	            else if(index == 1)
 	            {
@@ -82,15 +82,8 @@ public class DpiFixCoreMod implements IClassTransformer {
 	            	DpiFixAnnotation.patchAtMod(classNode);
 	            }
 	            
-	            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-	            classNode.accept(classWriter);
-	            
-	            byte[] bytes = classWriter.toByteArray();
-	            if(Boolean.parseBoolean(System.getProperty("asm.dump", "false")))
-	            	dumpFile(transformedName, bytes);
-	         
-	            
-	            return bytes;
+	            ClassWriter cw = CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS);
+	            return CoreUtils.toByteArray(cw, transformedName);
 			}
 			catch(Throwable t)
 			{
@@ -110,39 +103,39 @@ public class DpiFixCoreMod implements IClassTransformer {
 		String notch_fullscreen = (ForgeVersion.getMinorVersion() == 11 ? "P" : ForgeVersion.getMinorVersion() == 10 ? "P" : "O");
 		for(FieldNode f : classNode.fields)
 		{
-			if(f.name.equals(getObfString("leftClickCounter", onesixnotch ? notch_leftClickCounter : "field_71429_W")) || f.name.equals(getObfString("fullscreen", onesixnotch ? notch_fullscreen : "field_71431_Q")) )
+			if(f.name.equals(CoreUtils.getObfString("leftClickCounter", onesixnotch ? notch_leftClickCounter : "field_71429_W")) || f.name.equals(CoreUtils.getObfString("fullscreen", onesixnotch ? notch_fullscreen : "field_71431_Q")) )
 			{
 				f.access = Opcodes.ACC_PUBLIC;
 			}
 		}
 		
 		//fix MC-111419 by injecting DpiFixCoreMod#syncFullScreen
-		String toggleFullscreen = getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k");
-		MethodNode m = getMethodNode(classNode, toggleFullscreen, "()V");
+		String toggleFullscreen = CoreUtils.getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k");
+		MethodNode m = CoreUtils.getMethodNode(classNode, toggleFullscreen, "()V");
 		if(DpiFix.fsSaveFix)
 		{
 			InsnList l = new InsnList();
 			l.add(new LabelNode());
-			l.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "syncFullScreen", "()V", false));
+			l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "syncFullScreen", "()V", false));
 			m.instructions.insert(l);
 		}
 		
 		//fix MC-160054 tabbing out or showing desktop results in minimized MC < 1.8
 		if(DpiFix.fsTabFix)
 		{
-			MethodNode m2 = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
-			if(getMethodInsnNode(m2, Opcodes.INVOKEVIRTUAL, onesixnotch ? notch_mc : "net/minecraft/client/Minecraft", toggleFullscreen, "()V", false) != null)
+			MethodNode m2 = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
+			if(CoreUtils.getMethodInsnNode(m2, Opcodes.INVOKEVIRTUAL, onesixnotch ? notch_mc : "net/minecraft/client/Minecraft", toggleFullscreen, "()V", false) != null)
 			{
-				MethodInsnNode spot = getMethodInsnNode(m2, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "isActive", "()Z", false);
+				MethodInsnNode spot = CoreUtils.getMethodInsnNode(m2, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "isActive", "()Z", false);
 				if(spot != null)
 				{
-					JumpInsnNode jump = nextJumpInsnNode(spot);
+					JumpInsnNode jump = CoreUtils.nextJumpInsnNode(spot);
 					if(jump != null)
 					{
 						InsnList list = new InsnList();
-						list.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "rfalse", "()Z", false));
+						list.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "rfalse", "()Z", false));
 						list.add(new JumpInsnNode(Opcodes.IFEQ, jump.label));
-						m2.instructions.insert(prevLabelNode(spot), list);
+						m2.instructions.insert(CoreUtils.prevLabelNode(spot), list);
 					}
 				}
 			}
@@ -160,15 +153,15 @@ public class DpiFixCoreMod implements IClassTransformer {
 		if(DpiFix.fsResizeableFix)
 		{
 			//Disable all instances of Forge's / Optifine's Fullscreen "Fix"
-			MethodInsnNode startResize = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+			MethodInsnNode startResize = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
 			if(startResize != null)
 			{
 				System.err.println("Disabling Forge's \"FIX\" for Fullscreen!");
-				MethodInsnNode resizeInsn = newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+				MethodInsnNode resizeInsn = CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
 				AbstractInsnNode ab = startResize;
 				while(ab != null)
 				{
-					if(ab instanceof MethodInsnNode && equals(resizeInsn, (MethodInsnNode) ab))
+					if(ab instanceof MethodInsnNode && CoreUtils.equals(resizeInsn, (MethodInsnNode) ab))
 					{
 						MethodInsnNode minsn = (MethodInsnNode)ab;
 						minsn.owner = "jredfox/DpiFixCoreMod";
@@ -179,7 +172,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 			
 			InsnList li = new InsnList();
 			li.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("fullscreen", "field_71431_Q").toString(), "Z"));
+			li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("fullscreen", "field_71431_Q").toString(), "Z"));
 			LabelNode l26 = new LabelNode();
 			li.add(new JumpInsnNode(Opcodes.IFNE, l26));
 			if(DpiFix.isWindows)
@@ -187,31 +180,31 @@ public class DpiFixCoreMod implements IClassTransformer {
 				LabelNode l27 = new LabelNode();
 				li.add(l27);
 				li.add(new InsnNode(Opcodes.ICONST_0));
-				li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+				li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
 			}
 			LabelNode l28 = new LabelNode();
 			li.add(l28);
 			li.add(new InsnNode(Opcodes.ICONST_1));
-			li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+			li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
 			li.add(l26);
 			//since we can't compute frames for mc 1.6.4 manually add the frame
 			li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
 			
-			m.instructions.insert(getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
+			m.instructions.insert(CoreUtils.getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
 		}
 		
 		//DpiFixCoreMod.patchSplash(this.mcDataDir);
 		if(DpiFix.fsSplashFix && ForgeVersion.getMajorVersion() >= 10 && ForgeVersion.getBuildVersion() >= 1389)
 		{
-			MethodNode in = getMethodNode(classNode, getObfString("init", "func_71384_a"), "()V");
+			MethodNode in = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("init", "func_71384_a"), "()V");
 			if(in == null)
-				in = getMethodNode(classNode, "startGame", "()V");
+				in = CoreUtils.getMethodNode(classNode, "startGame", "()V");
 			
 			InsnList ilist = new InsnList();
 			ilist.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			ilist.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", getObfString("mcDataDir", "field_71412_D"), "Ljava/io/File;"));
-			ilist.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "patchSplash", "(Ljava/io/File;)V", false));
-			in.instructions.insert(nextLabelNode(in.instructions.getFirst()), ilist);
+			ilist.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("mcDataDir", "field_71412_D"), "Ljava/io/File;"));
+			ilist.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "patchSplash", "(Ljava/io/File;)V", false));
+			in.instructions.insert(CoreUtils.nextLabelNode(in.instructions.getFirst()), ilist);
 		}
 		
 		if(DpiFix.isLinux ? DpiFix.fsMouseFixLinux : DpiFix.fsMouseFixOther)
@@ -219,20 +212,20 @@ public class DpiFixCoreMod implements IClassTransformer {
 			/**
 			 * DpiFixCoreMod.fsMousePre(this);
 			 */
-			MethodInsnNode vsync = getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setVSyncEnabled", "(Z)V", false);
+			MethodInsnNode vsync = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setVSyncEnabled", "(Z)V", false);
 			InsnList fspre = new InsnList();
 			fspre.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			fspre.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePre", "(Lnet/minecraft/client/Minecraft;)V", false));
+			fspre.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePre", "(Lnet/minecraft/client/Minecraft;)V", false));
 			m.instructions.insert(vsync, fspre);
 			
 			/**
 			 * DpiFixCoreMod.fsMousePost(this);
 			 */
-			MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
+			MethodNode runGame = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
 			InsnList fspost = new InsnList();
 			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			fspost.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
-			AbstractInsnNode spot = getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "lv" : ForgeVersion.getMinorVersion() == 10 ? "lu" : "ls") : "net/minecraft/profiler/Profiler", getObfString("endSection", onesixnotch ? "b" : "func_76319_b"), "()V", false);
+			fspost.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
+			AbstractInsnNode spot = CoreUtils.getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "lv" : ForgeVersion.getMinorVersion() == 10 ? "lu" : "ls") : "net/minecraft/profiler/Profiler", CoreUtils.getObfString("endSection", onesixnotch ? "b" : "func_76319_b"), "()V", false);
 			runGame.instructions.insert(spot, fspost);
 		}
 	}
@@ -245,20 +238,20 @@ public class DpiFixCoreMod implements IClassTransformer {
 		String mcClass = onesixnotch ? notch_mc : "net/minecraft/client/Minecraft";
 		
 		//DpiFixCoreMod#tickDisplay(this);
-		MethodNode loadscreen = getMethodNode(classNode, getObfString("loadScreen", onesixnotch ? "R" : "func_71357_I"), "()V");
-		MethodInsnNode updateInsn = getLastMethodInsn(loadscreen, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
+		MethodNode loadscreen = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("loadScreen", onesixnotch ? "R" : "func_71357_I"), "()V");
+		MethodInsnNode updateInsn = CoreUtils.getLastMethodInsn(loadscreen, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
 		disableDisplayUpdate(loadscreen);
 		InsnList lslist = new InsnList();
 		lslist.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		lslist.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
-		loadscreen.instructions.insert(getLastLabelNode(loadscreen, false), lslist);
+		lslist.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
+		loadscreen.instructions.insert(CoreUtils.getLastLabelNode(loadscreen, false), lslist);
 		
 		//Disable buggy calls of Display#update
 		//DpiFixCoreMod#tickDisplay(this);
-		MethodNode runGame = getMethodNode(classNode, getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
-		MethodInsnNode keyInsn = newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/input/Keyboard", "isKeyDown", "(I)Z", false);
-		MethodInsnNode resizeInsn = newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "wasResized", "()Z", false);
-		MethodInsnNode yeildInsn = newMethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Thread", "yield", "()V", false);
+		MethodNode runGame = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("runGameLoop", onesixnotch ? "S" : "func_71411_J"), "()V");
+		MethodInsnNode keyInsn = CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/input/Keyboard", "isKeyDown", "(I)Z", false);
+		MethodInsnNode resizeInsn = CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "wasResized", "()Z", false);
+		MethodInsnNode yeildInsn = CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Thread", "yield", "()V", false);
 		boolean hasYeild = false;
 		AbstractInsnNode ab = runGame.instructions.getFirst();
 		while(ab != null)
@@ -266,49 +259,49 @@ public class DpiFixCoreMod implements IClassTransformer {
 			if(ab instanceof IntInsnNode && ((IntInsnNode)ab).operand == 65 && ab.getNext() instanceof MethodInsnNode)
 			{
 				MethodInsnNode minsn = (MethodInsnNode) ab.getNext();
-				if(equals(keyInsn, minsn))
+				if(CoreUtils.equals(keyInsn, minsn))
 				{
-					MethodInsnNode displayInsn = nextMethodInsnNode(minsn, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
-					displayInsn.owner = "jredfox/DpiFixCoreMod";
+					MethodInsnNode displayInsn = CoreUtils.nextMethodInsnNode(minsn, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
+					displayInsn.owner = "jredfox/CoreUtils";
 					displayInsn.name = "disabled";
 				}
 			}
 			else if(ab instanceof MethodInsnNode)
 			{
 				MethodInsnNode minsn = (MethodInsnNode) ab;
-				if(equals(resizeInsn, minsn))
+				if(CoreUtils.equals(resizeInsn, minsn))
 				{
-					minsn.owner = "jredfox/DpiFixCoreMod";
+					minsn.owner = "jredfox/CoreUtils";
 					minsn.name = "rfalse";
 				}
-				else if(!hasYeild && equals(yeildInsn, minsn))
+				else if(!hasYeild && CoreUtils.equals(yeildInsn, minsn))
 				{
 					hasYeild = true;//only insert 1 tickDisplay
 					InsnList li = new InsnList();
 					li.add(new VarInsnNode(Opcodes.ALOAD, 0));
-					li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
+					li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
 					runGame.instructions.insertBefore(minsn, li);
 				}
 			}
 			ab = ab.getNext();
 		}
 		
-		MethodNode fullscreen = getMethodNode(classNode, getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k"), "()V");
+		MethodNode fullscreen = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k"), "()V");
 		disableDisplayUpdate(fullscreen);//Disable all calls of Display#update
 		//DpiFixCoreMod#tickDisplay(this);
 		InsnList fsli = new InsnList();
 		fsli.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		fsli.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
-		fullscreen.instructions.insert(getLastMethodInsn(fullscreen, Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "disabled", "()V", false), fsli);
+		fsli.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
+		fullscreen.instructions.insert(CoreUtils.getLastMethodInsn(fullscreen, Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "disabled", "()V", false), fsli);
 		
-		MethodNode resize = getMethodNode(classNode, getObfString("resize", onesixnotch ? "a" : "func_71370_a"), "(II)V");
+		MethodNode resize = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("resize", onesixnotch ? "a" : "func_71370_a"), "(II)V");
 		resize.access = Opcodes.ACC_PUBLIC;//Make the method public
 		
 		//DpiFixCoreMod#updateViewPort
 		InsnList viewport = new InsnList();
 		viewport.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		viewport.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resize.instructions.insert(getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, getObfString("displayHeight", onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "e" : ForgeVersion.getMinorVersion() == 10 ? "e" : "d") : "field_71440_d"), "I"), viewport);
+		viewport.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
+		resize.instructions.insert(CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, CoreUtils.getObfString("displayHeight", onesixnotch ? (ForgeVersion.getMinorVersion() == 11 ? "e" : ForgeVersion.getMinorVersion() == 10 ? "e" : "d") : "field_71440_d"), "I"), viewport);
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
 		InsnList resizeList = new InsnList();
@@ -317,9 +310,9 @@ public class DpiFixCoreMod implements IClassTransformer {
 		resizeList.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/client/gui/LoadingScreenRenderer"));
 		resizeList.add(new InsnNode(Opcodes.DUP));
 		resizeList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		resizeList.add(newMethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/LoadingScreenRenderer", "<init>", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resizeList.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", getObfString("loadingScreen", "field_71461_s"), "Lnet/minecraft/client/gui/LoadingScreenRenderer;"));
-		resize.instructions.insertBefore(getLastInstruction(resize, Opcodes.RETURN), resizeList);
+		resizeList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/LoadingScreenRenderer", "<init>", "(Lnet/minecraft/client/Minecraft;)V", false));
+		resizeList.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("loadingScreen", "field_71461_s"), "Lnet/minecraft/client/gui/LoadingScreenRenderer;"));
+		resize.instructions.insertBefore(CoreUtils.getLastInstruction(resize, Opcodes.RETURN), resizeList);
 		
 	}
 	
@@ -331,7 +324,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		System.out.println("Patching: LoadingScreenRenderer");
 		
 		String cname = onesixnotch ? name : "net/minecraft/client/gui/LoadingScreenRenderer";
-		MethodNode m = getMethodNode(classNode, getObfString("setLoadingProgress", onesixnotch ? "a" : "func_73718_a"), "(I)V");
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("setLoadingProgress", onesixnotch ? "a" : "func_73718_a"), "(I)V");
 		
 		//Disable all Display#update calls
 		disableDisplayUpdate(m);
@@ -339,241 +332,29 @@ public class DpiFixCoreMod implements IClassTransformer {
 		//DpiFixCoreMod.tickDisplay(this.mc);
 		InsnList li = new InsnList();
 		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		li.add(new FieldInsnNode(Opcodes.GETFIELD, cname, getObfString("mc", "field_73725_b"), "Lnet/minecraft/client/Minecraft;"));
-		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
-		m.instructions.insertBefore(getLastMethodInsn(m, Opcodes.INVOKESTATIC, "java/lang/Thread", "yield", "()V", false), li);
+		li.add(new FieldInsnNode(Opcodes.GETFIELD, cname, CoreUtils.getObfString("mc", "field_73725_b"), "Lnet/minecraft/client/Minecraft;"));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
+		m.instructions.insertBefore(CoreUtils.getLastMethodInsn(m, Opcodes.INVOKESTATIC, "java/lang/Thread", "yield", "()V", false), li);
 	}
 	
 	private void disableDisplayUpdate(MethodNode m)
 	{
 		//Disable all calls of Display#update
-		MethodInsnNode updateInsn = newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
+		MethodInsnNode updateInsn = CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "update", "()V", false);
 		AbstractInsnNode ab = m.instructions.getFirst();
 		while(ab != null)
 		{
-			if(ab instanceof MethodInsnNode && equals(updateInsn, (MethodInsnNode) ab))
+			if(ab instanceof MethodInsnNode && CoreUtils.equals(updateInsn, (MethodInsnNode) ab))
 			{
 				MethodInsnNode minsn = (MethodInsnNode) ab;
-				minsn.owner = "jredfox/DpiFixCoreMod";
+				minsn.owner = "jredfox/CoreUtils";
 				minsn.name = "disabled";
 			}
 			ab = ab.getNext();
 		}
 	}
 	
-	public static void disabled() {}
-	
-	/**
-	 * Gets the Last LabelNode either before the return of the method or last label
-	 */
-	public static LabelNode getLastLabelNode(MethodNode method, boolean afterReturn)
-	{
-		AbstractInsnNode[] arr = method.instructions.toArray();
-		boolean found = afterReturn;
-		for(int i=arr.length-1;i>=0;i--)
-		{
-			AbstractInsnNode ab = arr[i];
-			if(!found && isReturnOpcode(ab.getOpcode()))
-				found = true;
-			
-			if(found && ab instanceof LabelNode)
-			{
-				return (LabelNode) ab;
-			}
-		}
-		return null;
-	}
-	
-	public static boolean isReturnOpcode(int opcode)
-	{
-		return opcode == Opcodes.RETURN || opcode == Opcodes.ARETURN || opcode == Opcodes.DRETURN || opcode == Opcodes.FRETURN || opcode == Opcodes.IRETURN || opcode == Opcodes.LRETURN;
-	}
-	
-	public static MethodInsnNode nextMethodInsnNode(AbstractInsnNode pretarg, int opcode, String owner, String name, String desc, boolean itf) 
-	{
-		MethodInsnNode look = newMethodInsnNode(opcode, owner, name, desc, itf);
-		AbstractInsnNode ab = pretarg;
-		while(ab != null)
-		{
-			ab = ab.getNext();
-			if(ab instanceof MethodInsnNode && equals(look, (MethodInsnNode) ab))
-				return (MethodInsnNode) ab;
-		}
-		return null;
-	}
-	
-	public static FieldInsnNode getFieldInsnNode(MethodNode node, int opcode, String owner, String name, String desc)
-	{
-		AbstractInsnNode[] arr = node.instructions.toArray();
-		FieldInsnNode compare = new FieldInsnNode(opcode, owner, name, desc);
-		for(AbstractInsnNode ab : arr)
-		{
-			if(ab instanceof FieldInsnNode && equals(compare, (FieldInsnNode)ab))
-			{
-				return (FieldInsnNode)ab;
-			}
-		}
-		return null;
-	}
-	
-	public static boolean equals(FieldInsnNode obj1, FieldInsnNode obj2)
-	{
-		return obj1.getOpcode() == obj2.getOpcode() && obj1.name.equals(obj2.name) && obj1.desc.equals(obj2.desc) && obj1.owner.equals(obj2.owner);
-	}
-	
-	/**
-	 * optimized way of getting a last instruction
-	 */
-	public static AbstractInsnNode getLastInstruction(MethodNode method, int opCode) 
-	{
-		AbstractInsnNode[] arr = method.instructions.toArray();
-		for(int i=arr.length-1;i>=0;i--)
-		{
-			AbstractInsnNode node = arr[i];
-			if(node.getOpcode() == opCode)
-				return node;
-		}
-		return null;
-	}
-	
-	/**
-	 * getting the first instanceof of this will usually tell you where the initial injection point should be after
-	 */
-	public static LineNumberNode getFirstInstruction(MethodNode method) 
-	{
-		for(AbstractInsnNode obj : method.instructions.toArray())
-			if(obj instanceof LineNumberNode)
-				return (LineNumberNode) obj;
-		return null;
-	}
-	
-	public static MethodInsnNode getLastMethodInsn(MethodNode node, int opcode, String owner, String name, String desc, boolean isInterface) 
-	{
-		MethodInsnNode compare = newMethodInsnNode(opcode,owner,name,desc,isInterface);
-		AbstractInsnNode[] list = node.instructions.toArray();
-		for(int i=list.length-1;i>=0;i--)
-		{
-			AbstractInsnNode ab = list[i];
-			if(ab.getOpcode() == opcode && ab instanceof MethodInsnNode && equals(compare, (MethodInsnNode)ab) )
-			{
-				return (MethodInsnNode)ab;
-			}
-		}
-		return null;
-	}
-
-	public static LineNumberNode prevLabelNode(AbstractInsnNode spot) 
-	{
-		AbstractInsnNode n = spot;
-		while(n != null)
-		{
-			n = n.getPrevious();
-			if(n instanceof LineNumberNode)
-				return (LineNumberNode) n;
-		}
-		return null;
-	}
-	
-	public static LineNumberNode nextLabelNode(AbstractInsnNode spot) 
-	{
-		AbstractInsnNode n = spot;
-		while(n != null)
-		{
-			n = n.getNext();
-			if(n instanceof LineNumberNode)
-				return (LineNumberNode) n;
-		}
-		return null;
-	}
-
-	public static JumpInsnNode nextJumpInsnNode(AbstractInsnNode spot)
-	{
-		AbstractInsnNode n = spot;
-		while(n != null)
-		{
-			n = n.getNext();
-			if(n instanceof JumpInsnNode)
-				return (JumpInsnNode) n;
-		}
-		return null;
-	}
-
-	public static MethodInsnNode newMethodInsnNode(int opcode, String owner, String name, String desc, boolean itf) 
-	{
-		MethodInsnNode insn = new MethodInsnNode(opcode, owner, name, desc);
-		return insn;
-	}
-
-	public static String getObfString(String deob, String ob)
-	{
-		return DpiFix.isObf ? ob : deob;
-	}
-	
-	public static MethodInsnNode getMethodInsnNode(MethodNode node, int opcode, String owner, String name, String desc, boolean itf)
-	{
-		AbstractInsnNode[] arr = node.instructions.toArray();
-		MethodInsnNode compare = newMethodInsnNode(opcode, owner, name, desc, itf);
-		for(AbstractInsnNode ab : arr)
-		{
-			if(ab instanceof MethodInsnNode)
-			{
-				if(equals(compare, (MethodInsnNode)ab))
-				{
-					return (MethodInsnNode)ab;
-				}
-			}
-		}
-		return null;
-	}
-	
-	public static boolean equals(MethodInsnNode obj1, MethodInsnNode obj2)
-	{
-		return obj1.getOpcode() == obj2.getOpcode() && obj1.name.equals(obj2.name) && obj1.desc.equals(obj2.desc) && obj1.owner.equals(obj2.owner);
-	}
-	
-	public static MethodNode getMethodNode(ClassNode classNode, String method_name, String method_desc) 
-	{
-		for (Object method_ : classNode.methods)
-		{
-			MethodNode method = (MethodNode) method_;
-			if (method.name.equals(method_name) && method.desc.equals(method_desc))
-			{
-				return method;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * dumps a file from memory
-	 * @throws IOException 
-	 */
-	public static void dumpFile(String name, byte[] bytes) throws IOException  
-	{
-    	name = name.replace('.', '/');
-    	File f = new File(System.getProperty("user.dir") + "/asm/dumps/dpi-fix/" + name + ".class");
-    	f.getParentFile().mkdirs();
-    	InputStream in = null;
-    	OutputStream out = null;
-    	try
-    	{
-    		in = new ByteArrayInputStream(bytes);
-    		out = new FileOutputStream(f);
-    		DpiFix.copy(in, out);
-    	}
-    	catch(Throwable e)
-    	{
-    		e.printStackTrace();
-    	}
-    	finally
-    	{
-    		DpiFix.closeQuietly(in);
-    		DpiFix.closeQuietly(out);
-    	}
-	}
-	
 	//##############################  START Functions  ##############################\\
-	//Minecraft
 	
 	public static boolean rfalse() { return false; }
 	
