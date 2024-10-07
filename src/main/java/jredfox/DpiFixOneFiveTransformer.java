@@ -1,5 +1,6 @@
 package jredfox;
 
+import org.lwjgl.opengl.Display;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -10,6 +11,7 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -106,6 +108,44 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		lctrLast.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		lctrLast.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "hide", "(Lnet/minecraft/client/Minecraft;)V", false));
 		ctr.instructions.insert(CoreUtils.getLastInstruction(ctr, Opcodes.PUTFIELD), lctrLast);
+		
+		MethodNode startGame = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("startGame", "a"), "()V");
+//    	Display.setParent(null);
+//    	DpiFixDeAWT.fixIcons(this);
+//    	DpiFixDeAWT.hide(this);
+		InsnList startList = new InsnList();
+		startList.add(new InsnNode(Opcodes.ACONST_NULL));
+		startList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setParent", "(Ljava/awt/Canvas;)V", false));
+		startList.add(new LabelNode());
+		startList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		startList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "fixIcons", "(Lnet/minecraft/client/Minecraft;)V", false));
+		startList.add(new LabelNode());
+		startList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		startList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "hide", "(Lnet/minecraft/client/Minecraft;)V", false));
+		startList.add(new LabelNode());
+		startGame.instructions.insert(CoreUtils.getFirstInstruction(startGame), startList);
+		
+		//if(false && this.mcCanvas != null)
+		FieldInsnNode id = CoreUtils.getFieldInsnNode(startGame, Opcodes.GETFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("mcCanvas", "m"), "Ljava/awt/Canvas;" );//TODO: Obf classes
+		JumpInsnNode jump = CoreUtils.nextJumpInsnNode(id);
+		LabelNode startIf = CoreUtils.prevLabel(id);
+		InsnList startIfList = new InsnList();
+		startIfList.add(new InsnNode(Opcodes.ICONST_0));
+		startIfList.add(new JumpInsnNode(Opcodes.IFEQ, jump.label));
+		startGame.instructions.insert(startIf, startIfList);
+		
+		//Display.setResizable(true);
+		MethodInsnNode spotDisplay = CoreUtils.getMethodInsnNode(startGame, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setDisplayMode", "(Lorg/lwjgl/opengl/DisplayMode;)V", false);
+		InsnList spotDisplayList = new InsnList();
+		spotDisplayList.add(new InsnNode(Opcodes.ICONST_1));
+		spotDisplayList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+		startGame.instructions.insert(spotDisplay, spotDisplayList);
+		
+		//DpiFixDeAWT.fixTitle
+		MethodInsnNode startTitle = CoreUtils.getMethodInsnNode(startGame, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setTitle", "(Ljava/lang/String;)V", false);
+		InsnList startTitleList = new InsnList();
+		startTitleList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "fixTitle", "()V", false));
+		startGame.instructions.insert(startTitle, startTitleList);
 		
 		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("toggleFullscreen", "k"), "()V");
 		m.access = Opcodes.ACC_PUBLIC;

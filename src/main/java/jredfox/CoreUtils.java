@@ -125,6 +125,18 @@ public class CoreUtils {
 		}
 		return null;
 	}
+	
+	public static LabelNode prevLabel(AbstractInsnNode spot) 
+	{
+		AbstractInsnNode n = spot;
+		while(n != null)
+		{
+			n = n.getPrevious();
+			if(n instanceof LabelNode)
+				return (LabelNode) n;
+		}
+		return null;
+	}
 
 	public static LineNumberNode prevLabelNode(AbstractInsnNode spot) 
 	{
