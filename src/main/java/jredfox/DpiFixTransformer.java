@@ -68,6 +68,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		//fix MC-111419 by injecting DpiFixCoreMod#syncFullScreen
 		String toggleFullscreen = CoreUtils.getObfString("toggleFullscreen", onesixnotch ? "j" : "func_71352_k");
 		MethodNode m = CoreUtils.getMethodNode(classNode, toggleFullscreen, "()V");
+		m.access = Opcodes.ACC_PUBLIC;
 		if(DpiFix.fsSaveFix)
 		{
 			InsnList l = new InsnList();

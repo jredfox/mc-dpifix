@@ -52,9 +52,13 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	public void patchFullScreen(String notch_mc, ClassNode classNode)
 	{
 		String mcApplet = CoreUtils.getObfString("mcApplet", "A");
+		String leftClickCounter = CoreUtils.getObfString("leftClickCounter", "Y");
+		String fullScreen = CoreUtils.getObfString("fullscreen", "S");
+		
+		//Manual Access Transformer (AT) for 1.5x
 		for(FieldNode f : classNode.fields)
 		{
-			if(f.name.equals(mcApplet) )
+			if(f.name.equals(mcApplet) || f.name.equals(leftClickCounter) || f.name.equals(fullScreen))
 			{
 				f.access = Opcodes.ACC_PUBLIC;
 			}
@@ -103,7 +107,8 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		lctrLast.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "hide", "(Lnet/minecraft/client/Minecraft;)V", false));
 		ctr.instructions.insert(CoreUtils.getLastInstruction(ctr, Opcodes.PUTFIELD), lctrLast);
 		
-		
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("toggleFullscreen", "k"), "()V");
+		m.access = Opcodes.ACC_PUBLIC;
 	}
 	
 	private void patchMaxResFix(String notch_mc, ClassNode classNode) 
