@@ -302,5 +302,20 @@ public class CoreUtils {
 		}
 		return null;
 	}
+	
+	public static FieldInsnNode previousFieldInsnNode(MethodNode runGameLoop, AbstractInsnNode spot, int opcode, String owner, String name, String desc) 
+	{
+		FieldInsnNode compare = new FieldInsnNode(opcode, owner, name, desc);
+		AbstractInsnNode ab = spot;
+		while(ab != null)
+		{
+			if(ab instanceof FieldInsnNode && equals(compare, (FieldInsnNode)ab))
+			{
+				return (FieldInsnNode)ab;
+			}
+			ab = ab.getPrevious();
+		}
+		return null;
+	}
 
 }

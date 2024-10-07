@@ -18,10 +18,14 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MinecraftApplet;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.EnumOS;
 
 public class DpiFixDeAWT {
@@ -255,5 +259,42 @@ public class DpiFixDeAWT {
 			e.printStackTrace();
 		}
 	}
+
+    public static void loadScreen() throws LWJGLException
+    {
+    	Minecraft mc = Minecraft.getMinecraft();
+        ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glLoadIdentity();
+        GL11.glOrtho(0.0D, scaledresolution.getScaledWidth_double(), scaledresolution.getScaledHeight_double(), 0.0D, 1000.0D, 3000.0D);
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glLoadIdentity();
+        GL11.glTranslatef(0.0F, 0.0F, -2000.0F);
+        GL11.glViewport(0, 0, mc.displayWidth, mc.displayHeight);
+        GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_FOG);
+        mc.renderEngine.bindTexture("/title/mojang.png");
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.startDrawingQuads();
+        tessellator.setColorOpaque_I(16777215);
+        tessellator.addVertexWithUV(0.0D, (double)mc.displayHeight, 0.0D, 0.0D, 0.0D);
+        tessellator.addVertexWithUV((double)mc.displayWidth, (double)mc.displayHeight, 0.0D, 0.0D, 0.0D);
+        tessellator.addVertexWithUV((double)mc.displayWidth, 0.0D, 0.0D, 0.0D, 0.0D);
+        tessellator.addVertexWithUV(0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
+        tessellator.draw();
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        tessellator.setColorOpaque_I(16777215);
+        short short1 = 256;
+        short short2 = 256;
+        mc.scaledTessellator((scaledresolution.getScaledWidth() - short1) / 2, (scaledresolution.getScaledHeight() - short2) / 2, 0, 0, short1, short2);
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_FOG);
+        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
+        DpiFixCoreMod.tickDisplay(mc);
+    }
 
 }
