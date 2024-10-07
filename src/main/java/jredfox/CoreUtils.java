@@ -278,5 +278,17 @@ public class CoreUtils {
         
         return bytes;
 	}
+	
+	public static MethodNode getFirstConstructor(ClassNode classNode) 
+	{
+		for (MethodNode method : classNode.methods)
+		{
+			if (method.name.equals("<init>"))
+			{
+				return method;
+			}
+		}
+		return null;
+	}
 
 }
