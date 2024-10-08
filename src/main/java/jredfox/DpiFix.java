@@ -89,7 +89,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean fsMouseFixLinux;
 	public static boolean fsMouseFixOther;
 	public static boolean maximizeFix;
-	public static boolean deawt;
+	public static boolean deawt_windows;
+	public static boolean deawt_mac;
+	public static boolean deawt_linux;
 	public static boolean guiMouseFix;
 	
 	public void loadConfig()
@@ -110,8 +112,10 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		fsMouseFixLinux = cfg.get("Coremod.FullScreen.MouseFix.Linux");
 		fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
 		maximizeFix = cfg.get("Coremod.MaximizeResFix");
-		deawt = cfg.get("Coremod.DeAWT");
 		guiMouseFix = cfg.get("Coremod.GUI.MouseFix");
+		deawt_windows = cfg.get("Coremod.DeAWT.Windows", false);
+		deawt_mac = cfg.get("Coremod.DeAWT.Mac");
+		deawt_linux = cfg.get("Coremod.DeAWT.Linux", false);
 		cfg.save();
 	}
 

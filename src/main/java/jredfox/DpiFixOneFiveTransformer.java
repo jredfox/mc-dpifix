@@ -165,7 +165,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	
 	private void patchDeAWT(String mcClazz, ClassNode classNode) 
 	{
-		if(!DpiFix.deawt)
+		if(!this.hasDeAWT())
 			return;
 		
 		System.out.println("Patching: Minecraft Using De-AWT Transformer");
@@ -411,7 +411,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 
 	public void patchLoadingScreenRenderer(String name, ClassNode classNode)
 	{
-		if(!DpiFix.deawt)
+		if(!this.hasDeAWT())
 			return;
 		
 		System.out.println("Patching: LoadingScreenRenderer Using De-AWT Transformer");
@@ -447,7 +447,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	
 	public void removeAppletShutdown(ClassNode classNode) 
 	{
-		if(!DpiFix.deawt)
+		if(!this.hasDeAWT())
 			return;
 		
 		System.out.println("Removing: Applet Shutdown");
@@ -496,6 +496,14 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		l.add(new InsnNode(Opcodes.RETURN));
 		l.add(new LabelNode());
 		m.instructions.insert(l);
+	}
+	
+    /**
+     * get De-AWT boolean based on the OS
+     */
+	public boolean hasDeAWT() 
+	{
+		return DpiFix.isWindows ? DpiFix.deawt_windows : DpiFix.isMacOs ? DpiFix.deawt_mac : DpiFix.isLinux ? DpiFix.deawt_linux : true;
 	}
 
 }
