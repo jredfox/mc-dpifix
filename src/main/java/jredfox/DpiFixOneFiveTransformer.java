@@ -47,6 +47,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 				patchMouseHelper(classNode);
 			break;
 			
+			case 5:
+				patchAppletImplShutdown(classNode);
+			break;
+			
 			default:
 				break;
 		}
@@ -496,6 +500,19 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		l.add(new InsnNode(Opcodes.RETURN));
 		l.add(new LabelNode());
 		m.instructions.insert(l);
+	}
+	
+	public void patchAppletImplShutdown(ClassNode classNode) 
+	{
+		if(!this.hasDeAWT())
+			return;
+		
+		System.out.println("Patching: MinecraftAppletImpl#displayCrashReportInternal Using De-AWT Transformer");
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("displayCrashReportInternal", "d"), CoreUtils.getObfString("(Lnet/minecraft/crash/CrashReport;)V", "(Lb;)V"));
+		InsnList li = new InsnList();
+		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/MinecraftAppletImpl", CoreUtils.getObfString("shutdownMinecraftApplet", "func_71405_e"), "()V", false));
+		m.instructions.insert(CoreUtils.getFirstInstruction(m), li);
 	}
 	
     /**
