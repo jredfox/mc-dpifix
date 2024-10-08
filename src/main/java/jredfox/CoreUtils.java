@@ -303,7 +303,7 @@ public class CoreUtils {
 		return null;
 	}
 	
-	public static FieldInsnNode previousFieldInsnNode(MethodNode runGameLoop, AbstractInsnNode spot, int opcode, String owner, String name, String desc) 
+	public static FieldInsnNode previousFieldInsnNode(AbstractInsnNode spot, int opcode, String owner, String name, String desc) 
 	{
 		FieldInsnNode compare = new FieldInsnNode(opcode, owner, name, desc);
 		AbstractInsnNode ab = spot;
@@ -314,6 +314,19 @@ public class CoreUtils {
 				return (FieldInsnNode)ab;
 			}
 			ab = ab.getPrevious();
+		}
+		return null;
+	}
+
+	public static FieldInsnNode nextFieldInsnNode(AbstractInsnNode pretarg, int opcode, String owner, String name, String desc) 
+	{
+		FieldInsnNode look = new FieldInsnNode(opcode, owner, name, desc);
+		AbstractInsnNode ab = pretarg;
+		while(ab != null)
+		{
+			ab = ab.getNext();
+			if(ab instanceof FieldInsnNode && equals(look, (FieldInsnNode) ab))
+				return (FieldInsnNode) ab;
 		}
 		return null;
 	}

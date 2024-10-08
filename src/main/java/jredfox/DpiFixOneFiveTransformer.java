@@ -14,6 +14,7 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import net.minecraftforge.common.ForgeVersion;
@@ -55,12 +56,18 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		String mcApplet = CoreUtils.getObfString("mcApplet", "A");
 		String leftClickCounter = CoreUtils.getObfString("leftClickCounter", "Y");
 		String fullScreen = CoreUtils.getObfString("fullscreen", "S");
+		String tempDisplayWidth = CoreUtils.getObfString("tempDisplayWidth", "Z");
+		String tempDisplayHeight = CoreUtils.getObfString("tempDisplayHeight", "aa");
+		String displayHeight = CoreUtils.getObfString("displayHeight", "d");
+		
 		String toggleFullScreen = CoreUtils.getObfString("toggleFullscreen", "k");
+		String mcCanvas = CoreUtils.getObfString("mcCanvas", "m");
+		String mcClazz = CoreUtils.getObfString("net/minecraft/client/Minecraft", notch_mc);
 		
 		//Manual Access Transformer (AT) for 1.5x
 		for(FieldNode f : classNode.fields)
 		{
-			if(f.name.equals(mcApplet) || f.name.equals(leftClickCounter) || f.name.equals(fullScreen))
+			if(f.name.equals(mcApplet) || f.name.equals(leftClickCounter) || f.name.equals(fullScreen) || f.name.equals(tempDisplayWidth) || f.name.equals(tempDisplayHeight))
 			{
 				f.access = Opcodes.ACC_PUBLIC;
 			}
@@ -122,7 +129,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		startGame.instructions.insert(CoreUtils.getFirstInstruction(startGame), startList);
 		
 		//if(false && this.mcCanvas != null)
-		FieldInsnNode id = CoreUtils.getFieldInsnNode(startGame, Opcodes.GETFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("mcCanvas", "m"), "Ljava/awt/Canvas;" );//TODO: Obf classes
+		FieldInsnNode id = CoreUtils.getFieldInsnNode(startGame, Opcodes.GETFIELD, "net/minecraft/client/Minecraft", mcCanvas, "Ljava/awt/Canvas;" );//TODO: Obf classes
 		JumpInsnNode jump = CoreUtils.nextJumpInsnNode(id);
 		LabelNode startIf = CoreUtils.prevLabel(id);
 		InsnList startIfList = new InsnList();
@@ -157,7 +164,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		AbstractInsnNode closeRequest = CoreUtils.getMethodInsnNode(runGameLoop, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "isCloseRequested", "()Z", false);
 		if(closeRequest != null)
 		{
-			FieldInsnNode canvasInsn = CoreUtils.previousFieldInsnNode(runGameLoop, closeRequest, Opcodes.GETFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("mcCanvas", "m"), "Ljava/awt/Canvas;");
+			FieldInsnNode canvasInsn = CoreUtils.previousFieldInsnNode(closeRequest, Opcodes.GETFIELD, "net/minecraft/client/Minecraft", mcCanvas, "Ljava/awt/Canvas;");
 			if(canvasInsn != null)
 			{
 				runGameLoop.instructions.remove(canvasInsn.getNext());//Remove JumpInsnNode
@@ -165,7 +172,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 				runGameLoop.instructions.remove(canvasInsn);//Remove check
 			}
 			else
-				System.out.println("Unable to Remove Minecraft#runGameLoop mcCanvas Check. The X Button may not work now :(");
+				System.err.println("Unable to Remove Minecraft#runGameLoop mcCanvas Check. The X Button may not work now :(");
 		}
 		
 		//Disable Display Updates
@@ -174,7 +181,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		//fix MC-160054 tabbing out or showing desktop results in minimized MC < 1.8
 		if(DpiFix.fsTabFix)
 		{
-			if(CoreUtils.getMethodInsnNode(runGameLoop, Opcodes.INVOKEVIRTUAL, CoreUtils.getObfString("net/minecraft/client/Minecraft", notch_mc), toggleFullScreen, "()V", false) != null)
+			if(CoreUtils.getMethodInsnNode(runGameLoop, Opcodes.INVOKEVIRTUAL, mcClazz, toggleFullScreen, "()V", false) != null)
 			{
 				MethodInsnNode spotTab = CoreUtils.getMethodInsnNode(runGameLoop, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "isActive", "()Z", false);
 				if(spotTab != null)
@@ -199,7 +206,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		runGameLoop.instructions.insert(yeild, yeildList);
 		
 		//Disable AWT resize method
-		FieldInsnNode canvasInsn2 = CoreUtils.getFieldInsnNode(runGameLoop, Opcodes.GETFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("mcCanvas", "m"), "Ljava/awt/Canvas;");
+		FieldInsnNode canvasInsn2 = CoreUtils.getFieldInsnNode(runGameLoop, Opcodes.GETFIELD, "net/minecraft/client/Minecraft", mcCanvas, "Ljava/awt/Canvas;");
 		if(canvasInsn2 != null)
 		{
 			InsnList liResize = new InsnList();
@@ -208,14 +215,63 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			runGameLoop.instructions.insert(CoreUtils.prevLabelNode(canvasInsn2), liResize);
 		}
 		
+		MethodNode nodeFS = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("toggleFullscreen", "k"), "()V");
+		nodeFS.access = Opcodes.ACC_PUBLIC;
+		
+		//Disable display update calls
+		this.disableDisplayUpdate(nodeFS);
+		
+		//Disable mcCanvas check
+		FieldInsnNode canvasInsnNode = CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, mcCanvas, "Ljava/awt/Canvas;");
+		if(canvasInsnNode != null)
+		{
+			InsnList fsIfList = new InsnList();
+			fsIfList.add(new InsnNode(Opcodes.ICONST_0));
+			fsIfList.add(new JumpInsnNode(Opcodes.IFEQ, CoreUtils.nextJumpInsnNode(canvasInsnNode).label));
+			nodeFS.instructions.insertBefore(canvasInsnNode.getPrevious(), fsIfList);//inject before ALOAD 0 we can't use prevLabel as there is a frame and we can't recompute frames
+		}
+		
+		//DpiFixDeAWT.setDisplayMode(this);
+		FieldInsnNode fsSpot = CoreUtils.nextFieldInsnNode(CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayHeight, "I"), Opcodes.PUTFIELD, mcClazz, displayHeight, "I");
+		InsnList fsSpotList = new InsnList();
+		fsSpotList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		fsSpotList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "setDisplayMode", "(Lnet/minecraft/client/Minecraft;)V", false));
+		nodeFS.instructions.insert(fsSpot, fsSpotList);
+		
+		//DpiFixCoreMod#tickDisplay(this);
+		InsnList fsli = new InsnList();
+		fsli.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		fsli.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
+		nodeFS.instructions.insert(CoreUtils.getLastMethodInsn(nodeFS, Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "disabled", "()V", false), fsli);
+		
+		MethodNode resize = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("resize", "a"), "(II)V");
+		resize.access = Opcodes.ACC_PUBLIC;//Make the method public
+		
+		//DpiFixCoreMod#updateViewPort
+		InsnList viewport = new InsnList();
+		viewport.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		viewport.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
+		resize.instructions.insert(CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClazz, CoreUtils.getObfString("displayHeight", "d"), "I"), viewport);
+		
+		//this.loadingScreen = new LoadingScreenRenderer(this);
+		InsnList resizeList = new InsnList();
+		resizeList.add(new LabelNode());
+		resizeList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		resizeList.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/client/gui/LoadingScreenRenderer"));
+		resizeList.add(new InsnNode(Opcodes.DUP));
+		resizeList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		resizeList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/LoadingScreenRenderer", "<init>", "(Lnet/minecraft/client/Minecraft;)V", false));
+		resizeList.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("loadingScreen", "field_71461_s"), "Lnet/minecraft/client/gui/LoadingScreenRenderer;"));
+		resize.instructions.insertBefore(CoreUtils.getLastInstruction(resize, Opcodes.RETURN), resizeList);
+		
+		MethodNode m = CoreUtils.getMethodNode(classNode, toggleFullScreen, "()V");
+		m.access = Opcodes.ACC_PUBLIC;
+		
 		//Disable FMLReEntry from ever appearing
 		MethodNode fmlReEntry = CoreUtils.getMethodNode(classNode, "fmlReentry", "(Lcpw/mods/fml/relauncher/ArgsWrapper;)V");
 		MethodInsnNode fmlReEntryInsn = CoreUtils.getMethodInsnNode(fmlReEntry, Opcodes.INVOKEVIRTUAL, "java/awt/Frame", "setVisible", "(Z)V", false);
 		fmlReEntry.instructions.remove(fmlReEntryInsn.getPrevious());
 		fmlReEntry.instructions.insertBefore(fmlReEntryInsn, new InsnNode(Opcodes.ICONST_0));
-		
-		MethodNode m = CoreUtils.getMethodNode(classNode, toggleFullScreen, "()V");
-		m.access = Opcodes.ACC_PUBLIC;
 	}
 	
 	public void patchLoadingScreenRenderer(String name, ClassNode classNode)

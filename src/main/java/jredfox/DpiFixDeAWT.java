@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -296,5 +297,10 @@ public class DpiFixDeAWT {
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
         DpiFixCoreMod.tickDisplay(mc);
     }
+
+	public static void setDisplayMode(Minecraft mc) throws LWJGLException 
+	{
+    	Display.setDisplayMode(new DisplayMode(mc.tempDisplayWidth, mc.tempDisplayHeight));
+	}
 
 }
