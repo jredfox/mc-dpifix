@@ -248,6 +248,79 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			nodeFS.instructions.insert(l);
 		}
 		
+		/*
+		 * Fixes MC-68754
+		 * if(!this.fullscreen)
+		 * {
+		 * 		if(DpiFix.isWindows)
+		 * 			Display.setResizable(false);
+		 * 		Display.setResizable(true);
+		 * }
+		 */
+		if(DpiFix.fsResizeableFix)
+		{
+			//Disable all instances of Forge's / Optifine's Fullscreen "Fix"
+			MethodInsnNode startResize = CoreUtils.getMethodInsnNode(nodeFS, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+			if(startResize != null)
+			{
+				System.err.println("Disabling Forge's \"FIX\" for Fullscreen!");
+				MethodInsnNode resizeInsn = CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+				AbstractInsnNode ab = startResize;
+				while(ab != null)
+				{
+					if(ab instanceof MethodInsnNode && CoreUtils.equals(resizeInsn, (MethodInsnNode) ab))
+					{
+						MethodInsnNode minsn = (MethodInsnNode)ab;
+						minsn.owner = "jredfox/DpiFixCoreMod";
+					}
+					ab = ab.getNext();
+				}
+			}
+			
+			InsnList li = new InsnList();
+			li.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("fullscreen", "field_71431_Q").toString(), "Z"));
+			LabelNode l26 = new LabelNode();
+			li.add(new JumpInsnNode(Opcodes.IFNE, l26));
+			if(DpiFix.isWindows)
+			{
+				LabelNode l27 = new LabelNode();
+				li.add(l27);
+				li.add(new InsnNode(Opcodes.ICONST_0));
+				li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+			}
+			LabelNode l28 = new LabelNode();
+			li.add(l28);
+			li.add(new InsnNode(Opcodes.ICONST_1));
+			li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
+			li.add(l26);
+			//since we can't compute frames for mc 1.6.4 manually add the frame
+			li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+			
+			nodeFS.instructions.insert(CoreUtils.getMethodInsnNode(nodeFS, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false), li);
+		}
+		
+		if(DpiFix.isLinux ? DpiFix.fsMouseFixLinux : DpiFix.fsMouseFixOther)
+		{	
+			/**
+			 * DpiFixCoreMod.fsMousePre(this);
+			 */
+			MethodInsnNode vsync = CoreUtils.getMethodInsnNode(nodeFS, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setVSyncEnabled", "(Z)V", false);
+			InsnList fspre = new InsnList();
+			fspre.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			fspre.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePre", "(Lnet/minecraft/client/Minecraft;)V", false));
+			nodeFS.instructions.insert(vsync, fspre);
+			
+			/**
+			 * DpiFixCoreMod.fsMousePost(this);
+			 */
+			InsnList fspost = new InsnList();
+			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			fspost.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
+			AbstractInsnNode spot = CoreUtils.getLastMethodInsn(runGameLoop, Opcodes.INVOKEVIRTUAL, CoreUtils.getObfString("net/minecraft/profiler/Profiler", "la"), CoreUtils.getObfString("endSection", "b"), "()V", false);
+			runGameLoop.instructions.insert(spot, fspost);
+		}
+		
 		//Disable display update calls
 		this.disableDisplayUpdate(nodeFS);
 		
