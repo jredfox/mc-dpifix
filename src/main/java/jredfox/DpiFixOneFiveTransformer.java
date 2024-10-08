@@ -512,7 +512,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		InsnList li = new InsnList();
 		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/MinecraftAppletImpl", CoreUtils.getObfString("shutdownMinecraftApplet", "func_71405_e"), "()V", false));
-		m.instructions.insert(CoreUtils.getFirstInstruction(m), li);
+		m.instructions.insert(CoreUtils.getLastInstruction(m), li);
 	}
 	
     /**

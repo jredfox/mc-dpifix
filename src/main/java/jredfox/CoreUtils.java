@@ -101,6 +101,21 @@ public class CoreUtils {
 	}
 	
 	/**
+	 * optimized way of getting a last instruction
+	 */
+	public static AbstractInsnNode getLastInstruction(MethodNode method) 
+	{
+		AbstractInsnNode[] arr = method.instructions.toArray();
+		for(int i=arr.length-1;i>=0;i--)
+		{
+			AbstractInsnNode node = arr[i];
+			if(node instanceof LineNumberNode)
+				return node;
+		}
+		return null;
+	}
+	
+	/**
 	 * getting the first instanceof of this will usually tell you where the initial injection point should be after
 	 */
 	public static LineNumberNode getFirstInstruction(MethodNode method) 
