@@ -49,8 +49,8 @@ public class DpiFixCoreMod implements IClassTransformer, cpw.mods.fml.relauncher
 			"net.minecraft.client.gui.LoadingScreenRenderer",
 			"jredfox.dpimod.DpiFixModLegacy",
 			"net.minecraft.client.MinecraftApplet",
-			"net.minecraft.util.MouseHelper",
-			"net.minecraft.client.MinecraftAppletImpl"
+			"net.minecraft.client.MinecraftAppletImpl",
+			"net.minecraft.util.MouseHelper"
 	});
 	
 	/**

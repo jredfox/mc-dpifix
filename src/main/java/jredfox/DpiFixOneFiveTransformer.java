@@ -44,11 +44,11 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			break;
 			
 			case 4:
-				patchMouseHelper(classNode);
+				patchAppletImplShutdown(classNode);
 			break;
 			
 			case 5:
-				patchAppletImplShutdown(classNode);
+				patchMouseHelper(classNode);
 			break;
 			
 			default:
@@ -87,6 +87,14 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	public final String runGameLoopMethod = CoreUtils.getObfString("runGameLoop", "K");//func_71411_J
 	public final String toggleFullScreenMethod = CoreUtils.getObfString("toggleFullscreen", "k");//func_71352_k
 	public final String resizeMethod = CoreUtils.getObfString("resize", "a");//func_71370_a
+	
+    /**
+     * get De-AWT boolean based on the OS
+     */
+	public boolean hasDeAWT() 
+	{
+		return DpiFix.isWindows ? DpiFix.deawt_windows : DpiFix.isMacOs ? DpiFix.deawt_mac : DpiFix.isLinux ? DpiFix.deawt_linux : true;
+	}
 
 	public void patchMC(String notch_mc, ClassNode classNode)
 	{
@@ -468,6 +476,19 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		m.instructions.insert(li);
 	}
 	
+	public void patchAppletImplShutdown(ClassNode classNode) 
+	{
+		if(!this.hasDeAWT())
+			return;
+		
+		System.out.println("Patching: MinecraftAppletImpl#displayCrashReportInternal Using De-AWT Transformer");
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("displayCrashReportInternal", "d"), CoreUtils.getObfString("(Lnet/minecraft/crash/CrashReport;)V", "(Lb;)V"));
+		InsnList li = new InsnList();
+		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/MinecraftAppletImpl", CoreUtils.getObfString("shutdownMinecraftApplet", "func_71405_e"), "()V", false));
+		m.instructions.insert(CoreUtils.getLastInstruction(m), li);
+	}
+	
 	public void patchMouseHelper(ClassNode classNode)
 	{
 		if(!DpiFix.guiMouseFix)
@@ -500,27 +521,6 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		l.add(new InsnNode(Opcodes.RETURN));
 		l.add(new LabelNode());
 		m.instructions.insert(l);
-	}
-	
-	public void patchAppletImplShutdown(ClassNode classNode) 
-	{
-		if(!this.hasDeAWT())
-			return;
-		
-		System.out.println("Patching: MinecraftAppletImpl#displayCrashReportInternal Using De-AWT Transformer");
-		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("displayCrashReportInternal", "d"), CoreUtils.getObfString("(Lnet/minecraft/crash/CrashReport;)V", "(Lb;)V"));
-		InsnList li = new InsnList();
-		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/MinecraftAppletImpl", CoreUtils.getObfString("shutdownMinecraftApplet", "func_71405_e"), "()V", false));
-		m.instructions.insert(CoreUtils.getLastInstruction(m), li);
-	}
-	
-    /**
-     * get De-AWT boolean based on the OS
-     */
-	public boolean hasDeAWT() 
-	{
-		return DpiFix.isWindows ? DpiFix.deawt_windows : DpiFix.isMacOs ? DpiFix.deawt_mac : DpiFix.isLinux ? DpiFix.deawt_linux : true;
 	}
 
 }
