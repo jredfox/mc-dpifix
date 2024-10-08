@@ -56,7 +56,8 @@ public class DpiFixCoreMod implements IClassTransformer, cpw.mods.fml.relauncher
 	 */
 	public static boolean onefive = ForgeVersion.getMajorVersion() < 8;
 	
-	public IDpiFixTransformer dpifixTransformer = onefive ? new DpiFixOneFiveTransformer() : new DpiFixTransformer();
+	public IDpiFixTransformer dpifixTransformer = null;
+	public boolean i = false;
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
@@ -66,6 +67,8 @@ public class DpiFixCoreMod implements IClassTransformer, cpw.mods.fml.relauncher
 		{
 			try
 			{
+				if(!this.i)
+					this.init();
 				name = name.replace(".", "/");
 				transformedName = transformedName.replace(".", "/");
 				ClassNode classNode = CoreUtils.getClassNode(basicClass);
@@ -88,6 +91,13 @@ public class DpiFixCoreMod implements IClassTransformer, cpw.mods.fml.relauncher
 		return basicClass;
 	}
 	
+	public void init() 
+	{
+		if(this.i) return;
+		this.dpifixTransformer = onefive ? new DpiFixOneFiveTransformer() : new DpiFixTransformer();
+		this.i = true;
+	}
+
 	//##############################  START Functions  ##############################\\
 	
 	public static boolean rfalse() { return false; }
