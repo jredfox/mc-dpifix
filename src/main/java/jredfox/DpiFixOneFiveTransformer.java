@@ -42,9 +42,16 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			case 3:
 				removeAppletShutdown(classNode);
 			break;
+			
+			case 4:
+				patchMouseHelper(classNode);
+			break;
+			
+			default:
+				break;
 		}
 	}
-	
+
 	public final String mcAppletF = CoreUtils.getObfString("mcApplet", "A");//field_71473_z
 	public final String mcCanvasF = CoreUtils.getObfString("mcCanvas", "m");//field_71447_l
 	public final String leftClickCounterF = CoreUtils.getObfString("leftClickCounter", "Y");//field_71429_W
@@ -455,6 +462,36 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		li.add(l1);
 		li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
 		m.instructions.insert(li);
+	}
+	
+	public void patchMouseHelper(ClassNode classNode)
+	{
+		//Display.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+		//Display.setGrabbed(false);
+		//return;
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("ungrabMouseCursor", "b"), "()V"); //func_74373_b
+		InsnList l = new InsnList();
+		LabelNode l0 = new LabelNode();
+		l.add(l0);
+		l.add(new LineNumberNode(42, l0));
+		l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "getWidth", "()I", false));
+		l.add(new InsnNode(Opcodes.ICONST_2));
+		l.add(new InsnNode(Opcodes.IDIV));
+		l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "getHeight", "()I", false));
+		l.add(new InsnNode(Opcodes.ICONST_2));
+		l.add(new InsnNode(Opcodes.IDIV));
+		l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/input/Mouse", "setCursorPosition", "(II)V", false));
+		
+		LabelNode l1 = new LabelNode();
+		l.add(l1);
+		l.add(new LineNumberNode(43, l1));
+		l.add(new InsnNode(Opcodes.ICONST_0));
+		l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/input/Mouse", "setGrabbed", "(Z)V", false));
+		l.add(new LabelNode());
+		
+		l.add(new InsnNode(Opcodes.RETURN));
+		l.add(new LabelNode());
+		m.instructions.insert(l);
 	}
 
 }
