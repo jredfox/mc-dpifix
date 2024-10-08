@@ -122,10 +122,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		lctr.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "hide", "(Ljava/awt/Canvas;Lnet/minecraft/client/MinecraftApplet;)V", false));
 		lctr.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		lctr.add(new VarInsnNode(Opcodes.ILOAD, 3));
-		lctr.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", tempDisplayWidthF_SRG, "I"));//TODO: Obfnames
+		lctr.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", tempDisplayWidthF_SRG, "I"));
 		lctr.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		lctr.add(new VarInsnNode(Opcodes.ILOAD, 4));
-		lctr.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", tempDisplayHeightF_SRG, "I"));//TODO: Obfnames
+		lctr.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", tempDisplayHeightF_SRG, "I"));
 		lctr.add(new LabelNode());
 		ctr.instructions.insert(spotPre, lctr);
 		
@@ -150,7 +150,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		startGame.instructions.insert(CoreUtils.getFirstInstruction(startGame), startList);
 		
 		//if(false && this.mcCanvas != null)
-		FieldInsnNode id = CoreUtils.getFieldInsnNode(startGame, Opcodes.GETFIELD, mcClazz, mcCanvasF, "Ljava/awt/Canvas;" );//TODO: Obf classes
+		FieldInsnNode id = CoreUtils.getFieldInsnNode(startGame, Opcodes.GETFIELD, mcClazz, mcCanvasF, "Ljava/awt/Canvas;" );
 		JumpInsnNode jump = CoreUtils.nextJumpInsnNode(id);
 		LabelNode startIf = CoreUtils.prevLabel(id);
 		InsnList startIfList = new InsnList();
@@ -238,6 +238,15 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		
 		MethodNode nodeFS = CoreUtils.getMethodNode(classNode, toggleFullScreenMethod, "()V");
 		nodeFS.access = Opcodes.ACC_PUBLIC;
+		
+		//fix MC-111419 by injecting DpiFixCoreMod#syncFullScreen
+		if(DpiFix.fsSaveFix)
+		{
+			InsnList l = new InsnList();
+			l.add(new LabelNode());
+			l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "syncFullScreen", "()V", false));
+			nodeFS.instructions.insert(l);
+		}
 		
 		//Disable display update calls
 		this.disableDisplayUpdate(nodeFS);
