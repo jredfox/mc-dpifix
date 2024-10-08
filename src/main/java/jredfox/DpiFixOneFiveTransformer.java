@@ -168,7 +168,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		if(!DpiFix.deawt)
 			return;
 		
-		System.out.println("Patching Minecraft Using De-AWT Transformer");
+		System.out.println("Patching: Minecraft Using De-AWT Transformer");
 		MethodNode ctr = CoreUtils.getFirstConstructor(classNode);
 		
 		//Find Injection point of first-ish line of the constructor
@@ -450,7 +450,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		if(!DpiFix.deawt)
 			return;
 		
-		System.out.println("Removing Applet Shutdown");
+		System.out.println("Removing: Applet Shutdown");
 		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("shutdown", "b"), "()V"); //func_71480_b
 		InsnList li = new InsnList();
 		LabelNode l0 = new LabelNode();
@@ -466,6 +466,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	
 	public void patchMouseHelper(ClassNode classNode)
 	{
+		if(!DpiFix.guiMouseFix)
+			return;
+		
+		System.out.println("Patching: MouseHelper");
 		//Display.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
 		//Display.setGrabbed(false);
 		//return;
