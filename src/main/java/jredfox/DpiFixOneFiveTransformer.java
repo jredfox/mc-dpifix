@@ -249,6 +249,17 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		loadScreen.instructions.insert(CoreUtils.getFirstInstruction(loadScreen), loadList);
 		
 		MethodNode runGameLoop = CoreUtils.getMethodNode(classNode, runGameLoopMethod, "()V");
+		
+		//disable mcApplet check
+		FieldInsnNode appletCheck = CoreUtils.getFieldInsnNode(runGameLoop, Opcodes.GETFIELD, mcClazz, mcAppletF, "Lnet/minecraft/client/MinecraftApplet;");
+		if(appletCheck != null)
+		{
+			InsnList appletList = new InsnList();
+			appletList.add(new InsnNode(Opcodes.ICONST_0));
+			appletList.add(new JumpInsnNode(Opcodes.IFEQ, CoreUtils.nextJumpInsnNode(appletCheck).label));
+			runGameLoop.instructions.insert(CoreUtils.prevLabelNode(appletCheck), appletList);
+		}
+		
 		//remove canvas check
 		AbstractInsnNode closeRequest = CoreUtils.getMethodInsnNode(runGameLoop, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "isCloseRequested", "()Z", false);
 		if(closeRequest != null)
