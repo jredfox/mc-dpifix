@@ -59,6 +59,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		String displayWidthF = CoreUtils.getObfString("displayWidth", "c");//field_71443_c
 		String loadingScreenF = CoreUtils.getObfString("loadingScreen", "t");//field_71461_s
 		
+		String tempDisplayWidthF_SRG = CoreUtils.getObfString("tempDisplayWidth", "field_71436_X");
+		String tempDisplayHeightF_SRG = CoreUtils.getObfString("tempDisplayHeight", "field_71435_Y");
+		String loadingScreenF_SRG = CoreUtils.getObfString("loadingScreen", "field_71461_s");
+		
 		String[] fields_at = new String[] {
 				mcAppletF,
 				mcCanvasF,
@@ -118,10 +122,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		lctr.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "hide", "(Ljava/awt/Canvas;Lnet/minecraft/client/MinecraftApplet;)V", false));
 		lctr.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		lctr.add(new VarInsnNode(Opcodes.ILOAD, 3));
-		lctr.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", tempDisplayWidthF, "I"));//TODO: Obfnames
+		lctr.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", tempDisplayWidthF_SRG, "I"));//TODO: Obfnames
 		lctr.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		lctr.add(new VarInsnNode(Opcodes.ILOAD, 4));
-		lctr.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", tempDisplayHeightF, "I"));//TODO: Obfnames
+		lctr.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", tempDisplayHeightF_SRG, "I"));//TODO: Obfnames
 		lctr.add(new LabelNode());
 		ctr.instructions.insert(spotPre, lctr);
 		
@@ -161,7 +165,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		spotDisplayList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false));
 		startGame.instructions.insert(spotDisplay, spotDisplayList);
 		
-		//DpiFixDeAWT.fixTitle
+		//DpiFixDeAWT.fixTitle();
 		MethodInsnNode startTitle = CoreUtils.getMethodInsnNode(startGame, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setTitle", "(Ljava/lang/String;)V", false);
 		InsnList startTitleList = new InsnList();
 		startTitleList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "fixTitle", "()V", false));
@@ -278,7 +282,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		resizeList.add(new InsnNode(Opcodes.DUP));
 		resizeList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		resizeList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/LoadingScreenRenderer", "<init>", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resizeList.add(new FieldInsnNode(Opcodes.PUTFIELD, mcClazz, loadingScreenF, "Lnet/minecraft/client/gui/LoadingScreenRenderer;"));
+		resizeList.add(new FieldInsnNode(Opcodes.PUTFIELD, mcClazz, loadingScreenF_SRG, "Lnet/minecraft/client/gui/LoadingScreenRenderer;"));
 		resize.instructions.insertBefore(CoreUtils.getLastInstruction(resize, Opcodes.RETURN), resizeList);
 		
 		//Disable FMLReEntry from ever appearing
