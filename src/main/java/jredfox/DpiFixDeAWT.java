@@ -27,7 +27,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MinecraftApplet;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.EnumOS;
 
 public class DpiFixDeAWT {
 	
@@ -100,7 +99,7 @@ public class DpiFixDeAWT {
         title = frame.getTitle();
     	
 		//Don't set Icons on macOS as that's the Xdocer arguments
-        if (Minecraft.getOs() == EnumOS.MACOS)//TODO: replace with isMacOs to prevent being version locked in 1.5.2
+        if (DpiFix.isMacOs)
         	return;
         
     	List<Image> list = frame.getIconImages();
