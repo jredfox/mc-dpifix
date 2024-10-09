@@ -37,7 +37,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			break;
 			
 			case 2:
-				DpiFixAnnotation.patchAtMod(classNode);
+				DpiFixAnn.patchAtMod(classNode);
 			break;
 			
 			case 3:

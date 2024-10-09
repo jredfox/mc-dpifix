@@ -43,7 +43,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 			break;
 			
 			case 2:
-				DpiFixAnnotation.patchAtMod(classNode);
+				DpiFixAnn.patchAtMod(classNode);
 			break;
 			
 			default:

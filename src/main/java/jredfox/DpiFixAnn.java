@@ -1,32 +1,22 @@
 package jredfox;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.List;
 
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
-import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.common.ForgeVersion;
 
-public class DpiFixAnnotation implements IClassTransformer, cpw.mods.fml.relauncher.IClassTransformer {
+public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer {
 	
-	public DpiFixAnnotation()
+	public DpiFixAnn()
 	{
 		LaunchClassLoaderFix.stopMemoryOverflow(null);
 	}
 	
-	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
 	{
 		if(transformedName.equals("jredfox.dpimod.DpiFixModLegacy"))
@@ -34,7 +24,7 @@ public class DpiFixAnnotation implements IClassTransformer, cpw.mods.fml.relaunc
 			try
 			{
 				ClassNode classNode = CoreUtils.getClassNode(basicClass);
-	            DpiFixAnnotation.patchAtMod(classNode);
+				DpiFixAnn.patchAtMod(classNode);
 	            ClassWriter cw = CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS);
 	            return CoreUtils.toByteArray(cw, transformedName);
 			}

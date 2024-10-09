@@ -37,7 +37,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.common.ForgeVersion;
 
-public class DpiFixCoreMod implements IClassTransformer, cpw.mods.fml.relauncher.IClassTransformer {
+public class DpiFixCoreMod implements IClassTransformer {
 	
 	static
 	{

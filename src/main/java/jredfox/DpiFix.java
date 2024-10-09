@@ -80,7 +80,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 
 	//ASM config
-	public static final boolean isClient = ForgeVersion.getMajorVersion() < 8 ? DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null : DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null;
+	public static final boolean onefive = ForgeVersion.getMajorVersion() < 8;
+	public static final boolean isClient = onefive ? DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null : DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null;
 	public static boolean coremod;
 	public static boolean fsSaveFix;
 	public static boolean fsTabFix;
@@ -316,7 +317,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	@Override
 	public String[] getASMTransformerClass() {
-		return (this.coremod && isClient) ? new String[]{"jredfox.DpiFixCoreMod"} : new String[] {"jredfox.DpiFixAnnotation"};
+		String cof = onefive ? "OF" : "";
+		return (coremod && isClient) ? new String[]{"jredfox.DpiFixCoreMod" + cof} : new String[] {"jredfox.DpiFixAnn" + cof};
 	}
 
 	//___________________________________________START Dummy Methods for IMPL of Coremod______________________________\\
