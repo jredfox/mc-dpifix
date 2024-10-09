@@ -11,6 +11,7 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -113,6 +114,8 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			}
 		}
 		
+		this.patchMemCache(mcClazz, classNode);
+		
 		/**
 		 * De-AWT which includes patches De-AWT & MaxResFix if enabled. De-AWT cannot be applied without the MaxResFix
 		 * MaxResFix without De-AWT is useless in 1.5x
@@ -175,6 +178,28 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		}
 	}
 	
+	public void patchMemCache(String mcClazz, ClassNode classNode)
+	{
+		MethodNode clinit = CoreUtils.getMethodNode(classNode, "<clinit>", "()V");
+		if(clinit == null)
+			return;
+		
+		AbstractInsnNode ab = clinit.instructions.getFirst();
+		while(ab != null)
+		{
+			if(ab instanceof LdcInsnNode)
+			{
+				LdcInsnNode dc = (LdcInsnNode) ab;
+				if(dc.cst instanceof Integer && dc.cst.equals(new Integer(10485760)) && ab.getNext().getOpcode() == Opcodes.NEWARRAY)
+				{
+					dc.cst = new Integer(0);
+					break;
+				}
+			}
+			ab = ab.getNext();
+		}
+	}
+
 	private void patchDeAWT(String mcClazz, ClassNode classNode) 
 	{
 		if(!this.hasDeAWT())

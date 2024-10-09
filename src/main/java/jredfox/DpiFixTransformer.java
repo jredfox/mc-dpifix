@@ -11,6 +11,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -34,6 +35,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
             	System.out.println("Patching: Minecraft Fullscreen to fix MC-68754, MC-111419, MC-160054");
 				patchFullScreen(notch_mc, classNode);
 				patchMaxResFix( notch_mc, classNode);
+            	patchMemCache(notch_mc, classNode);
 			break;
 			
 			case 1:
@@ -46,6 +48,28 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 			
 			default:
 				break;
+		}
+	}
+	
+	public void patchMemCache(String mcClazz, ClassNode classNode)
+	{
+		MethodNode clinit = CoreUtils.getMethodNode(classNode, "<clinit>", "()V");
+		if(clinit == null)
+			return;
+		
+		AbstractInsnNode ab = clinit.instructions.getFirst();
+		while(ab != null)
+		{
+			if(ab instanceof LdcInsnNode)
+			{
+				LdcInsnNode dc = (LdcInsnNode) ab;
+				if(dc.cst instanceof Integer && dc.cst.equals(new Integer(10485760)) && ab.getNext().getOpcode() == Opcodes.NEWARRAY)
+				{
+					dc.cst = new Integer(0);
+					break;
+				}
+			}
+			ab = ab.getNext();
 		}
 	}
 	
