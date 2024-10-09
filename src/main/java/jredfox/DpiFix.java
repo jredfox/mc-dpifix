@@ -31,8 +31,8 @@ import net.minecraftforge.common.ForgeVersion;
 @net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions("jredfox.DpiFix")
 public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 
-	public boolean dpifix = true;
-	public boolean highPriority = true;
+	public static boolean dpifix = true;
+	public static boolean highPriority = true;
 	public static int nicenessMac;
 	public static int nicenessLinux;
 	public static boolean hasNatives = true;

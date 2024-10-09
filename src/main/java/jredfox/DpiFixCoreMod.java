@@ -39,7 +39,7 @@ import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixCoreMod implements IClassTransformer {
 	
-	static
+	public DpiFixCoreMod()
 	{
 		LaunchClassLoaderFix.stopMemoryOverflow(null);
 	}
