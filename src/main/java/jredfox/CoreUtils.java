@@ -239,10 +239,10 @@ public class CoreUtils {
 	 * dumps a file from memory
 	 * @throws IOException 
 	 */
-	public static void dumpFile(String name, byte[] bytes) throws IOException  
+	public static void dumpFile(String name, byte[] bytes) throws IOException
 	{
     	name = name.replace('.', '/');
-    	File f = new File(System.getProperty("user.dir"), "asm/dumps/dpi-fix/" + name + ".class");
+    	File f = new File(System.getProperty("user.dir"), "asm/dumps/dpi-fix/" + name + ".class").getAbsoluteFile();
     	f.getParentFile().mkdirs();
     	InputStream in = null;
     	OutputStream out = null;
