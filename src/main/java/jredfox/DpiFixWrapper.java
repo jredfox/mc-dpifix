@@ -3,6 +3,7 @@ package jredfox;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import net.minecraftforge.fml.relauncher.CoreModManager;
  * caused by Java 7 making forge find the wrong IFMLLoadingPlugin which then later throws a security exception when it tries to load IFMLLoadingPlugin$Name
  * @author jredfox
  */
-//TODO addTransformerExclusion 1.6+ or and something for 1.5x
 public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 	
 	public DpiFixWrapper() throws Exception
@@ -37,10 +37,28 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 		int sortIndex = 1005;
 		String exclusions = "jredfox.DpiFix";
 		
-		//Works for 1.5 - 1.12.2
+		//setup booleans
 		boolean onefive = ForgeVersion.getMajorVersion() < 8;
 		boolean onesixnotch = ForgeVersion.getMajorVersion() < 9 || ForgeVersion.getMajorVersion() == 9 && ForgeVersion.getMinorVersion() <= 11 && ForgeVersion.getBuildVersion() < 937;
 		boolean oneeight = ForgeVersion.getMajorVersion() >= 11;
+		
+		//Add Exclusion List 1.5 - 1.12.2
+		try
+		{
+			ClassLoader cl = this.getClass().getClassLoader();
+			Class clClazz = LaunchClassLoaderFix.forName("net.minecraft.launchwrapper.LaunchClassLoader");
+			if(clClazz == null || !LaunchClassLoaderFix.instanceOf(clClazz, cl.getClass()))
+				clClazz = LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.RelaunchClassLoader");
+			Method addTransformerExclusion = clClazz.getDeclaredMethod("addTransformerExclusion", String.class);
+			addTransformerExclusion.setAccessible(true);
+			addTransformerExclusion.invoke(cl, "jredfox.DpiFix");
+		}
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
+		
+		//Works for 1.5 - 1.12.2
 		Class IFMLLoadingPluginClazz = oneeight ? net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.class : cpw.mods.fml.relauncher.IFMLLoadingPlugin.class;
 		Class coreModManagerClazz = oneeight ? LaunchClassLoaderFix.forName("net.minecraftforge.fml.relauncher.CoreModManager") : ( (!onefive) ? LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.CoreModManager") : LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.RelaunchLibraryManager"));
 		Class FMLPluginWrapper = LaunchClassLoaderFix.forName(coreModManagerClazz.getName() + "$FMLPluginWrapper");
