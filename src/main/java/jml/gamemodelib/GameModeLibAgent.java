@@ -129,7 +129,7 @@ public class GameModeLibAgent {
     	return null;
     }
     
-	private static Field getField(Class c, String... fields) 
+	public static Field getField(Class c, String... fields) 
 	{
 		return getField(c, true, fields);
 	}
@@ -137,7 +137,7 @@ public class GameModeLibAgent {
 	/**
 	 * Trys to get exact Field First and if not found returns the first Field that is found with ignoring case if the search ignores case
 	 */
-	private static Field getField(Class c, boolean ignoreCase, String... fields) 
+	public static Field getField(Class c, boolean ignoreCase, String... fields) 
 	{
 		try
 		{
