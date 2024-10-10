@@ -18,6 +18,8 @@ import net.minecraftforge.fml.relauncher.CoreModManager;
  * caused by Java 7 making forge find the wrong IFMLLoadingPlugin which then later throws a security exception when it tries to load IFMLLoadingPlugin$Name
  * @author jredfox
  */
+//TODO addTransformerExclusion 1.6+ or and something for 1.5x
+//TODO transformer names for legacy 1.5-1.6.4 versions
 public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 	
 	public DpiFixWrapper() throws Exception
@@ -31,28 +33,48 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 	 */
 	public void wrap() throws Exception
 	{
-		//Annotation Equilvent Values
+		//Annotation Equivalent Values
 		String name = "mc-dpifix";
 		int sortIndex = 1005;
 		String exclusions = "jredfox.DpiFix";
 		
-		//Works for 1.6.4 - 1.12.2
+		//Works for 1.6.1 - 1.12.2
+		boolean onesixnotch = ForgeVersion.getMajorVersion() < 9 || ForgeVersion.getMajorVersion() == 9 && ForgeVersion.getMinorVersion() <= 11 && ForgeVersion.getBuildVersion() < 937;
 		boolean oneeight = ForgeVersion.getMajorVersion() >= 11;
 		Class IFMLLoadingPluginClazz = oneeight ? net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.class : cpw.mods.fml.relauncher.IFMLLoadingPlugin.class;
 		Class coreModManagerClazz = oneeight ? LaunchClassLoaderFix.forName("net.minecraftforge.fml.relauncher.CoreModManager") : LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.CoreModManager");
 		Class FMLPluginWrapper = LaunchClassLoaderFix.forName(coreModManagerClazz.getName() + "$FMLPluginWrapper");
 		List plugins = (List) GameModeLibAgent.getField(coreModManagerClazz, "loadPlugins").get(null);//TODO: change to an array of possible fields
 		File location = GameModeLibAgent.getFileFromClass(GameModeLibAgent.class);
-		
-        Constructor<?> ctr = FMLPluginWrapper.getDeclaredConstructor(
+		if(!onesixnotch)
+		{
+			Constructor<?> ctr = FMLPluginWrapper.getDeclaredConstructor(
         		String.class, 
         		IFMLLoadingPluginClazz, 
         		File.class, 
         		int.class, 
                 String[].class
             );
-		ctr.setAccessible(true);
-		plugins.add(ctr.newInstance(name, new DpiFix(), location, sortIndex, new String[0] ));
+			ctr.setAccessible(true);
+			plugins.add(ctr.newInstance(name, new DpiFix(), location, sortIndex, new String[0] ));
+		}
+		//1.6.2 - 1.6.4(notch)
+		else if(FMLPluginWrapper != null)
+		{
+			Constructor<?> ctr = FMLPluginWrapper.getDeclaredConstructor(
+	        		String.class, 
+	        		IFMLLoadingPluginClazz,
+	        		File.class,
+	                String[].class
+	        );
+			ctr.setAccessible(true);
+			plugins.add(ctr.newInstance(name, new DpiFix(), location, new String[0] ));
+		}
+		//1.6.1
+		else
+		{
+			plugins.add(new DpiFix());
+		}
 	}
 
 	@Override
