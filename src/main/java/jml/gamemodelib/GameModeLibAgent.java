@@ -37,7 +37,7 @@ public class GameModeLibAgent {
 		try
 		{
 			//Remove agent from classpath so forge doesn't load our "@Mod" when not in coremods or mods folder
-			if(forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null)
+			if(Boolean.parseBoolean(System.getProperty("gamemodelib.removeAgent", "false")) || Boolean.parseBoolean(System.getProperty("gamemodelib.removeModAgent", "true")) && forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null)
 			{
 				File jarFile = getFileFromClass(GameModeLibAgent.class);
 				ClassLoader sy = ClassLoader.getSystemClassLoader();

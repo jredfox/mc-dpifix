@@ -21,14 +21,6 @@ import net.minecraftforge.common.ForgeVersion;
  * TODO: macos intel(x64) and silicon (arm64)
  * TODO: linux ubuntu / mint x86, x64, arm64
  */
-//1.6.4-1.7.10 forge's annotations
-@IFMLLoadingPlugin.Name("mc-dpifix")
-@IFMLLoadingPlugin.SortingIndex(1005)
-@IFMLLoadingPlugin.TransformerExclusions("jredfox.DpiFix")
-//newer minecraft forge's annotations
-@net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name("mc-dpifix")
-@net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.SortingIndex(1001)
-@net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions("jredfox.DpiFix")
 public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 
 	public static boolean dpifix = true;
@@ -94,7 +86,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean deawt_mac;
 	public static boolean deawt_linux;
 	public static boolean guiMouseFix;
-	
 	public void loadConfig()
 	{
 		PropertyConfig cfg = new PropertyConfig(new File("config/DpiFix", "DpiFix.cfg"));

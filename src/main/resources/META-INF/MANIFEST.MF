@@ -2,5 +2,5 @@ Manifest-Version: 1.0
 Premain-Class: jml.gamemodelib.GameModeLibAgent
 Agent-Class: jml.gamemodelib.GameModeLibAgent
 FMLCorePluginContainsFMLMod: false
-FMLCorePlugin: jredfox.DpiFix
+FMLCorePlugin: jredfox.DpiFixWrapper
 
