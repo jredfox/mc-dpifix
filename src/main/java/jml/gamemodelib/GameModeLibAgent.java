@@ -1,33 +1,25 @@
 package jml.gamemodelib;
 
+import java.io.Closeable;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.ProtectionDomain;
 import java.util.Collection;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Stack;
 
 public class GameModeLibAgent {
 	
 	public static void premain(String agentArgs, Instrumentation inst)
 	{
-		System.setProperty("gamemodelib.agent", "true");
-		boolean fixDPI = Boolean.parseBoolean(System.getProperty("gamemodelib.dpi", "false"));
-		boolean highPriority = Boolean.parseBoolean(System.getProperty("gamemodelib.high", "false"));
-		GameModeLib.load();
 		try
 		{
-			if(fixDPI)
-				GameModeLib.fixDPI();
-			if(highPriority)
-				GameModeLib.setHighPriority();
+			System.setProperty("gamemodelib.agent", "true");
+			GameModeLib.load();
+			GameModeLib.fixDPI();
+			GameModeLib.setHighPriority();
 		}
 		catch(Throwable t)
 		{
@@ -59,6 +51,9 @@ public class GameModeLibAgent {
 	
     public static void removeAgentClassPath(File jarPath, ClassLoader... classLoaders) throws Exception 
     {
+    	System.out.println("java.cp:" + System.getProperty("java.class.path"));
+    	System.out.println();
+    	System.out.println();
     	URL jarURL = jarPath.toURI().toURL();
     	for(ClassLoader classLoader : classLoaders)
     	{
@@ -93,6 +88,43 @@ public class GameModeLibAgent {
 		            Object lmap = lmapField.get(ucp);
 		            remove(lmap, jarURL);
 	            }
+	            
+	            //Remove it from List<Loader> loaders
+	            Class loaderClazz = forName(urlCPClazz.getName() + "$Loader", classLoader);
+	            if(loaderClazz == null)
+	            {
+	            	System.err.println("Unable to find " + urlCPClazz.getName() + "$Loader Please Report to https://github.com/jredfox/mc-dpifix/issues");
+	            	System.err.println(System.getProperty("java.version") + " " + System.getProperty("java.vendor"));
+	            	continue;
+	            }
+	            
+	            Field loaderField = getField(urlCPClazz, "loaders");
+	            if(loaderField != null)
+	            {
+	            	Collection loaders = getCollection(loaderField.get(ucp));
+	                Iterator it = loaders.iterator();
+	                Field getBase = getField(loaderClazz, "base", "url", "csu", "baseurl", "jarurl", "base_url");//guess other java distro's field names
+	                while(it.hasNext())
+	                {
+	                	Object loader = it.next();
+	                	URL lurl = (URL) getBase.get(loader);
+	                	if(jarURL.equals( getFileFromURL(lurl).toURI().toURL() ) )
+	                	{
+	                		it.remove();
+	                		if(loader instanceof Closeable)
+	                		{
+	                			try
+	                			{
+	                				((Closeable)loader).close();
+	                			}
+	                			catch(Exception e)
+	                			{
+	                				e.printStackTrace();
+	                			}
+	                		}
+	                	}
+	                }
+	            }
     		}
     		catch(Throwable t)
     		{
@@ -102,9 +134,16 @@ public class GameModeLibAgent {
     }
     
     /**
+     * Safely gets a collection whether it be a Map or Collection
+     */
+    public static Collection getCollection(Object o) {
+		return o instanceof Map ? ((Map)o).values() : (Collection) o;
+	}
+
+	/**
      * Removes an Object from either a Collection(ArrayList) or Map (HashMap)
      */
-    private static void remove(Object l, Object o) 
+    public static void remove(Object l, Object o) 
     {
 		if(l instanceof Collection)
 			((Collection)l).remove(o);

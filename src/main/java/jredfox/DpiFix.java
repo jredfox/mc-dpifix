@@ -1,11 +1,13 @@
 package jredfox;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.management.ManagementFactory;
@@ -23,16 +25,17 @@ import net.minecraftforge.common.ForgeVersion;
  */
 public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 
-	public static boolean dpifix = true;
-	public static boolean highPriority = true;
-	public static int nicenessMac;
-	public static int nicenessLinux;
+	public static boolean agentmode = Boolean.parseBoolean(System.getProperty("gamemodelib.agent", "false"));
+	public static boolean dpifix = agentmode ? Boolean.parseBoolean(System.getProperty("gamemodelib.dpi", "false")) : true;
+	public static boolean highPriority = agentmode ? Boolean.parseBoolean(System.getProperty("gamemodelib.high", "false")) : true;
+	public static int nicenessMac = agentmode ? toNiceness(Integer.parseInt(System.getProperty("gamemodelib.niceness.mac", "-5"))) : -5;
+	public static int nicenessLinux = agentmode ? toNiceness(Integer.parseInt(System.getProperty("gamemodelib.niceness.linux", "-5"))) : -5;
 	public static boolean hasNatives = true;
 	
 	public DpiFix()
 	{
 		//only load the mod if it hasn't been loaded by the javaagent already
-		if(!Boolean.parseBoolean(System.getProperty("gamemodelib.agent", "false")))
+		if(!agentmode)
 			this.loadMod();
 		else
 			this.loadConfig(); //If we are still in the mods folder load the coremod fixes without the Process fixes as they have already been applied manually
@@ -86,13 +89,13 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean deawt_mac;
 	public static boolean deawt_linux;
 	public static boolean guiMouseFix;
-	public void loadConfig()
+	public static void loadConfig()
 	{
-		PropertyConfig cfg = new PropertyConfig(new File("config/DpiFix", "DpiFix.cfg"));
+		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
 		cfg.load();
 		
-		this.dpifix = cfg.get("Process.DpiFix");
-		this.highPriority = cfg.get("Process.HighPriority");
+		dpifix = cfg.get("Process.DpiFix");
+		highPriority = cfg.get("Process.HighPriority");
 		nicenessMac = toNiceness(cfg.getInt("Process.HighPriority.Niceness.Mac", -5));
 		nicenessLinux = toNiceness(cfg.getInt("Process.HighPriority.Niceness.Linux", -5));
 		
@@ -213,8 +216,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		{
 			try
 			{
-				System.out.print("Setting High Priority" + System.lineSeparator());
-				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+				String pid = getPIDMac();
+				System.out.print("Setting High Priority " + pid + " niceness:" + nicenessMac + System.lineSeparator());
 				Runtime.getRuntime().exec(changeNiceness.getPath() + " " + nicenessMac + " " + pid);
 			}
 			catch(Throwable t)
@@ -226,8 +229,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		{
 			try
 			{
-				System.out.print("Setting High Priority" + System.lineSeparator());
 				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];//keep pid as string as we don't have unsigned long in java
+				System.out.print("Setting High Priority " + pid + " niceness:" + nicenessLinux + System.lineSeparator());
 				Runtime.getRuntime().exec(renicer.getPath() + " " + nicenessLinux + " -p " + pid);//-5 is "high" for windows. Anything lower and it will be out of sync with the keyboard and mouse and graphics drivers causing input lag
 			}
 			catch (Throwable e)
@@ -238,9 +241,36 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 	
 	/**
+	 * avoids a java bug which causes java to hang for 5,000MS on macOS monetary when trying to get the PID
+	 * While this method is expensive 5-29ms it's compatible with java 6 or higher
+	 */
+	public static String getPIDMac() throws IOException 
+	{
+		BufferedReader reader = null;
+		try
+		{
+	        // Use ProcessBuilder to get the Parent Process ID this will always be java's Process Id
+	        ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "echo $(ps -o ppid= -p $$)");
+	        Process process = processBuilder.start();
+	
+	        // Capture the output from the command
+	        reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+	        String pid = reader.readLine().replace("\"", "").replace("'", "").trim();
+	        closeQuietly(reader);
+	        return pid;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			closeQuietly(reader);
+		}
+		return null;
+	}
+
+	/**
 	 * Allows values from 0 to -20. Do not allow users to troll and make minecraft slower then normal
 	 */
-	public int toNiceness(int val)
+	public static int toNiceness(int val)
 	{
 		return Math.min(0, Math.max(-20, val));
 	}
