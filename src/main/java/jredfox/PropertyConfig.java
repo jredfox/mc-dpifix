@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -29,7 +29,7 @@ public class PropertyConfig
 		try
 		{
 			this.createFile();
-			input = new BufferedReader(new InputStreamReader(new FileInputStream(this.property_file), StandardCharsets.UTF_8) );
+			input = new BufferedReader(new InputStreamReader(new FileInputStream(this.property_file), Charset.forName("UTF-8") ) );
 			properties.load(input);
 		}
 		catch(Throwable t)
@@ -51,7 +51,7 @@ public class PropertyConfig
 		StringBuilder sb = new StringBuilder();
 		try
 		{
-			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.property_file),StandardCharsets.UTF_8 ) );
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.property_file), Charset.forName("UTF-8") ) );
 			for(Map.Entry<Object, Object> entry : new TreeMap<Object, Object>(this.properties).entrySet())
 			{
 				writer.write(sb.append((String)entry.getKey()).append("=").append(entry.getValue()).append("\r\n").toString());

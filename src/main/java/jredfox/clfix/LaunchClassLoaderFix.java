@@ -12,7 +12,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -302,7 +302,7 @@ public class LaunchClassLoaderFix {
 		BufferedWriter writer = null;
 		try
 		{
-			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f),StandardCharsets.UTF_8 ) );
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), Charset.forName("UTF-8") ) );
 			for(Object s : list)
 				writer.write(s + System.lineSeparator());
 		}
@@ -339,7 +339,7 @@ public class LaunchClassLoaderFix {
 			}
 			else
 			{
-				reader = new BufferedReader(new InputStreamReader(new FileInputStream(f),StandardCharsets.UTF_8) );
+				reader = new BufferedReader(new InputStreamReader(new FileInputStream(f), Charset.forName("UTF-8") ) );
 			}
 			
 			list = new ArrayList();
