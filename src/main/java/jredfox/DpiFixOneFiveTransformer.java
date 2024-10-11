@@ -509,8 +509,11 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		System.out.println("Patching: MinecraftAppletImpl#displayCrashReportInternal Using De-AWT Transformer");
 		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("displayCrashReportInternal", "d"), CoreUtils.getObfString("(Lnet/minecraft/crash/CrashReport;)V", "(Lb;)V"));
 		InsnList li = new InsnList();
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "shutdown", "()V", false));
 		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/MinecraftAppletImpl", CoreUtils.getObfString("shutdownMinecraftApplet", "func_71405_e"), "()V", false));
+		li.add(new InsnNode(Opcodes.ICONST_M1));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/System", "exit", "(I)V", false));
 		m.instructions.insert(CoreUtils.getLastInstruction(m), li);
 	}
 	

@@ -260,6 +260,32 @@ public class DpiFixCoreMod implements IClassTransformer {
         GL11.glEnable(GL11.GL_ALPHA_TEST);
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
 	}
+
+    /**
+     * Creates a shutdown thread that will force exit in 10s if minecraft can't save
+     * Used Only for Minecraft 1.5x with De-AWT Enabled
+     */
+	public static void shutdown()
+	{
+		Thread t = new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try 
+				{
+					Thread.sleep(10000);
+				} 
+				catch (InterruptedException e) 
+				{
+					
+				}
+				System.exit(-1);
+			}
+		});
+		t.setDaemon(true);
+		t.start();
+	}
 	
 	//##############################  End Functions  ##############################\\
 	

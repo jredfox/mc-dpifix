@@ -12,7 +12,6 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import jml.gamemodelib.GameModeLibAgent;
 import jredfox.clfix.LaunchClassLoaderFix;
 import net.minecraftforge.common.ForgeVersion;
-import net.minecraftforge.fml.relauncher.CoreModManager;
 
 /**
  * DpiFixWrapper is a wrapper for DpiFix that will correctly add it to CoreModManager without annotation or security conflicts
