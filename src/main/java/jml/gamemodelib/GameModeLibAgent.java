@@ -49,6 +49,15 @@ public class GameModeLibAgent {
 		
 	}
 	
+	/**
+	 * Does not work in instances where the class loader is replaced and the parent is set to null or a different parent
+	 * Fixing it would be a nightmare and significantly slow down the process for removing them.
+	 * - Because just checking instanceof would check both all superclasses (slow) and interfaces (slow)
+	 * - Then Instead of just calling normal methods they would all be gotten using reflection (slow)
+	 * - Since this works on all major java distros and shouldn't be an issue with Minecraft or Forge I refuse to make it slower
+	 * It works as long as another java agent before this doesn't replace the class loader with a different parent before this gets called
+	 * @author jredfox
+	 */
     public static void removeAgentClassPath(File jarPath, boolean removeCP, ClassLoader... classLoaders) throws Exception 
     {
     	if(removeCP)
