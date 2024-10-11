@@ -139,7 +139,7 @@ public class GameModeLibAgent {
     public static void removeCP(File jar)
     {
     	jar = jar.getAbsoluteFile();
-		String[] cp = System.getProperty("java.class.path").replace(";", File.pathSeparator).split(File.pathSeparator);
+		String[] cp = System.getProperty("java.class.path").replace(";", File.pathSeparator).split("\\" + File.pathSeparator, -1);
 		StringBuilder b = new StringBuilder();
 		for(String c : cp)
 		{
