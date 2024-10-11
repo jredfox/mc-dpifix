@@ -35,7 +35,7 @@ public class GameModeLibAgent {
 				ClassLoader sy = ClassLoader.getSystemClassLoader();
 				ClassLoader parent = getParentCL(ClassLoader.getSystemClassLoader());
 				ClassLoader context = Thread.currentThread().getContextClassLoader();
-				removeAgentClassPath(jarFile, sy, parent, (sy == context ? null : context));
+				removeAgentClassPath(jarFile, true, sy, parent, (sy == context ? null : context));
 			}
 		}
 		catch(Throwable t)
@@ -49,11 +49,10 @@ public class GameModeLibAgent {
 		
 	}
 	
-    public static void removeAgentClassPath(File jarPath, ClassLoader... classLoaders) throws Exception 
+    public static void removeAgentClassPath(File jarPath, boolean removeCP, ClassLoader... classLoaders) throws Exception 
     {
-    	System.out.println("java.cp:" + System.getProperty("java.class.path"));
-    	System.out.println();
-    	System.out.println();
+    	if(removeCP)
+    		removeCP(jarPath);
     	URL jarURL = jarPath.toURI().toURL();
     	for(ClassLoader classLoader : classLoaders)
     	{
@@ -132,8 +131,30 @@ public class GameModeLibAgent {
     		}
     	}
     }
-    
+
     /**
+     * Removes the jar from the java.class.path property to prevent future reloading of the jar
+     * This method doesn't remove it from the class loaders only the java property
+     */
+    public static void removeCP(File jar)
+    {
+    	jar = jar.getAbsoluteFile();
+		String[] cp = System.getProperty("java.class.path").replace(";", File.pathSeparator).split(File.pathSeparator);
+		StringBuilder b = new StringBuilder();
+		for(String c : cp)
+		{
+			if(!jar.equals(new File(c).getAbsoluteFile()))
+			{
+				if(b.length() > 0)
+					b.append(File.pathSeparator);
+				b.append(c);
+			}
+		}
+		String built = b.toString();
+		System.setProperty("java.class.path", built);
+	}
+
+	/**
      * Safely gets a collection whether it be a Map or Collection
      */
     public static Collection getCollection(Object o) {
