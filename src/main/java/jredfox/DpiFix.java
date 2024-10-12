@@ -18,6 +18,7 @@ import java.util.Map;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import jredfox.clfix.LaunchClassLoaderFix;
+import jredfox.dpimod.DpiFixModVars;
 
 /**
  * TODO: macos intel(x64) and silicon (arm64)
@@ -49,15 +50,18 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			System.out.println("Dpi-Fix Loading Natives:" + arch);
 			this.loadConfig();
 			this.loadNatives(arch, 0);
-			if(this.dpifix)
+			if(dpifix)
 				this.fixProcessDPI();
-			if(this.highPriority)
+			if(highPriority)
 				this.setHighProcessPriority();
 		}
 		catch (Throwable t)
 		{
 			t.printStackTrace();
 		}
+		
+		if(onefive && !agentmode && highPriority)
+			throw new IllegalArgumentException("DPI-Fix High Process Priority for 1.5x Requies java agent mode!\nAdd these JVM Flags: -javaagent:\"coremods/[1.5-1.12.2]HighDPI-Fix-" + DpiFixModVars.VERSION + ".jar\" -Dgamemodelib.cfg=true");
 	}
 	
 	public static void load()
@@ -192,28 +196,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				System.err.println("change_niceness command not found! To get High Process Priority Please install it from https://github.com/jredfox/change_niceness/releases");
 			}
 		}
-		else if(isWindows)
-		{
-			InputStream in = null;
-			OutputStream out = null;
-			File fnative = new File("natives/jredfox/change_niceness.exe").getAbsoluteFile();
-			fnative.getParentFile().mkdirs();
-			try
-			{
-				in = DpiFix.class.getClassLoader().getResourceAsStream("natives/jredfox/change_niceness.exe");
-				out = new FileOutputStream(fnative);
-				copy(in, out);
-			}
-			catch(Throwable t)
-			{
-				t.printStackTrace();
-			}
-			finally
-			{
-				closeQuietly(in);
-				closeQuietly(out);
-			}
-		}
 	}
 
 	/**
@@ -235,24 +217,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	{
 		if(DpiFix.isWindows)
 		{
-			if(onefive && !agentmode)
-			{
-				try
-				{
-					String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
-					ProcessBuilder pb = new ProcessBuilder(new String[]{"cmd", "/c", "start", new File("natives/jredfox/change_niceness.exe").getAbsolutePath(), "" + pid, "HIGH", "750"});
-					pb.inheritIO();
-					Process p = pb.start();
-				}
-				catch(Throwable t)
-				{
-					t.printStackTrace();
-				}
-			}
-			else
-			{
-				DpiFix.setHighPriority();
-			}
+			DpiFix.setHighPriority();
 		}
 		else if(DpiFix.hasChangeNiceness)
 		{
