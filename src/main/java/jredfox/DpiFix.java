@@ -34,7 +34,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	
 	public DpiFix()
 	{
-		Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());//Prevent Weird Process Prioirty Lock well it will still lock but not by mod loading
 		//only load the mod if it hasn't been loaded by the javaagent already
 		if(!agentmode)
 			this.loadMod();
@@ -214,7 +213,24 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	{
 		if(DpiFix.isWindows)
 		{
-			DpiFix.setHighPriority();
+			if(onefive && !agentmode)
+			{
+				try
+				{
+					String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+					ProcessBuilder pb = new ProcessBuilder(new String[]{"cmd", "/c", "start", new File("natives/jredfox/change_niceness.exe").getAbsolutePath(), "" + pid, "HIGH", "750"});
+					pb.inheritIO();
+					Process p = pb.start();
+				}
+				catch(Throwable t)
+				{
+					t.printStackTrace();
+				}
+			}
+			else
+			{
+				DpiFix.setHighPriority();
+			}
 		}
 		else if(DpiFix.hasChangeNiceness)
 		{

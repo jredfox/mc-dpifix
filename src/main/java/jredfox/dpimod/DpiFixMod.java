@@ -13,11 +13,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 	)
 public class DpiFixMod {
 	
-	static
-	{
-		DpiFixModProxy.modPreInit();
-	}
-	
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent e)
 	{

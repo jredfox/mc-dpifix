@@ -16,11 +16,6 @@ import net.minecraftforge.common.ForgeVersion;
 	)
 public class DpiFixModLegacy {
 	
-	static
-	{
-		DpiFixModProxy.modPreInit();
-	}
-	
 //	@PreInit replaces @EventHandler at runtime dynamically if it's needed
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent pre)
