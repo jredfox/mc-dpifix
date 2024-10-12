@@ -34,6 +34,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	
 	public DpiFix()
 	{
+		Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());//Prevent Weird Process Prioirty Lock well it will still lock but not by mod loading
 		//only load the mod if it hasn't been loaded by the javaagent already
 		if(!agentmode)
 			this.loadMod();
