@@ -52,6 +52,14 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 				patchMouseHelper(classNode);
 			break;
 			
+			case 6:
+				disableThreadDownloadResources(classNode);
+			break;
+			
+			case 7:
+				disableThreadSpamResources(classNode);
+			break;
+			
 			default:
 				break;
 		}
@@ -549,6 +557,37 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		l.add(new InsnNode(Opcodes.RETURN));
 		l.add(new LabelNode());
 		m.instructions.insert(l);
+	}
+	
+	public void disableThreadDownloadResources(ClassNode classNode) 
+	{
+		if(!DpiFix.fixResourceThread)
+			return;
+		
+		MethodNode run = CoreUtils.getMethodNode(classNode, "run", "()V");
+		InsnList li = new InsnList();
+		li.add(new LabelNode());
+		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		li.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/util/ThreadDownloadResources", CoreUtils.getObfString("resourcesFolder", "field_74579_a"), "Ljava/io/File;"));
+		li.add(new LdcInsnNode(""));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/util/ThreadDownloadResources", CoreUtils.getObfString("loadResource", "func_74576_a"), "(Ljava/io/File;Ljava/lang/String;)V", false));
+		li.add(new InsnNode(Opcodes.RETURN));
+		li.add(new LabelNode());
+		run.instructions.insert(li);
+	}
+	
+	private void disableThreadSpamResources(ClassNode classNode) 
+	{
+		if(!DpiFix.fixResourceThread)
+			return;
+		
+		MethodNode run = CoreUtils.getMethodNode(classNode, "run", "()V");
+		InsnList li = new InsnList();
+		li.add(new LabelNode());
+		li.add(new InsnNode(Opcodes.RETURN));
+		li.add(new LabelNode());
+		run.instructions.insert(li);
 	}
 
 }

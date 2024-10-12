@@ -90,6 +90,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean deawt_mac;
 	public static boolean deawt_linux;
 	public static boolean guiMouseFix;
+	public static boolean fixResourceThread;
 	public static void loadConfig()
 	{
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
@@ -109,9 +110,10 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
 		maximizeFix = cfg.get("Coremod.MaximizeResFix");
 		guiMouseFix = cfg.get("Coremod.GUI.MouseFix");
-		deawt_windows = cfg.get("Coremod.DeAWT.Windows", false);
-		deawt_mac = cfg.get("Coremod.DeAWT.Mac");
-		deawt_linux = cfg.get("Coremod.DeAWT.Linux", false);
+		deawt_windows = cfg.get("Coremod.OneFive.DeAWT.Windows", false);
+		deawt_mac = cfg.get("Coremod.OneFive.DeAWT.Mac");
+		deawt_linux = cfg.get("Coremod.OneFive.DeAWT.Linux", false);
+		fixResourceThread = cfg.get("Coremod.OneFive.ThreadResourcesFix");
 		cfg.save();
 	}
 
