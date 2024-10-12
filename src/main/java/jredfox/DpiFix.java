@@ -197,6 +197,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			InputStream in = null;
 			OutputStream out = null;
 			File fnative = new File("natives/jredfox/change_niceness.exe").getAbsoluteFile();
+			fnative.getParentFile().mkdirs();
 			try
 			{
 				in = DpiFix.class.getClassLoader().getResourceAsStream("natives/jredfox/change_niceness.exe");
