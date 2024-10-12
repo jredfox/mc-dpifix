@@ -120,7 +120,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static void loadNatives(ARCH arch, int pass) throws IOException 
 	{
 		if(pass == 0)
-			DpiFix.loadReNicer();
+			DpiFix.loadChangeNiceness();
 		String strNativeName = "mc-dpifix-" + arch.toString().toLowerCase() + (isWindows7() ? "-7" : "") + (isWindows ? ".dll" : isMacOs ? ".jnilib" : ".so");
 		File fnative = new File("natives/jredfox", strNativeName).getAbsoluteFile();
 		//load the natives if they do not exist
@@ -174,7 +174,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static File changeNiceness = new File("/usr/local/bin/change_niceness");
 	public static boolean hasRenicer;
 	public static boolean hasChangeNiceness;
-	public static void loadReNicer()
+	public static void loadChangeNiceness()
 	{
 		if(isLinux)
 		{
@@ -190,6 +190,27 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			if(!hasChangeNiceness)
 			{
 				System.err.println("change_niceness command not found! To get High Process Priority Please install it from https://github.com/jredfox/change_niceness/releases");
+			}
+		}
+		else if(isWindows)
+		{
+			InputStream in = null;
+			OutputStream out = null;
+			File fnative = new File("natives/jredfox/change_niceness.exe").getAbsoluteFile();
+			try
+			{
+				in = DpiFix.class.getClassLoader().getResourceAsStream("natives/jredfox/change_niceness.exe");
+				out = new FileOutputStream(fnative);
+				copy(in, out);
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
+			}
+			finally
+			{
+				closeQuietly(in);
+				closeQuietly(out);
 			}
 		}
 	}
