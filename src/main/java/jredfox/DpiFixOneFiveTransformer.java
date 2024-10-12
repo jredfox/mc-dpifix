@@ -577,7 +577,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		run.instructions.insert(li);
 	}
 	
-	private void disableThreadSpamResources(ClassNode classNode) 
+	public void disableThreadSpamResources(ClassNode classNode) 
 	{
 		if(!DpiFix.fixResourceThread)
 			return;
