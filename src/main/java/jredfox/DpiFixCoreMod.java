@@ -275,12 +275,12 @@ public class DpiFixCoreMod implements IClassTransformer {
 				try 
 				{
 					Thread.sleep(10000);
-				} 
+					System.exit(-1);
+				}
 				catch (InterruptedException e) 
 				{
 					
 				}
-				System.exit(-1);
 			}
 		});
 		t.setDaemon(true);
