@@ -2,3 +2,4 @@
 src/main/resources/pack.mcmeta
 src/main/java/net/minecraft/client/Minecraft.java
 src/main/java/net/minecraft/client/gui/ScaledResolution.java
+src/main/java/java/*

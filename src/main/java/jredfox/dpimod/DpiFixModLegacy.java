@@ -1,5 +1,11 @@
 package jredfox.dpimod;
 
+import java.awt.Color;
+import java.awt.Frame;
+import java.lang.reflect.Field;
+
+import javax.swing.JFrame;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.FMLModContainer;
 import cpw.mods.fml.common.Mod;
@@ -17,13 +23,31 @@ import net.minecraftforge.common.ForgeVersion;
 	)
 public class DpiFixModLegacy {
 	
-	public DpiFixModLegacy()
+	public DpiFixModLegacy() throws Exception
 	{
 		//The Coremod not loading can only mean one of two things they are in 1.5x or they deleted or modified the meta-inf
 		if(!DpiFix.coremodLoaded)
 			throw new IllegalArgumentException("Dpi-Fix Mod Must be put in your coremods Folder!");
+		
+		jframetest();
 	}
 	
+    private void jframetest()
+    {
+    	try
+    	{
+	    	//Create & display new JFrame
+	    	JFrame frame = new JFrame();
+	    	frame.setBounds(0, 0, 500, 500);
+	    	frame.getContentPane().setBackground( Color.BLUE );
+	    	frame.setVisible(true);
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+	}
+
 //	@PreInit replaces @EventHandler at runtime dynamically if it's needed
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent pre)

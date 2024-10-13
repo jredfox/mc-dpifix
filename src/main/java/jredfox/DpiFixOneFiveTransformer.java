@@ -1,5 +1,7 @@
 package jredfox;
 
+import java.awt.Component;
+
 import org.lwjgl.opengl.Display;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -259,6 +261,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 //    	Display.setParent(null);
 //    	DpiFixDeAWT.fixIcons(this);
 //    	DpiFixDeAWT.hide(this);
+//		java.awt.Component.canSetVisible = true;
 		InsnList startList = new InsnList();
 		startList.add(new InsnNode(Opcodes.ACONST_NULL));
 		startList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setParent", "(Ljava/awt/Canvas;)V", false));
@@ -267,6 +270,13 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		startList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		startList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "hide", "(Lnet/minecraft/client/Minecraft;)V", false));
 		startList.add(new LabelNode());
+		//only inject the code if the agent has transformed java.awt.Component
+		if(DpiFix.agentmode)
+		{
+			startList.add(new InsnNode(Opcodes.ICONST_1));
+			startList.add(new FieldInsnNode(Opcodes.PUTSTATIC, "java/awt/Component", "canSetVisible", "Z"));
+			startList.add(new LabelNode());
+		}
 		startGame.instructions.insert(CoreUtils.getFirstInstruction(startGame), startList);
 		
 		//if(false && this.mcCanvas != null)
