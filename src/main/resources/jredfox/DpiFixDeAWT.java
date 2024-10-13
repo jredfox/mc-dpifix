@@ -117,9 +117,9 @@ public class DpiFixDeAWT {
             {
         		BufferedImage icon = convertToBufferedImage(img);//Convert to BufferedImage Required for next step
         		System.out.println("Icon Found:" + icon.getWidth() + "x" + icon.getHeight());
-            	ByteBuffer bufIcon16x16 = readImage(resizeIcon(icon, 16, 16));
+//            	ByteBuffer bufIcon16x16 = readImage(resizeIcon(icon, 32, 32));
             	ByteBuffer bufIcon32x32 = readImage(resizeIcon(icon, 32, 32));
-                Display.setIcon(new ByteBuffer[] {bufIcon16x16 ,  bufIcon32x32});
+                Display.setIcon(new ByteBuffer[] {bufIcon32x32,  bufIcon32x32});
             }
             catch (Exception ioexception)
             {
