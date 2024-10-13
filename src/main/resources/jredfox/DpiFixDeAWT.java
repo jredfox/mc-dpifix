@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -96,14 +97,14 @@ public class DpiFixDeAWT {
     		return;
     	
         //Set the Title
-        title = frame.getTitle();
+        title = getTitle(frame);
     	
 		//Don't set Icons on macOS as that's the Xdocer arguments
         if (DpiFix.isMacOs)
         	return;
         
-    	List<Image> list = frame.getIconImages();
-    	if(list != null && !list.isEmpty()) 
+    	List<Image> list = getIconList(frame);
+    	if(!list.isEmpty()) 
     	{
     		Image img = null;
     		//Get Highest Resolution for Icon
@@ -152,6 +153,45 @@ public class DpiFixDeAWT {
         }
 	}
 	
+	private static String getTitle(Frame frame)
+	{
+		String title = frame.getTitle();
+		if(title == null || title.trim().isEmpty() || title.trim().equalsIgnoreCase("Minecraft"))
+		{
+			String prism = System.getProperty("org.prismlauncher.window.title");
+			if(prism != null)
+				return "Prism Launcher:" + prism;
+			
+			String multi = System.getProperty("multimc.instance.title");
+			if(multi != null)
+				return "MultiMC:" + multi;
+		}
+		return title;
+	}
+
+	public static List<Image> getIconList(Frame frame) 
+	{
+		List<Image> icons = frame.getIconImages();
+		//Support MultiMC & PRISM Launcher for noapplet params
+		if(icons == null || icons.isEmpty())
+		{
+			icons = new ArrayList();
+			File iconFile = new File("icon.png");
+			if(iconFile.exists())
+			{
+				try 
+				{
+					icons.add(ImageIO.read(iconFile));
+				} 
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		return icons;
+	}
+
 	public static void fixTitle()
 	{
 		if(title != null && !title.isEmpty())
