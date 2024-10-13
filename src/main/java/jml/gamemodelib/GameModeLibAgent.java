@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
@@ -12,11 +13,13 @@ import java.util.Map;
 
 public class GameModeLibAgent {
 	
+	public static boolean debug;
 	public static void premain(String agentArgs, Instrumentation inst)
 	{
 		try
 		{
 			System.setProperty("gamemodelib.agent", "true");
+			debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
 			GameModeLib.load();
 			GameModeLib.fixDPI();
 			GameModeLib.setHighPriority();
@@ -58,11 +61,10 @@ public class GameModeLibAgent {
 	 * It works as long as another java agent before this doesn't replace the class loader with a different parent before this gets called
 	 * @author jredfox
 	 */
-    public static void removeAgentClassPath(File jarPath, boolean removeCP, ClassLoader... classLoaders) throws Exception 
+    public static void removeAgentClassPath(File jarFile, boolean removeCP, ClassLoader... classLoaders) throws Exception 
     {
     	if(removeCP)
-    		removeCP(jarPath);
-    	URL jarURL = jarPath.toURI().toURL();
+    		removeCP(jarFile);
     	for(ClassLoader classLoader : classLoaders)
     	{
     		if(!(classLoader instanceof URLClassLoader))
@@ -81,12 +83,12 @@ public class GameModeLibAgent {
 		        //Remove jarURL from urls
 		        Field u = getField(urlCPClazz, "urls", "url");
 		        Object urls = u.get(ucp);
-		        remove(urls, jarURL);
+		        remove(urls, jarFile);
 		        
 		        //Remove jarURL from path
 		        Field u2 = getField(urlCPClazz, "path", "paths");
 		        Object path = u2.get(ucp);
-		        remove(path, jarURL);
+		        remove(path, jarFile);
 		        
 		        //Remove open jarURL from path
 	            Field lmapField = getField(urlCPClazz, "lmap");
@@ -94,7 +96,7 @@ public class GameModeLibAgent {
 	            {
 		            lmapField.setAccessible(true);
 		            Object lmap = lmapField.get(ucp);
-		            remove(lmap, jarURL);
+		            remove(lmap, jarFile);
 	            }
 	            
 	            //Remove it from List<Loader> loaders
@@ -115,8 +117,8 @@ public class GameModeLibAgent {
 	                while(it.hasNext())
 	                {
 	                	Object loader = it.next();
-	                	URL lurl = (URL) getBase.get(loader);
-	                	if(jarURL.equals( getFileFromURL(lurl).toURI().toURL() ) )
+	                	URL lurl = new URL(getBase.get(loader).toString());
+	                	if(jarFile.equals(getFileFromURL(lurl)) )
 	                	{
 	                		it.remove();
 	                		if(loader instanceof Closeable)
@@ -131,6 +133,12 @@ public class GameModeLibAgent {
 	                			}
 	                		}
 	                	}
+	                }
+	                
+	                if(debug) 
+	                {
+		                for(Object loader : loaders)
+		                	System.out.println("loaders:" + getBase.get(loader).toString());
 	                }
 	            }
     		}
@@ -161,6 +169,8 @@ public class GameModeLibAgent {
 		}
 		String built = b.toString();
 		System.setProperty("java.class.path", built);
+    	if(debug)
+    		System.out.println(System.getProperty("java.class.path") + "\n");
 	}
 
 	/**
@@ -172,13 +182,41 @@ public class GameModeLibAgent {
 
 	/**
      * Removes an Object from either a Collection(ArrayList) or Map (HashMap)
+	 * @throws MalformedURLException 
      */
-    public static void remove(Object l, Object o) 
+    public static void remove(Object l, File f) throws MalformedURLException 
     {
 		if(l instanceof Collection)
-			((Collection)l).remove(o);
+		{
+			Iterator it = ((Collection)l).iterator();
+			while(it.hasNext())
+			{
+				URL url = new URL(it.next().toString());//support string only mode
+				if(f.equals(getFileFromURL(url)))
+					it.remove();
+			}
+			if(debug)
+			{
+		        System.out.println("list#size:" + ((Collection)l).size());
+				for(Object o : (Collection)l)
+					System.out.println("list:" + l.hashCode() + " " + o);
+			}
+		}
 		else
-			((Map)l).remove(o);
+		{
+			Iterator it = ((Map)l).keySet().iterator();
+			while(it.hasNext())
+			{
+				URL url = new URL(it.next().toString());
+				if(f.equals(getFileFromURL(url)))
+					it.remove();
+			}
+			if(debug) 
+			{
+				for(Object o : ((Map)l).keySet() )
+					System.out.println("lmap:" + o);
+			}
+		}
 	}
 
 	public static <T> Class<T> forName(String className, ClassLoader cl)
@@ -270,7 +308,7 @@ public class GameModeLibAgent {
 	{
 		try 
 		{
-			return new File(new URL(url).toURI());
+			return new File(new URL(url).toURI()).getAbsoluteFile();
 		}
 		catch (Exception e) 
 		{
