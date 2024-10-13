@@ -63,6 +63,7 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 		Class FMLPluginWrapper = LaunchClassLoaderFix.forName(coreModManagerClazz.getName() + "$FMLPluginWrapper");
 		List plugins = (List) GameModeLibAgent.getField(coreModManagerClazz, "loadPlugins").get(null);//TODO: change to an array of possible fields
 		File location = GameModeLibAgent.getFileFromClass(GameModeLibAgent.class);
+		//1.6.4(SRG) - 1.12.2
 		if(!onesixnotch)
 		{
 			Constructor<?> ctr = FMLPluginWrapper.getDeclaredConstructor(

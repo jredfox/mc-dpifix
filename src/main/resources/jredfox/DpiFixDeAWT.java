@@ -158,13 +158,16 @@ public class DpiFixDeAWT {
 		String title = frame.getTitle();
 		if(title == null || title.trim().isEmpty() || title.trim().equalsIgnoreCase("Minecraft"))
 		{
-			String prism = System.getProperty("org.prismlauncher.window.title");
+			String prism = System.getProperty("org.prismlauncher.window.title", System.getProperty("org.prismlauncher.instance.name"));
 			if(prism != null)
-				return "Prism Launcher:" + prism;
+				return (prism.toLowerCase().startsWith("prism launcher:") ? "" : "Prism Launcher: ") + prism;
 			
 			String multi = System.getProperty("multimc.instance.title");
 			if(multi != null)
-				return "MultiMC:" + multi;
+			{
+				String lmulti = multi.toLowerCase();
+				return (lmulti.startsWith("multimc:") || lmulti.startsWith("prism launcher:") ? "" : "MultiMC: ") + multi;
+			}
 		}
 		return title;
 	}
