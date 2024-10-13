@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import jml.gamemodelib.GameModeLibAgent;
 import jredfox.clfix.LaunchClassLoaderFix;
 import jredfox.dpimod.DpiFixModVars;
 
@@ -31,6 +32,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean highPriority = agentmode ? Boolean.parseBoolean(System.getProperty("gamemodelib.high", "false")) : true;
 	public static int nicenessMac = agentmode ? toNiceness(Integer.parseInt(System.getProperty("gamemodelib.niceness.mac", "-5"))) : -5;
 	public static int nicenessLinux = agentmode ? toNiceness(Integer.parseInt(System.getProperty("gamemodelib.niceness.linux", "-5"))) : -5;
+	public static boolean coremodLoaded = Boolean.parseBoolean(System.getProperty("dpifix.coremod.loaded", "false"));
 	public static boolean hasNatives = true;
 	
 	public DpiFix()
@@ -40,6 +42,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			this.loadMod();
 		else
 			this.loadConfig(); //If we are still in the mods folder load the coremod fixes without the Process fixes as they have already been applied manually
+		
+		coremodLoaded = true;
+		System.setProperty("dpifix.coremod.loaded", "true");
 	}
 
 	public void loadMod()
@@ -61,7 +66,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 		
 		if(onefive && !agentmode && highPriority)
-			throw new IllegalArgumentException("DPI-Fix High Process Priority for 1.5x Requies java agent mode!\nAdd these JVM Flags: -javaagent:\"coremods/[1.5-1.12.2]HighDPI-Fix-" + DpiFixModVars.VERSION + ".jar\" -Dgamemodelib.cfg=true");
+			throw new IllegalArgumentException("DPI-Fix High Process Priority for 1.5x Requies java agent mode!\nAdd these JVM Flags: -javaagent:\"coremods/" + GameModeLibAgent.getFileFromClass(GameModeLibAgent.class).getName()  + "\" -Dgamemodelib.cfg=true");
 	}
 	
 	public static void load()
