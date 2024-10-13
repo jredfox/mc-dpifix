@@ -30,13 +30,14 @@ import org.objectweb.asm.tree.VarInsnNode;
 import jml.gamemodelib.GameModeLibAgent;
 
 /**
- * Temporarily Disables all java.awt.* To Prevent Flashy frames
+ * Temporarily Disables all java.awt.* To Prevent Flashy frames Until Minecraft#startGame gets called
  * @author jredfox
  * @credit MoreStack for suggesting editing {@link java.awt.Component#setVisible(boolean)} directly instead of whitelisting 50 classes
  */
 public class DeAWTTransformer implements ClassFileTransformer {
 
 	public byte[] component;
+	public static final String DEAWT_VERSION = "0.1";//TODO: make part of the filename
 	
 	@Override
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classBytes) 

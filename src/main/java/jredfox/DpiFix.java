@@ -19,7 +19,6 @@ import java.util.Map;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import jml.gamemodelib.GameModeLibAgent;
 import jredfox.clfix.LaunchClassLoaderFix;
-import jredfox.dpimod.DpiFixModVars;
 
 /**
  * TODO: macos intel(x64) and silicon (arm64)
