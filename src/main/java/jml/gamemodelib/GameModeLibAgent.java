@@ -186,36 +186,20 @@ public class GameModeLibAgent {
      */
     public static void remove(Object l, File f) throws MalformedURLException 
     {
-		if(l instanceof Collection)
+    	Collection col = l instanceof Collection ? (Collection) l : ((Map)l).keySet();
+		Iterator it = col.iterator();
+		while(it.hasNext())
 		{
-			Iterator it = ((Collection)l).iterator();
-			while(it.hasNext())
-			{
-				URL url = new URL(it.next().toString());//support string only mode
-				if(f.equals(getFileFromURL(url)))
-					it.remove();
-			}
-			if(debug)
-			{
-		        System.out.println("list#size:" + ((Collection)l).size());
-				for(Object o : (Collection)l)
-					System.out.println("list:" + l.hashCode() + " " + o);
-			}
+			URL url = new URL(it.next().toString());//support string only mode
+			if(f.equals(getFileFromURL(url)))
+				it.remove();
 		}
-		else
+		if(debug)
 		{
-			Iterator it = ((Map)l).keySet().iterator();
-			while(it.hasNext())
-			{
-				URL url = new URL(it.next().toString());
-				if(f.equals(getFileFromURL(url)))
-					it.remove();
-			}
-			if(debug) 
-			{
-				for(Object o : ((Map)l).keySet() )
-					System.out.println("lmap:" + o);
-			}
+	        System.out.println("list#size:" + col.size());
+	        String list = l instanceof Collection ? "list:" : "lmap:";
+			for(Object o : col)
+				System.out.println(list + l.hashCode() + " " + o);
 		}
 	}
 
