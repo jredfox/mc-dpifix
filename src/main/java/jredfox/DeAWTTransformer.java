@@ -15,19 +15,19 @@ import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
 import org.apache.commons.io.FileUtils;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.FrameNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.ow2.asm.ClassWriter;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.FieldInsnNode;
+import org.ow2.asm.tree.FieldNode;
+import org.ow2.asm.tree.FrameNode;
+import org.ow2.asm.tree.InsnList;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.JumpInsnNode;
+import org.ow2.asm.tree.LabelNode;
+import org.ow2.asm.tree.MethodNode;
+import org.ow2.asm.tree.TypeInsnNode;
+import org.ow2.asm.tree.VarInsnNode;
 
 import jml.gamemodelib.GameModeLibAgent;
 

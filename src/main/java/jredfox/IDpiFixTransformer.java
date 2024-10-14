@@ -1,6 +1,6 @@
 package jredfox;
 
-import org.objectweb.asm.tree.ClassNode;
+import org.ow2.asm.tree.ClassNode;
 
 public interface IDpiFixTransformer {
 	

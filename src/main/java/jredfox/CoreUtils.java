@@ -8,18 +8,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LineNumberNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.ow2.asm.ClassReader;
+import org.ow2.asm.ClassWriter;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.AnnotationNode;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.FieldInsnNode;
+import org.ow2.asm.tree.JumpInsnNode;
+import org.ow2.asm.tree.LabelNode;
+import org.ow2.asm.tree.LineNumberNode;
+import org.ow2.asm.tree.MethodInsnNode;
+import org.ow2.asm.tree.MethodNode;
 
 public class CoreUtils {
 	

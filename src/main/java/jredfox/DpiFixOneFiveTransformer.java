@@ -3,22 +3,22 @@ package jredfox;
 import java.awt.Component;
 
 import org.lwjgl.opengl.Display;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.FrameNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.LineNumberNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.FieldInsnNode;
+import org.ow2.asm.tree.FieldNode;
+import org.ow2.asm.tree.FrameNode;
+import org.ow2.asm.tree.InsnList;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.JumpInsnNode;
+import org.ow2.asm.tree.LabelNode;
+import org.ow2.asm.tree.LdcInsnNode;
+import org.ow2.asm.tree.LineNumberNode;
+import org.ow2.asm.tree.MethodInsnNode;
+import org.ow2.asm.tree.MethodNode;
+import org.ow2.asm.tree.TypeInsnNode;
+import org.ow2.asm.tree.VarInsnNode;
 
 import net.minecraftforge.common.ForgeVersion;
 

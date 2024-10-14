@@ -2,10 +2,10 @@ package jredfox;
 
 import java.util.ArrayList;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.ow2.asm.ClassWriter;
+import org.ow2.asm.tree.AnnotationNode;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.MethodNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
 import net.minecraftforge.common.ForgeVersion;
