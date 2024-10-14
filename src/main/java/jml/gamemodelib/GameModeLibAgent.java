@@ -1,6 +1,5 @@
 package jml.gamemodelib;
 
-import java.awt.Frame;
 import java.io.Closeable;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
@@ -17,24 +16,21 @@ import jredfox.DeAWTTransformer;
 public class GameModeLibAgent {
 	
 	public static boolean debug;
+	public static File jarFile;
 	public static boolean hasForge;
+	
 	public static void premain(String agentArgs, Instrumentation inst)
 	{
 		try
 		{
 			System.setProperty("gamemodelib.agent", "true");
 			debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
+			jarFile = getFileFromClass(GameModeLibAgent.class);
 			hasForge = forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
 			GameModeLib.load();
 			GameModeLib.fixDPI();
 			GameModeLib.setHighPriority();
-			//If is Forge 1.5x Register a DeAWT Transformer
-			if(hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8)
-			{
-				System.out.println("Registering DeAWTTransformer");
-				inst.addTransformer(new DeAWTTransformer());
-				Frame f = new Frame();//Load the java.awt.Frame Class
-			}
+			DeAWTTransformer.init(inst);
 		}
 		catch(Throwable t)
 		{
@@ -46,9 +42,8 @@ public class GameModeLibAgent {
 			//Remove agent from classpath so forge doesn't load our "@Mod" when not in coremods or mods folder
 			if(Boolean.parseBoolean(System.getProperty("gamemodelib.removeAgent", "false")) || Boolean.parseBoolean(System.getProperty("gamemodelib.removeModAgent", "true")) && hasForge)
 			{
-				File jarFile = getFileFromClass(GameModeLibAgent.class);
 				ClassLoader sy = ClassLoader.getSystemClassLoader();
-				ClassLoader parent = getParentCL(ClassLoader.getSystemClassLoader());
+				ClassLoader parent = getParentCL(sy);
 				ClassLoader context = Thread.currentThread().getContextClassLoader();
 				removeAgentClassPath(jarFile, true, sy, parent, (sy == context ? null : context));
 			}
@@ -214,6 +209,11 @@ public class GameModeLibAgent {
 				System.out.println(list + l.hashCode() + " " + o);
 		}
 	}
+    
+	public static <T> Class<T> forName(String className)
+    {
+    	return forName(className, GameModeLibAgent.class.getClassLoader());
+    }
 
 	public static <T> Class<T> forName(String className, ClassLoader cl)
     {

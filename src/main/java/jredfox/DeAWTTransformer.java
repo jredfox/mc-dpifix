@@ -1,6 +1,9 @@
 package jredfox;
 
+import java.applet.Applet;
+import java.awt.Canvas;
 import java.awt.Component;
+import java.awt.Frame;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -9,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
 import org.objectweb.asm.ClassReader;
@@ -23,10 +27,13 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import jml.gamemodelib.GameModeLib;
 import jml.gamemodelib.GameModeLibAgent;
 
 /**
@@ -38,6 +45,35 @@ public class DeAWTTransformer implements ClassFileTransformer {
 
 	public byte[] component;
 	public static final String DEAWT_VERSION = "0.1";//TODO: make part of the filename
+	
+	public static void init(Instrumentation inst)
+	{
+		if(GameModeLibAgent.hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 && isCoreMod() && isDeAWT())
+		{
+			System.out.println("Registering Agent DeAWTTransformer");
+			inst.addTransformer(new DeAWTTransformer());
+			GameModeLibAgent.forName("java.awt.Component");//Force Load the java.awt.Frame Class
+		}
+	}
+	
+	/**
+	 * Verify the jar is inside the coremods jar before registering DeAWTTransformer
+	 */
+	public static boolean isCoreMod()
+	{
+		return GameModeLibAgent.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile());
+	}
+	
+	/**
+	 * Know if DeAWT is enabled in the mod's config without overriding any current fields
+	 */
+	public static boolean isDeAWT()
+	{
+		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
+		cfg.load();
+		String os = DpiFix.isWindows ? "Windows" : DpiFix.isMacOs ? "Mac" : "Linux";
+		return cfg.get("Coremod.OneFive.DeAWT." + os, false);
+	}
 	
 	@Override
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classBytes) 
@@ -58,46 +94,12 @@ public class DeAWTTransformer implements ClassFileTransformer {
 				classNode.fields.add(new FieldNode(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, "canSetVisible", "Z", null, null));
 				
 				MethodNode m = CoreUtils.getMethodNode(classNode, "setVisible", "(Z)V");
-				InsnList l = new InsnList();
-				//Print debug
-				if(GameModeLibAgent.debug)
-				{
-					l.add(new FieldInsnNode(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;"));
-					l.add(new VarInsnNode(Opcodes.ALOAD, 0));
-					l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;"));
-					l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false));
-					l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false));
-				}
+				deawt(m, false);
 				
-				LabelNode l1 = new LabelNode();
-				l.add(new VarInsnNode(Opcodes.ILOAD, 1));
-				l.add(new JumpInsnNode(Opcodes.IFEQ, l1));
+				MethodNode show = CoreUtils.getMethodNode(classNode, "show", "()V");
+				if(show != null)
+					deawt(show, true);
 				
-				l.add(new FieldInsnNode(Opcodes.GETSTATIC, "java/awt/Component", "canSetVisible", "Z"));
-				l.add(new JumpInsnNode(Opcodes.IFNE, l1));
-				
-				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;"));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;"));
-				l.add(new LdcInsnNode("cpw.mods.fml"));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "startsWith", "(Ljava/lang/String;)Z"));
-				l.add(new JumpInsnNode(Opcodes.IFNE, l1));
-
-				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;"));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false));
-				l.add(new LdcInsnNode("javax.swing.JDialog"));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "startsWith", "(Ljava/lang/String;)Z", false));
-				l.add(new JumpInsnNode(Opcodes.IFNE, l1));
-				
-				LabelNode l2 = new LabelNode();
-				l.add(l2);
-				l.add(new InsnNode(Opcodes.RETURN));
-				l.add(l1);
-				l.add(new LabelNode());
-				l.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-				
-				m.instructions.insert(l);
 				this.component = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS), className);
 				return this.component;
 			}
@@ -108,6 +110,40 @@ public class DeAWTTransformer implements ClassFileTransformer {
 		}
 		
 		return classBytes;
+	}
+
+	private void deawt(MethodNode m, boolean isShow) 
+	{
+		InsnList l = new InsnList();
+		//Component#setVisible if(b && !canSetVisible && (this instanceof java.awt.Frame || this instanceof Canvas || this instanceof Applet)) return;
+		//Component#show       if(!canSetVisible && (this instanceof java.awt.Frame || this instanceof Canvas || this instanceof Applet)) return;
+		LabelNode l0 = new LabelNode();
+		l.add(l0);
+		LabelNode l1 = new LabelNode();
+		//prepends b &&
+		if(!isShow)
+		{
+			l.add(new VarInsnNode(Opcodes.ILOAD, 1));
+			l.add(new JumpInsnNode(Opcodes.IFEQ, l1));
+		}
+		l.add(new FieldInsnNode(Opcodes.GETSTATIC, "java/awt/Component", "canSetVisible", "Z"));
+		l.add(new JumpInsnNode(Opcodes.IFNE, l1));
+		l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		l.add(new TypeInsnNode(Opcodes.INSTANCEOF, "java/awt/Frame"));
+		LabelNode l2 = new LabelNode();
+		l.add(new JumpInsnNode(Opcodes.IFNE, l2));
+		l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		l.add(new TypeInsnNode(Opcodes.INSTANCEOF, "java/awt/Canvas"));
+		l.add(new JumpInsnNode(Opcodes.IFNE, l2));
+		l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		l.add(new TypeInsnNode(Opcodes.INSTANCEOF, "java/applet/Applet"));
+		l.add(new JumpInsnNode(Opcodes.IFEQ, l1));
+		l.add(l2);
+		l.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+		l.add(new InsnNode(Opcodes.RETURN));
+		l.add(l1);
+		l.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+		m.instructions.insert(l);
 	}
 
 }
