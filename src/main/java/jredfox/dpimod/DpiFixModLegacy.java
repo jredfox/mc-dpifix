@@ -29,7 +29,8 @@ public class DpiFixModLegacy {
 		if(!DpiFix.coremodLoaded)
 			throw new IllegalArgumentException("Dpi-Fix Mod Must be put in your coremods Folder!");
 		
-		jframetest();
+		if(Boolean.parseBoolean(System.getProperty("dpifix.testJFrame", "false")))
+			jframetest();
 	}
 	
     private void jframetest()

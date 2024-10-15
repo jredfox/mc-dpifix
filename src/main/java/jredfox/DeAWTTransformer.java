@@ -32,9 +32,9 @@ import org.ow2.asm.tree.VarInsnNode;
 import jml.gamemodelib.GameModeLibAgent;
 
 /**
- * Temporarily Disables all java.awt.* To Prevent Flashy frames Until Minecraft#startGame gets called
+ * Temporarily Disables all Frame#setVisible, Canvas#setVisible, Applet#setVisible To Prevent Flashy frames Until Minecraft#startGame gets called
  * @author jredfox
- * @credit MoreStack for suggesting editing {@link java.awt.Component#setVisible(boolean)} directly instead of whitelisting 50 classes
+ * @credit MoreStack for suggesting editing {@link java.awt.Component#setVisible(boolean)} directly instead of whitelisting 50+ launcher classes
  */
 public class DeAWTTransformer implements ClassFileTransformer {
 	
