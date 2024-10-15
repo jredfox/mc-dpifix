@@ -24,6 +24,7 @@ import org.ow2.asm.tree.FieldNode;
 import org.ow2.asm.tree.FrameNode;
 import org.ow2.asm.tree.InsnList;
 import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.IntInsnNode;
 import org.ow2.asm.tree.JumpInsnNode;
 import org.ow2.asm.tree.LabelNode;
 import org.ow2.asm.tree.MethodInsnNode;
@@ -177,18 +178,41 @@ public class DeAWTTransformer implements ClassFileTransformer {
 				runGame.instructions.insert(CoreUtils.prevLabelNode(CoreUtils.getMethodInsnNode(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "init", "()V", false)), l);
 				
 				//Replace all calls of this.setDefaultCloseOperation(JFrame#EXIT_ON_CLOSE); with this.setDefaultCloseOperation(JFrame#HIDE_ON_CLOSE);
+				//Correct Default Resolution 854x480
 				MethodInsnNode closeInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/technicpack/legacywrapper/Frame", "setDefaultCloseOperation", "(I)V");
 				for(MethodNode m : classNode.methods)
 				{
 					AbstractInsnNode ab = m.instructions.getFirst();
+					boolean flag = m.name.equals("<init>");
+					int countRes = 0;
 					while(ab != null)
 					{
-						ab = ab.getNext();
+						//Patch Default resolution to match Minecraft's Default Resolution 854x480
+						if(flag)
+						{
+							if(ab instanceof IntInsnNode && ab.getOpcode() == Opcodes.SIPUSH && ab.getNext() != null && ab.getNext().getOpcode() == Opcodes.PUTFIELD)
+							{
+								IntInsnNode insnInt = (IntInsnNode) ab;
+								String name = ((FieldInsnNode) ab.getNext()).name.toLowerCase();
+								boolean width = name.contains("len") || name.contains("wi");
+								if(insnInt.operand > 400 && (width || name.contains("height")))
+								{
+									insnInt.operand = width ? 854 : 480;
+									countRes++;
+									if(countRes >= 2)
+										flag = false;//Only patch first two PUTFIELD instructions that are likely resolution
+								}
+							}
+						}
+						
+						//this.setDefaultCloseOperation(JFrame#HIDE_ON_CLOSE);
 						if(ab instanceof MethodInsnNode && CoreUtils.equals(closeInsn, (MethodInsnNode) ab))
 						{
 							m.instructions.remove(ab.getPrevious());
 							m.instructions.insertBefore(ab, new InsnNode(Opcodes.ICONST_1));
 						}
+						
+						ab = ab.getNext();
 					}
 				}
 				
