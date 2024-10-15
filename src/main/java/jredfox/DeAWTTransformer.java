@@ -17,6 +17,7 @@ import java.security.ProtectionDomain;
 import org.apache.commons.io.FileUtils;
 import org.ow2.asm.ClassWriter;
 import org.ow2.asm.Opcodes;
+import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.ClassNode;
 import org.ow2.asm.tree.FieldInsnNode;
 import org.ow2.asm.tree.FieldNode;
@@ -25,6 +26,7 @@ import org.ow2.asm.tree.InsnList;
 import org.ow2.asm.tree.InsnNode;
 import org.ow2.asm.tree.JumpInsnNode;
 import org.ow2.asm.tree.LabelNode;
+import org.ow2.asm.tree.MethodInsnNode;
 import org.ow2.asm.tree.MethodNode;
 import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
@@ -39,6 +41,7 @@ import jml.gamemodelib.GameModeLibAgent;
 public class DeAWTTransformer implements ClassFileTransformer {
 	
 	public static File component = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/java/awt/Component.class").getAbsoluteFile();
+	public static File technicFile = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/technic/Frame.class").getAbsoluteFile();
 	public static boolean technic = Boolean.parseBoolean(System.getProperty("gamemodelib.technic", "false"));
 	
 	public static void init(Instrumentation inst)
@@ -47,8 +50,11 @@ public class DeAWTTransformer implements ClassFileTransformer {
 		{
 			System.out.println("Registering Agent DeAWTTransformer");
 			component.delete();//delete previous caches
+			technicFile.delete();//delete previous caches
 			inst.addTransformer(new DeAWTTransformer());
 			GameModeLibAgent.forName("java.awt.Component");//Force Load the java.awt.Frame Class
+			if(technic)
+				GameModeLibAgent.forName("net.technicpack.legacywrapper.Frame");//Force Load Technic's Frame Class so we can edit it
 		}
 	}
 	
@@ -76,11 +82,12 @@ public class DeAWTTransformer implements ClassFileTransformer {
 		if(className == null)
 			return classBytes;
 		
+		className = className.replace(".", "/");
 		if(className.equals("java/awt/Component"))
 		{
 			try
 			{
-				System.out.println("Transforming java.awt.Component to prevent flashes");
+				System.out.println("Transforming " + className.replace("/", ".") + " to prevent flashes");
 				
 				//Return the cached file if it exists
 				if(component.exists())
@@ -101,6 +108,92 @@ public class DeAWTTransformer implements ClassFileTransformer {
 				
 				byte[] clazzBytes = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS), className);
 				CoreUtils.toFile(clazzBytes, component);
+				return clazzBytes;
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
+			}
+		}
+		else if(technic && className.equals("net/technicpack/legacywrapper/Frame"))
+		{
+			try
+			{
+				System.out.println("Transforming " + className + "#runGame to be compatible with De-AWT");
+				
+				//Return the cached file if it exists
+				if(technicFile.exists())
+					return toByteArray(technicFile);
+				
+				ClassNode classNode = CoreUtils.getClassNode(classBytes);
+				
+				//Dynamically Find runGame based on Launcher#start call
+				MethodNode runGame = null;
+				FieldInsnNode mcFieldInsn = null;
+				if(runGame == null)
+				{
+					MethodInsnNode startInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "start", "()V");
+					for(MethodNode m : classNode.methods)
+					{
+						AbstractInsnNode ab = m.instructions.getFirst();
+						while(ab != null)
+						{
+							if(ab instanceof MethodInsnNode && CoreUtils.equals(startInsn, (MethodInsnNode) ab))
+							{
+								runGame = m;
+								mcFieldInsn = CoreUtils.previousFieldInsnNode(ab);
+								mcFieldInsn = new FieldInsnNode(mcFieldInsn.getOpcode(), mcFieldInsn.owner, mcFieldInsn.name, mcFieldInsn.desc);
+								break;
+							}
+							ab = ab.getNext();
+						}
+						if(runGame != null)
+							break;
+					}
+					if(runGame == null)
+					{
+						System.err.println("Could Not Find net/technicpack/legacywrapper/Frame#runGame Technic Support is not possible :(");
+						return classBytes;
+					}
+				}
+				
+				//this.minecraft.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()));
+				//this.pack();
+				InsnList l = new InsnList();
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(mcFieldInsn);
+				l.add(new TypeInsnNode(Opcodes.NEW, "java/awt/Dimension"));
+				l.add(new InsnNode(Opcodes.DUP));
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "getWidth", "()I", false));
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "getHeight", "()I", false));
+				l.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/awt/Dimension", "<init>", "(II)V", false));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "setPreferredSize", "(Ljava/awt/Dimension;)V", false));
+				l.add(new LabelNode());
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "pack", "()V", false));
+				l.add(new LabelNode());
+				runGame.instructions.insert(CoreUtils.prevLabelNode(CoreUtils.getMethodInsnNode(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "init", "()V", false)), l);
+				
+				//Replace all calls of this.setDefaultCloseOperation(JFrame#EXIT_ON_CLOSE); with this.setDefaultCloseOperation(JFrame#HIDE_ON_CLOSE);
+				MethodInsnNode closeInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/technicpack/legacywrapper/Frame", "setDefaultCloseOperation", "(I)V");
+				for(MethodNode m : classNode.methods)
+				{
+					AbstractInsnNode ab = m.instructions.getFirst();
+					while(ab != null)
+					{
+						ab = ab.getNext();
+						if(ab instanceof MethodInsnNode && CoreUtils.equals(closeInsn, (MethodInsnNode) ab))
+						{
+							m.instructions.remove(ab.getPrevious());
+							m.instructions.insertBefore(ab, new InsnNode(Opcodes.ICONST_1));
+						}
+					}
+				}
+				
+				byte[] clazzBytes = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS), className);
+				CoreUtils.toFile(clazzBytes, technicFile);
 				return clazzBytes;
 			}
 			catch(Throwable t)

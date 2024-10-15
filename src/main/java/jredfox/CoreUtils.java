@@ -332,6 +332,20 @@ public class CoreUtils {
 		}
 		return null;
 	}
+	
+	public static FieldInsnNode previousFieldInsnNode(AbstractInsnNode spot) 
+	{
+		AbstractInsnNode ab = spot;
+		while(ab != null)
+		{
+			if(ab instanceof FieldInsnNode)
+			{
+				return (FieldInsnNode)ab;
+			}
+			ab = ab.getPrevious();
+		}
+		return null;
+	}
 
 	public static FieldInsnNode nextFieldInsnNode(AbstractInsnNode pretarg, int opcode, String owner, String name, String desc) 
 	{
