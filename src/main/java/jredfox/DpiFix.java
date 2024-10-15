@@ -65,7 +65,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 		
 		if(onefive && !agentmode && highPriority)
-			throw new IllegalArgumentException("DPI-Fix High Process Priority for 1.5x Requies java agent mode!\nAdd these JVM Flags: -javaagent:\"coremods/" + GameModeLibAgent.getFileFromClass(GameModeLibAgent.class).getName()  + "\" -Dgamemodelib.cfg=true");
+			throw new IllegalArgumentException("DPI-Fix High Process Priority for 1.5x Requies java agent mode!\nAdd these JVM Flags: -javaagent:coremods/" + GameModeLibAgent.getFileFromClass(GameModeLibAgent.class).getName()  + " -Dgamemodelib.cfg=true");
 	}
 	
 	public static void load()
