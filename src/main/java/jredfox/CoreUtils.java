@@ -345,5 +345,28 @@ public class CoreUtils {
 		}
 		return null;
 	}
+	
+	public static void toFile(byte[] data, File f)
+	{
+		f.getParentFile().mkdirs();
+		
+    	InputStream in = null;
+    	OutputStream out = null;
+    	try
+    	{
+    		in = new ByteArrayInputStream(data);
+    		out = new FileOutputStream(f);
+    		DpiFix.copy(in, out);
+    	}
+    	catch(Throwable e)
+    	{
+    		e.printStackTrace();
+    	}
+    	finally
+    	{
+    		DpiFix.closeQuietly(in);
+    		DpiFix.closeQuietly(out);
+    	}
+	}
 
 }

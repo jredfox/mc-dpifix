@@ -122,6 +122,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		deawt_mac = cfg.get("Coremod.OneFive.DeAWT.Mac");
 		deawt_linux = cfg.get("Coremod.OneFive.DeAWT.Linux", false);
 		fixResourceThread = cfg.get("Coremod.OneFive.ThreadResourcesFix");
+		cfg.get("Coremod.OneFive.DeAWT.Compat.Technic");//Make this generate even when the agent isn't active
 		cfg.save();
 	}
 

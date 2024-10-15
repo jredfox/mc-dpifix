@@ -38,14 +38,14 @@ import jml.gamemodelib.GameModeLibAgent;
  */
 public class DeAWTTransformer implements ClassFileTransformer {
 	
-	public static File component = null;
+	public static File component = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/java/awt/Component.class").getAbsoluteFile();
+	public static boolean technic = Boolean.parseBoolean(System.getProperty("gamemodelib.technic", "false"));
 	
 	public static void init(Instrumentation inst)
 	{
-		if(GameModeLibAgent.hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 && isCoreMod() && isDeAWT())
+		if(GameModeLibAgent.hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 && isInCoreMods() && isDeAWT())
 		{
 			System.out.println("Registering Agent DeAWTTransformer");
-			component = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/java/awt/Component.class").getAbsoluteFile();
 			component.delete();//delete previous caches
 			inst.addTransformer(new DeAWTTransformer());
 			GameModeLibAgent.forName("java.awt.Component");//Force Load the java.awt.Frame Class
@@ -55,20 +55,19 @@ public class DeAWTTransformer implements ClassFileTransformer {
 	/**
 	 * Verify the jar is inside the coremods jar before registering DeAWTTransformer
 	 */
-	public static boolean isCoreMod()
+	public static boolean isInCoreMods()
 	{
 		return GameModeLibAgent.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile());
 	}
 	
-	/**
-	 * Know if DeAWT is enabled in the mod's config without overriding any current fields
-	 */
 	public static boolean isDeAWT()
 	{
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
 		cfg.load();
+		technic = cfg.get("Coremod.OneFive.DeAWT.Compat.Technic");
+		System.setProperty("gamemodelib.technic", String.valueOf(technic) );
 		String os = DpiFix.isWindows ? "Windows" : DpiFix.isMacOs ? "Mac" : "Linux";
-		return cfg.get("Coremod.OneFive.DeAWT." + os, false);
+		return cfg.get("CoreMod.Enabled") && cfg.get("Coremod.OneFive.DeAWT." + os, false);
 	}
 	
 	@Override
@@ -79,14 +78,14 @@ public class DeAWTTransformer implements ClassFileTransformer {
 		
 		if(className.equals("java/awt/Component"))
 		{
-			System.out.println("Transforming java.awt.Component to prevent flashes");
-			
-			//Return the cached file if it exists
-			if(component.exists())
-				return toByteArray(component);
-			
 			try
 			{
+				System.out.println("Transforming java.awt.Component to prevent flashes");
+				
+				//Return the cached file if it exists
+				if(component.exists())
+					return toByteArray(component);
+				
 				ClassNode classNode = CoreUtils.getClassNode(classBytes);
 				//add the field canSetVisible
 				classNode.fields.add(new FieldNode(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, "canSetVisible", "Z", null, null));
@@ -101,7 +100,7 @@ public class DeAWTTransformer implements ClassFileTransformer {
 					deawt(show, true);
 				
 				byte[] clazzBytes = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS), className);
-				toFile(clazzBytes, component);
+				CoreUtils.toFile(clazzBytes, component);
 				return clazzBytes;
 			}
 			catch(Throwable t)
@@ -145,29 +144,6 @@ public class DeAWTTransformer implements ClassFileTransformer {
 		l.add(l1);
 		l.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
 		m.instructions.insert(l);
-	}
-	
-	public static void toFile(byte[] data, File f)
-	{
-		f.getParentFile().mkdirs();
-		
-    	InputStream in = null;
-    	OutputStream out = null;
-    	try
-    	{
-    		in = new ByteArrayInputStream(data);
-    		out = new FileOutputStream(f);
-    		copy(in, out);
-    	}
-    	catch(Throwable e)
-    	{
-    		e.printStackTrace();
-    	}
-    	finally
-    	{
-    		closeQuietly(in);
-    		closeQuietly(out);
-    	}
 	}
 	
     public static byte[] toByteArray(File file)
