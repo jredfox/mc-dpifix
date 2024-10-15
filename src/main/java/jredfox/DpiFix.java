@@ -233,7 +233,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			try
 			{
 				String pid = getPIDMac();
-				System.out.print("Setting High Priority " + pid + " niceness:" + nicenessMac + System.lineSeparator());
+				System.out.print("Setting High Priority " + pid + " niceness:" + nicenessMac + "\n");
 				Runtime.getRuntime().exec(changeNiceness.getPath() + " " + nicenessMac + " " + pid);
 			}
 			catch(Throwable t)
@@ -246,7 +246,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			try
 			{
 				String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];//keep pid as string as we don't have unsigned long in java
-				System.out.print("Setting High Priority " + pid + " niceness:" + nicenessLinux + System.lineSeparator());
+				System.out.print("Setting High Priority " + pid + " niceness:" + nicenessLinux + "\n");
 				Runtime.getRuntime().exec(renicer.getPath() + " " + nicenessLinux + " -p " + pid);//-5 is "high" for windows. Anything lower and it will be out of sync with the keyboard and mouse and graphics drivers causing input lag
 			}
 			catch (Throwable e)
@@ -433,7 +433,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		{
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), Charset.forName("UTF-8") ) );
 			for(String s : list)
-				writer.write(s + System.lineSeparator());
+				writer.write(s + lineSeparator());
 		}
 		catch(Exception e)
 		{
@@ -443,6 +443,11 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		{
 			closeQuietly(writer);
 		}
+	}
+	
+	public static String lineSeparator()
+	{
+		return System.getProperty("java.version").replace("'", "").replace("\"", "").trim().startsWith("1.6.") ? System.getProperty("line.separator") : System.lineSeparator();
 	}
 
     public static List<String> asStringList(String... arr) {

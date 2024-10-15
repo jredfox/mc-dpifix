@@ -304,7 +304,7 @@ public class LaunchClassLoaderFix {
 		{
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), Charset.forName("UTF-8") ) );
 			for(Object s : list)
-				writer.write(s + System.lineSeparator());
+				writer.write(s + lineSeparator());
 		}
 		catch(Exception e)
 		{
@@ -378,6 +378,11 @@ public class LaunchClassLoaderFix {
 		}
 		
 		return list;
+	}
+	
+	public static String lineSeparator()
+	{
+		return System.getProperty("java.version").replace("'", "").replace("\"", "").trim().startsWith("1.6.") ? System.getProperty("line.separator") : System.lineSeparator();
 	}
 
 }

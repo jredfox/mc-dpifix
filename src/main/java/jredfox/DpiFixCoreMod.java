@@ -126,7 +126,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 				cfgdir.mkdirs();
 			
 			List<String> li = new ArrayList();
-			String nl = System.lineSeparator();
+			String nl = DpiFix.lineSeparator();
 			li.add("#Splash screen properties" + nl +
 					"background=0xFFFFFF" + nl +
 					"memoryGood=0x78CB34\r\n" + nl +
