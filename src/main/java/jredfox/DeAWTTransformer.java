@@ -188,9 +188,8 @@ public class DeAWTTransformer implements ClassFileTransformer {
 								}
 							}
 						}
-						else if(flag_rg)
+						if(flag || flag_rg)
 						{
-							//disable all calls of this.pack(); as calling this.pack more then once causes screen to go invisible and weirdness on linux
 							if(ab instanceof MethodInsnNode && CoreUtils.equals(packInsn, (MethodInsnNode) ab))
 							{
 								AbstractInsnNode prev = ab.getPrevious();
