@@ -157,33 +157,17 @@ public class DeAWTTransformer implements ClassFileTransformer {
 						return classBytes;
 					}
 				}
-				
-				//this.minecraft.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()));
-				//this.pack();
-				InsnList l = new InsnList();
-				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				l.add(mcFieldInsn);
-				l.add(new TypeInsnNode(Opcodes.NEW, "java/awt/Dimension"));
-				l.add(new InsnNode(Opcodes.DUP));
-				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "getWidth", "()I", false));
-				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "getHeight", "()I", false));
-				l.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/awt/Dimension", "<init>", "(II)V", false));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "setPreferredSize", "(Ljava/awt/Dimension;)V", false));
-				l.add(new LabelNode());
-				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "pack", "()V", false));
-				l.add(new LabelNode());
-				runGame.instructions.insert(CoreUtils.prevLabelNode(CoreUtils.getMethodInsnNode(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "init", "()V", false)), l);
-				
+
 				//Replace all calls of this.setDefaultCloseOperation(JFrame#EXIT_ON_CLOSE); with this.setDefaultCloseOperation(JFrame#HIDE_ON_CLOSE);
 				//Correct Default Resolution 854x480
-				MethodInsnNode closeInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/technicpack/legacywrapper/Frame", "setDefaultCloseOperation", "(I)V");
+				//Remove Additional this.pack(); calls which can cause invisible JFrame on linux
+				MethodInsnNode closeInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "setDefaultCloseOperation", "(I)V");
+				MethodInsnNode packInsn =  new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "pack", "()V", false);
 				for(MethodNode m : classNode.methods)
 				{
 					AbstractInsnNode ab = m.instructions.getFirst();
 					boolean flag = m.name.equals("<init>");
+					boolean flag_rg = m.name.equals(runGame.name);
 					int countRes = 0;
 					while(ab != null)
 					{
@@ -204,6 +188,20 @@ public class DeAWTTransformer implements ClassFileTransformer {
 								}
 							}
 						}
+						else if(flag_rg)
+						{
+							//disable all calls of this.pack(); as calling this.pack more then once causes screen to go invisible and weirdness on linux
+							if(ab instanceof MethodInsnNode && CoreUtils.equals(packInsn, (MethodInsnNode) ab))
+							{
+								AbstractInsnNode prev = ab.getPrevious();
+								InsnList l2 = new InsnList();
+								l2.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "toString", "()Ljava/lang/String;"));
+								l2.add(new InsnNode(Opcodes.POP));
+								m.instructions.insert(ab, l2);
+								m.instructions.remove(ab);
+								ab = prev;
+							}
+						}
 						
 						//this.setDefaultCloseOperation(JFrame#HIDE_ON_CLOSE);
 						if(ab instanceof MethodInsnNode && CoreUtils.equals(closeInsn, (MethodInsnNode) ab))
@@ -215,6 +213,25 @@ public class DeAWTTransformer implements ClassFileTransformer {
 						ab = ab.getNext();
 					}
 				}
+				
+				//this.minecraft.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()));
+				//this.pack();
+				InsnList l = new InsnList();
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(mcFieldInsn);
+				l.add(new TypeInsnNode(Opcodes.NEW, "java/awt/Dimension"));
+				l.add(new InsnNode(Opcodes.DUP));
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "getWidth", "()I", false));
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "getHeight", "()I", false));
+				l.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/awt/Dimension", "<init>", "(II)V", false));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "setPreferredSize", "(Ljava/awt/Dimension;)V", false));
+				l.add(new LabelNode());
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "pack", "()V", false));
+				l.add(new LabelNode());
+				runGame.instructions.insert(CoreUtils.prevLabelNode(CoreUtils.getMethodInsnNode(runGame, Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "init", "()V", false)), l);
 				
 				byte[] clazzBytes = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS), className);
 				CoreUtils.toFile(clazzBytes, technicFile);
