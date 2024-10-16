@@ -258,11 +258,14 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		ctr.instructions.insert(CoreUtils.getLastInstruction(ctr, Opcodes.PUTFIELD), lctrLast);
 		
 		MethodNode startGame = CoreUtils.getMethodNode(classNode, startGameMethod, "()V");
+//		DpiFixCoreMod.sleep(250);
 //    	Display.setParent(null);
 //    	DpiFixDeAWT.fixIcons(this);
 //    	DpiFixDeAWT.hide(this);
 //		java.awt.Component.canSetVisible = true;
 		InsnList startList = new InsnList();
+		startList.add(new LdcInsnNode(new Long(250L)));
+		startList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "sleep", "(J)V", false));
 		startList.add(new InsnNode(Opcodes.ACONST_NULL));
 		startList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setParent", "(Ljava/awt/Canvas;)V", false));
 		startList.add(new VarInsnNode(Opcodes.ALOAD, 0));

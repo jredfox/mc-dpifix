@@ -289,6 +289,21 @@ public class DpiFixCoreMod implements IClassTransformer {
 		t.start();
 	}
 	
+	/**
+	 * sleep in ms
+	 */
+	public static void sleep(long ms)
+	{
+		try
+		{
+			Thread.sleep(ms);
+		}
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
+	}
+	
 	//##############################  End Functions  ##############################\\
 	
 
