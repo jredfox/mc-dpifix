@@ -619,11 +619,6 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		
 		System.out.println("Transforming EntityRenderer for Optifine 1.5x Compat");
 		InsnList l = new InsnList();
-		LabelNode l0 = new LabelNode();
-		l.add(l0);
-		l.add(new LineNumberNode(620, l0));
-		l.add(new IntInsnNode(Opcodes.SIPUSH, 3553));
-		l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glEnable", "(I)V", false));
 		l.add(new LabelNode());
 		l.add(new InsnNode(Opcodes.RETURN));
 		m.instructions.insert(l);
