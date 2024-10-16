@@ -52,7 +52,8 @@ public class DpiFixCoreMod implements IClassTransformer {
 			"net.minecraft.client.MinecraftAppletImpl",
 			"net.minecraft.util.MouseHelper",
 			"net.minecraft.util.ThreadDownloadResources",
-			"net.minecraft.client.gui.RunnableTitleScreen"
+			"net.minecraft.client.gui.RunnableTitleScreen",
+			"net.minecraft.client.renderer.EntityRenderer"//Optifine Compat
 	});
 	
 	/**

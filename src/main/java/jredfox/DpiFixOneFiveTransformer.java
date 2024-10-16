@@ -3,6 +3,7 @@ package jredfox;
 import java.awt.Component;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 import org.ow2.asm.Opcodes;
 import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.ClassNode;
@@ -11,6 +12,7 @@ import org.ow2.asm.tree.FieldNode;
 import org.ow2.asm.tree.FrameNode;
 import org.ow2.asm.tree.InsnList;
 import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.IntInsnNode;
 import org.ow2.asm.tree.JumpInsnNode;
 import org.ow2.asm.tree.LabelNode;
 import org.ow2.asm.tree.LdcInsnNode;
@@ -60,6 +62,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			
 			case 7:
 				disableThreadSpamResources(classNode);
+			break;
+			
+			case 8:
+				optifineCompat(classNode);
 			break;
 			
 			default:
@@ -601,6 +607,31 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		li.add(new InsnNode(Opcodes.RETURN));
 		li.add(new LabelNode());
 		run.instructions.insert(li);
+	}
+	
+	public void optifineCompat(ClassNode classNode)
+	{
+		if(!this.hasDeAWT()) 
+			return;
+		MethodNode m = CoreUtils.getMethodNode(classNode, "checkDisplayMode", "()V");
+		if(m == null) 
+			return;
+		
+		System.out.println("Transforming EntityRenderer for Optifine 1.5x Compat");
+		InsnList l = new InsnList();
+		LabelNode l0 = new LabelNode();
+		l.add(l0);
+		l.add(new LineNumberNode(620, l0));
+		l.add(new IntInsnNode(Opcodes.SIPUSH, 3553));
+		l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glEnable", "(I)V", false));
+		l.add(new LabelNode());
+		l.add(new InsnNode(Opcodes.RETURN));
+		m.instructions.insert(l);
+	}
+	
+	private void checkDisplayMode()
+	{
+		GL11.glEnable(3553);
 	}
 
 }
