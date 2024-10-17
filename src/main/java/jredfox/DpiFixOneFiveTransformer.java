@@ -22,7 +22,6 @@ import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
-import jredfox.dpifix.compat.OptifineCompat;
 
 public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	
@@ -70,6 +69,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			
 			case 9:
 				optifineAntiAlisCompat(classNode);
+			break;
+			
+			case 10:
+				optifineConfigProxy(classNode);
 			break;
 
 			default:
@@ -673,6 +676,26 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		l.add(new InsnNode(Opcodes.RETURN));
 		l.add(new LabelNode());
 		m.instructions.insert(l);
+	}
+	
+	/**
+	 * Transform our Optifine Proxy so it actually works with no reflection :)
+	 */
+	public void optifineConfigProxy(ClassNode classNode) 
+	{
+		for(MethodNode m : classNode.methods)
+		{
+			AbstractInsnNode ab = m.instructions.getFirst();
+			while(ab != null)
+			{
+				if(ab instanceof MethodInsnNode && ((MethodInsnNode)ab).owner.equals("jredfox/OptifineConfig") )
+				{
+					MethodInsnNode mInsn = (MethodInsnNode) ab;
+					mInsn.owner = "Config";
+				}
+				ab = ab.getNext();
+			}
+		}
 	}
 
 }

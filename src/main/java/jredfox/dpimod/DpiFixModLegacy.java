@@ -12,7 +12,7 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import jredfox.DpiFix;
-import jredfox.dpifix.compat.OptifineCompat;
+import jredfox.OptifineCompat;
 import net.minecraftforge.common.ForgeVersion;
 
 @Mod(

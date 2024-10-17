@@ -33,7 +33,6 @@ import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
-import jredfox.dpifix.compat.OptifineCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -98,7 +97,8 @@ public class DpiFixCoreMod implements IClassTransformer {
 				"net.minecraft.util.ThreadDownloadResources",
 				"net.minecraft.client.gui.RunnableTitleScreen",
 				"net.minecraft.client.renderer.EntityRenderer",//Optifine Compat
-				"net.minecraft.client.renderer.RenderEngine"
+				"net.minecraft.client.renderer.RenderEngine",
+				"jredfox.OptifineCompat"
 			};
 		}
 		return new String[] {

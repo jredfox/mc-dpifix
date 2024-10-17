@@ -1,4 +1,4 @@
-package jredfox.dpifix.compat;
+package jredfox;
 
 import java.awt.Dimension;
 import java.lang.reflect.Method;
@@ -19,18 +19,16 @@ public class OptifineCompat {
 	{
 		if(!hasOF)
 			return null;
+		
 		try
 		{
-			Method m2 = cfgClazz.getDeclaredMethod("getFullscreenDimension");
-			m2.setAccessible(true);
-			Dimension dim = (Dimension) m2.invoke(null);
-			Method getDisplayMode = cfgClazz.getDeclaredMethod("getDisplayMode", Dimension.class);
-			return (DisplayMode) getDisplayMode.invoke(null, dim);
+			return (DisplayMode) OptifineConfig.getDisplayMode(OptifineConfig.getFullscreenDimension());
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
+		
 		return null;
 	}
 	
@@ -41,9 +39,7 @@ public class OptifineCompat {
 		
 		try
 		{
-			Method m2 = cfgClazz.getDeclaredMethod("getDesktopDisplayMode", DisplayMode.class);
-			m2.setAccessible(true);
-			return (DisplayMode) m2.invoke(null);
+			return OptifineConfig.getDesktopDisplayMode();
 		}
 		catch(Exception e)
 		{
@@ -59,10 +55,7 @@ public class OptifineCompat {
 		
 		try
 		{
-			Method m2 = cfgClazz.getDeclaredMethod("setDesktopDisplayMode", DisplayMode.class);
-			m2.setAccessible(true);
-			m2.invoke(null, mode);
-			System.out.println(getDisplayMode());
+			OptifineConfig.setDesktopDisplayMode(mode);
 		}
 		catch(Exception e)
 		{
