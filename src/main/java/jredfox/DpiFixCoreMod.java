@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.PixelFormat;
 import org.ow2.asm.ClassReader;
 import org.ow2.asm.ClassWriter;
 import org.ow2.asm.Opcodes;
@@ -37,6 +39,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixCoreMod implements IClassTransformer {
@@ -96,9 +99,10 @@ public class DpiFixCoreMod implements IClassTransformer {
 				"net.minecraft.util.MouseHelper",
 				"net.minecraft.util.ThreadDownloadResources",
 				"net.minecraft.client.gui.RunnableTitleScreen",
-				"net.minecraft.client.renderer.EntityRenderer",//Optifine Compat
+				"net.minecraft.client.renderer.EntityRenderer",//START Optifine Compat
 				"net.minecraft.client.renderer.RenderEngine",
-				"jredfox.OptifineCompat"
+				"jredfox.OptifineCompat",
+				"net.minecraftforge.client.ForgeHooksClient"//END Optifine Compat
 			};
 		}
 		return new String[] {
@@ -331,6 +335,41 @@ public class DpiFixCoreMod implements IClassTransformer {
 	{
 		DisplayMode ofmode = OptifineCompat.getDisplayMode();
     	Display.setDisplayMode(ofmode != null ? ofmode : fsmode);
+	}
+	
+	/**
+	 * Creates Display with Anti-Aliasing Support for Optifine 1.5x
+	 */
+	public static boolean createOptifineDisplay()
+	{
+		if(!OptifineCompat.hasOF)
+			return false;
+		
+		int samples = OptifineCompat.getAntialiasingLevel();
+		PixelFormat pixelformat = new PixelFormat().withDepthBits(24).withSamples(samples);
+		try
+		{
+			try
+			{
+				Display.create(pixelformat.withStencilBits(8));//create pixelformat with 8 stencil bits
+				Field stencilBits = ForgeHooksClient.class.getDeclaredField("stencilBits");
+				stencilBits.setAccessible(true);
+				stencilBits.set(null, 8);
+				System.out.println("Display#create with stencilBits:8 Samples:" + samples);
+				return true;
+			}
+			catch(Exception e)
+			{
+				System.out.println("Display#create with Samples:" + samples);
+				Display.create(pixelformat);//on failure of stencil bits try with just the sampling
+				return true;
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	//##############################  End Functions  ##############################\\

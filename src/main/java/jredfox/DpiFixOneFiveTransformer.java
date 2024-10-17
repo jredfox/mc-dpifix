@@ -74,6 +74,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			case 10:
 				optifineConfigProxy(classNode);
 			break;
+			
+			case 11:
+				optifineDisplayCreate(classNode);
+			break;
 
 			default:
 				break;
@@ -693,9 +697,39 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 					MethodInsnNode mInsn = (MethodInsnNode) ab;
 					mInsn.owner = "Config";
 				}
+				else if(ab instanceof FieldInsnNode && ((FieldInsnNode)ab).owner.equals("jredfox/OptifineConfig") )
+				{
+					FieldInsnNode mInsn = (FieldInsnNode) ab;
+					mInsn.owner = "Config";
+				}
 				ab = ab.getNext();
 			}
 		}
+	}
+	
+	public void optifineDisplayCreate(ClassNode classNode) 
+	{
+		if(!this.hasDeAWT() || !OptifineCompat.hasOFAA)//TODO: if samples are 0 return false from Display
+			return;
+		
+		MethodNode m = CoreUtils.getMethodNode(classNode, "createDisplay", "()V");
+		if(m == null)
+		{
+			System.err.println("Error ForgeHooksClient#createDisplay is not found! Anti-Aliasing Won't work with Optifine! Please Upgrade Forge to 1.5.2-7.8.0.691 or higher");
+			return;
+		}
+		
+		InsnList li = new InsnList();
+		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "createOptifineDisplay", "()Z", false));
+		LabelNode l5 = new LabelNode();
+		li.add(new JumpInsnNode(Opcodes.IFEQ, l5));
+		LabelNode l6 = new LabelNode();
+		li.add(l6);
+		li.add(new InsnNode(Opcodes.RETURN));
+		li.add(l5);
+		li.add(new LabelNode());	
+		li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+		m.instructions.insert(CoreUtils.getMethodInsnNode(m, Opcodes.INVOKESTATIC, "javax/imageio/ImageIO", "setUseCache", "(Z)V", false), li);
 	}
 
 }
