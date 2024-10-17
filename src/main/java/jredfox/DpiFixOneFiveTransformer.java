@@ -1,11 +1,9 @@
 package jredfox;
 
-import java.awt.Component;
+import java.lang.reflect.Method;
 
-import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.PixelFormat;
+import org.lwjgl.opengl.DisplayMode;
 import org.ow2.asm.Opcodes;
 import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.ClassNode;
@@ -14,7 +12,6 @@ import org.ow2.asm.tree.FieldNode;
 import org.ow2.asm.tree.FrameNode;
 import org.ow2.asm.tree.InsnList;
 import org.ow2.asm.tree.InsnNode;
-import org.ow2.asm.tree.IntInsnNode;
 import org.ow2.asm.tree.JumpInsnNode;
 import org.ow2.asm.tree.LabelNode;
 import org.ow2.asm.tree.LdcInsnNode;
@@ -24,8 +21,8 @@ import org.ow2.asm.tree.MethodNode;
 import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
-import net.minecraftforge.common.ForgeVersion;
+import jredfox.clfix.LaunchClassLoaderFix;
+import jredfox.dpifix.compat.OptifineCompat;
 
 public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	
@@ -643,13 +640,15 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		if(!this.hasDeAWT()) 
 			return;
 		MethodNode m = CoreUtils.getMethodNode(classNode, "checkDisplayMode", "()V");
-		if(m == null) 
+		if(m == null)
 			return;
 		
 		System.out.println("Transforming EntityRenderer for Optifine 1.5x Compat");
+		OptifineCompat.setDesktopDisplayMode(Display.getDesktopDisplayMode());
 		InsnList l = new InsnList();
 		l.add(new LabelNode());
 		l.add(new InsnNode(Opcodes.RETURN));
+		l.add(new LabelNode());
 		m.instructions.insert(l);
 	}
 
