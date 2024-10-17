@@ -342,9 +342,6 @@ public class DpiFixCoreMod implements IClassTransformer {
 	 */
 	public static boolean createOptifineDisplay()
 	{
-		if(!OptifineCompat.hasOF)
-			return false;
-		
 		int samples = OptifineCompat.getAntialiasingLevel();
 		PixelFormat pixelformat = new PixelFormat().withDepthBits(24).withSamples(samples);
 		try
