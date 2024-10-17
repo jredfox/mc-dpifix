@@ -314,6 +314,24 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		startTitleList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "fixTitle", "()V", false));
 		startGame.instructions.insert(startTitle, startTitleList);
 		
+		//this.fullscreen = false;
+		//this.toggleFullscreen();
+		//Wrap if(false) around the rest of the code inside the block as this.toggleFullscreen() has already been called
+		LabelNode sfsLabel = CoreUtils.prevLabel(CoreUtils.prevLabelNode(startTitle));
+		InsnList sfs = new InsnList();
+		sfs.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		sfs.add(new InsnNode(Opcodes.ICONST_0));
+		sfs.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/Minecraft", CoreUtils.getObfString("fullscreen", "field_71431_Q"), "Z"));
+		sfs.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		sfs.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/Minecraft", CoreUtils.getObfString("toggleFullscreen", "func_71352_k"), "()V", false));
+		sfs.add(new LabelNode());
+		sfs.add(new InsnNode(Opcodes.ICONST_0));
+		sfs.add(new JumpInsnNode(Opcodes.IFEQ, sfsLabel));
+		sfs.add(new LabelNode());
+		sfs.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+		AbstractInsnNode sfsSpot = CoreUtils.getMethodInsnNode(startGame, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false);
+		startGame.instructions.insert(sfsSpot, sfs);
+		
 		//DpiFixDeAWT.loadScreen();
 		//return;
 		InsnList loadList = new InsnList();
