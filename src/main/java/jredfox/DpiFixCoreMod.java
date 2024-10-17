@@ -33,6 +33,7 @@ import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
+import jredfox.dpifix.compat.OptifineCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -308,6 +309,15 @@ public class DpiFixCoreMod implements IClassTransformer {
 		{
 			t.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Set FullScreen DisplayMode with optifine compat
+	 */
+	public static void setFSDisplayMode(Minecraft mc) throws LWJGLException 
+	{
+		DisplayMode mode = OptifineCompat.getDisplayMode();
+    	Display.setDisplayMode(mode != null ? mode : new DisplayMode(mc.tempDisplayWidth, mc.tempDisplayHeight));
 	}
 	
 	//##############################  End Functions  ##############################\\

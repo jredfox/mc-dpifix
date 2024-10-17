@@ -54,7 +54,7 @@ public class DpiFixModLegacy {
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent pre)
 	{
-		System.out.println("pre-init" + OptifineCompat.getDisplayMode());
+		System.out.println("pre-init FS DisplayMode:" + OptifineCompat.getDisplayMode());
 		DpiFixModProxy.modInit(this.getClass().getClassLoader());
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{

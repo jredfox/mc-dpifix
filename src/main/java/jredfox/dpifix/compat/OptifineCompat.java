@@ -17,6 +17,8 @@ public class OptifineCompat {
 	
 	public static DisplayMode getDisplayMode()
 	{
+		if(!hasOF)
+			return null;
 		try
 		{
 			Method m2 = cfgClazz.getDeclaredMethod("getFullscreenDimension");
@@ -34,6 +36,9 @@ public class OptifineCompat {
 	
 	public static DisplayMode getDesktopDisplayMode()
 	{
+		if(!hasOF)
+			return null;
+		
 		try
 		{
 			Method m2 = cfgClazz.getDeclaredMethod("getDesktopDisplayMode", DisplayMode.class);
@@ -49,6 +54,9 @@ public class OptifineCompat {
 	
 	public static void setDesktopDisplayMode(DisplayMode mode)
 	{
+		if(!hasOF)
+			return;
+		
 		try
 		{
 			Method m2 = cfgClazz.getDeclaredMethod("setDesktopDisplayMode", DisplayMode.class);
