@@ -12,6 +12,7 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import jredfox.DpiFix;
+import jredfox.dpifix.compat.OptifineCompat;
 import net.minecraftforge.common.ForgeVersion;
 
 @Mod(
@@ -53,6 +54,7 @@ public class DpiFixModLegacy {
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent pre)
 	{
+		System.out.println("pre-init" + OptifineCompat.getDisplayMode());
 		DpiFixModProxy.modInit(this.getClass().getClassLoader());
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{

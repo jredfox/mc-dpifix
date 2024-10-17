@@ -87,9 +87,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 
 	//ASM config
-	public static final boolean hasForge = LaunchClassLoaderFix.forName("net.minecraftforge.common.ForgeVersion") != null;
-	public static final boolean onefive = hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8;
-	public static final boolean isClient = onefive ? DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null : DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null;
+	public static boolean hasForge = LaunchClassLoaderFix.forName("net.minecraftforge.common.ForgeVersion") != null;
+	public static boolean onefive = hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8;
+	public static boolean isClient = onefive ? DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null : DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null;
 	public static boolean coremod;
 	public static boolean fsSaveFix;
 	public static boolean fsTabFix;
