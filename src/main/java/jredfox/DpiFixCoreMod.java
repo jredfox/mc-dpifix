@@ -343,15 +343,17 @@ public class DpiFixCoreMod implements IClassTransformer {
 	public static boolean createOptifineDisplay()
 	{
 		int samples = OptifineCompat.getAntialiasingLevel();
+		//if Anti-Aliasing is Disabled Let normal Flow of Code Happen
+		if(samples <= 0)
+			return false;
+		
 		PixelFormat pixelformat = new PixelFormat().withDepthBits(24).withSamples(samples);
 		try
 		{
 			try
 			{
 				Display.create(pixelformat.withStencilBits(8));//create pixelformat with 8 stencil bits
-				Field stencilBits = ForgeHooksClient.class.getDeclaredField("stencilBits");
-				stencilBits.setAccessible(true);
-				stencilBits.set(null, 8);
+				LaunchClassLoaderFix.setPrivate(null, 8, ForgeHooksClient.class, "stencilBits");
 				System.out.println("Display#create with stencilBits:8 Samples:" + samples);
 				return true;
 			}

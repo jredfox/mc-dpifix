@@ -165,6 +165,18 @@ public class CoreUtils {
 		return null;
 	}
 	
+	public static LabelNode nextLabel(AbstractInsnNode spot) 
+	{
+		AbstractInsnNode n = spot;
+		while(n != null)
+		{
+			n = n.getNext();
+			if(n instanceof LabelNode)
+				return (LabelNode) n;
+		}
+		return null;
+	}
+	
 	public static LineNumberNode nextLabelNode(AbstractInsnNode spot) 
 	{
 		AbstractInsnNode n = spot;

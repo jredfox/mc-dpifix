@@ -22,6 +22,7 @@ import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
+import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	
@@ -338,6 +339,25 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		sfs.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
 		AbstractInsnNode sfsSpot = CoreUtils.getMethodInsnNode(startGame, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false);
 		startGame.instructions.insert(sfsSpot, sfs);
+		
+		if(ForgeVersion.getBuildVersion() <= 689 && OptifineCompat.hasOFAA)
+		{
+			//if(!DpiFixCoreMod.createOptifineDisplay())
+			AbstractInsnNode liOFAASpot = CoreUtils.prevLabelNode(CoreUtils.getMethodInsnNode(startGame, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "create", "(Lorg/lwjgl/opengl/PixelFormat;)V", false));
+			if(liOFAASpot != null)
+			{
+				InsnList liOFAA = new InsnList();
+				liOFAA.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "createOptifineDisplay", "()Z", false));
+				liOFAA.add(new JumpInsnNode(Opcodes.IFNE, CoreUtils.nextJumpInsnNode(liOFAASpot).label));
+				liOFAA.add(new LabelNode());
+				liOFAA.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+				startGame.instructions.insert(liOFAASpot, liOFAA);
+			}
+			else
+			{
+				System.err.println("Error Missing Display#create Method call inside of Minecraft#startGame. Optifine Anti-Alias Support is not possible!");
+			}
+		}
 		
 		//DpiFixDeAWT.loadScreen();
 		//return;
@@ -699,25 +719,22 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 				}
 				else if(ab instanceof FieldInsnNode && ((FieldInsnNode)ab).owner.equals("jredfox/OptifineConfig") )
 				{
-					FieldInsnNode mInsn = (FieldInsnNode) ab;
-					mInsn.owner = "Config";
+					FieldInsnNode fInsn = (FieldInsnNode) ab;
+					fInsn.owner = "Config";
 				}
 				ab = ab.getNext();
 			}
 		}
 	}
 	
-	public void optifineDisplayCreate(ClassNode classNode) 
+	public void optifineDisplayCreate(ClassNode classNode)
 	{
-		if(!this.hasDeAWT() || !OptifineCompat.hasOFAA)//TODO: if samples are 0 return false from Display
+		if(!this.hasDeAWT() || !OptifineCompat.hasOFAA)
 			return;
 		
 		MethodNode m = CoreUtils.getMethodNode(classNode, "createDisplay", "()V");
 		if(m == null)
-		{
-			System.err.println("Error ForgeHooksClient#createDisplay is not found! Anti-Aliasing Won't work with Optifine! Please Upgrade Forge to 1.5.2-7.8.0.691 or higher");
 			return;
-		}
 		
 		InsnList li = new InsnList();
 		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "createOptifineDisplay", "()Z", false));
