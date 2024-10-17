@@ -47,23 +47,12 @@ public class DpiFixCoreMod implements IClassTransformer {
 		LaunchClassLoaderFix.stopMemoryOverflow(null);
 	}
 	
-	public static List<String> cls = DpiFix.asStringList(new String[] {
-			"net.minecraft.client.Minecraft", 
-			"net.minecraft.client.gui.LoadingScreenRenderer",
-			"jredfox.dpimod.DpiFixModLegacy",
-			"net.minecraft.client.MinecraftApplet",
-			"net.minecraft.client.MinecraftAppletImpl",
-			"net.minecraft.util.MouseHelper",
-			"net.minecraft.util.ThreadDownloadResources",
-			"net.minecraft.client.gui.RunnableTitleScreen",
-			"net.minecraft.client.renderer.EntityRenderer",//Optifine Compat
-			"net.minecraft.client.renderer.RenderEngine"
-	});
-	
 	/**
 	 * Check if we are in 1.5x so we can configure the transformer for 1.5x
 	 */
 	public static boolean onefive = ForgeVersion.getMajorVersion() < 8;
+	
+	public static List<String> cls =  DpiFix.asStringList( getCls() );
 	
 	public IDpiFixTransformer dpifixTransformer = null;
 	public boolean i = false;
@@ -95,6 +84,30 @@ public class DpiFixCoreMod implements IClassTransformer {
 		return basicClass;
 	}
 	
+	private static String[] getCls() 
+	{
+		if(onefive)
+		{
+			return new String[] {
+				"net.minecraft.client.Minecraft", 
+				"net.minecraft.client.gui.LoadingScreenRenderer",
+				"jredfox.dpimod.DpiFixModLegacy",
+				"net.minecraft.client.MinecraftApplet",
+				"net.minecraft.client.MinecraftAppletImpl",
+				"net.minecraft.util.MouseHelper",
+				"net.minecraft.util.ThreadDownloadResources",
+				"net.minecraft.client.gui.RunnableTitleScreen",
+				"net.minecraft.client.renderer.EntityRenderer",//Optifine Compat
+				"net.minecraft.client.renderer.RenderEngine"
+			};
+		}
+		return new String[] {
+			"net.minecraft.client.Minecraft", 
+			"net.minecraft.client.gui.LoadingScreenRenderer",
+			"jredfox.dpimod.DpiFixModLegacy"
+		};
+	}
+
 	public void init() 
 	{
 		if(this.i) return;
