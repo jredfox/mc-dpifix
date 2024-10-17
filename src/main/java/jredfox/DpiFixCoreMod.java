@@ -314,10 +314,10 @@ public class DpiFixCoreMod implements IClassTransformer {
 	/**
 	 * Set FullScreen DisplayMode with optifine compat
 	 */
-	public static void setFSDisplayMode(Minecraft mc) throws LWJGLException 
+	public static void setFSDisplayMode(DisplayMode fsmode) throws LWJGLException 
 	{
-		DisplayMode mode = OptifineCompat.getDisplayMode();
-    	Display.setDisplayMode(mode != null ? mode : new DisplayMode(mc.tempDisplayWidth, mc.tempDisplayHeight));
+		DisplayMode ofmode = OptifineCompat.getDisplayMode();
+    	Display.setDisplayMode(ofmode != null ? ofmode : fsmode);
 	}
 	
 	//##############################  End Functions  ##############################\\

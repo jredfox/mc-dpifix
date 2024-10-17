@@ -398,6 +398,11 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		fsli.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "tickDisplay", "(Lnet/minecraft/client/Minecraft;)V", false));
 		nodeFS.instructions.insert(CoreUtils.getLastMethodInsn(nodeFS, Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "disabled", "()V", false), fsli);
 		
+		//DpiFixCoreMod#setFSDisplayMode(Display#getDesktopDisplayMode());
+		MethodInsnNode setDisplayModeInsn = CoreUtils.getMethodInsnNode(nodeFS, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setDisplayMode", "(Lorg/lwjgl/opengl/DisplayMode;)V", false);
+		setDisplayModeInsn.owner = "jredfox/DpiFixCoreMod";
+		setDisplayModeInsn.name = "setFSDisplayMode";
+		
 		/*
 		 * Fixes MC-68754
 		 * if(!this.fullscreen)
