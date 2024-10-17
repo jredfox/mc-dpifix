@@ -2,8 +2,10 @@ package jredfox;
 
 import java.awt.Component;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.PixelFormat;
 import org.ow2.asm.Opcodes;
 import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.ClassNode;
@@ -22,6 +24,7 @@ import org.ow2.asm.tree.MethodNode;
 import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
@@ -68,6 +71,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 				optifineCompat(classNode);
 			break;
 			
+			case 9:
+				optifineAntiAlisCompat(classNode);
+			break;
+
 			default:
 				break;
 		}
@@ -609,6 +616,28 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		run.instructions.insert(li);
 	}
 	
+	public void optifineAntiAlisCompat(ClassNode classNode)
+	{
+		if(!this.hasDeAWT()) 
+			return;
+		
+		MethodNode m = CoreUtils.getFirstConstructor(classNode);
+		InsnList l = new InsnList();
+		MethodInsnNode cfgInsn = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKESTATIC, "Config", "isMultiTexture", "()Z", false);
+		//if optifine is not installed return
+		if(cfgInsn == null)
+			return;
+		
+		//Disable need for creating LWJGL Frame as we are already in De-AWT
+		System.out.println("Transforming RenderEngine for Optifine 1.5x Compat");
+		AbstractInsnNode spot = CoreUtils.prevLabelNode(cfgInsn);
+		JumpInsnNode jump = CoreUtils.nextJumpInsnNode(cfgInsn);
+		InsnList li = new InsnList();
+		li.add(new InsnNode(Opcodes.ICONST_0));
+		li.add(new JumpInsnNode(Opcodes.IFEQ, jump.label));
+		m.instructions.insert(spot, li);
+	}
+	
 	public void optifineCompat(ClassNode classNode)
 	{
 		if(!this.hasDeAWT()) 
@@ -622,11 +651,6 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		l.add(new LabelNode());
 		l.add(new InsnNode(Opcodes.RETURN));
 		m.instructions.insert(l);
-	}
-	
-	private void checkDisplayMode()
-	{
-		GL11.glEnable(3553);
 	}
 
 }

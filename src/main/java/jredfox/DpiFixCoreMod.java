@@ -9,7 +9,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.ow2.asm.ClassReader;
 import org.ow2.asm.ClassWriter;
@@ -53,7 +55,8 @@ public class DpiFixCoreMod implements IClassTransformer {
 			"net.minecraft.util.MouseHelper",
 			"net.minecraft.util.ThreadDownloadResources",
 			"net.minecraft.client.gui.RunnableTitleScreen",
-			"net.minecraft.client.renderer.EntityRenderer"//Optifine Compat
+			"net.minecraft.client.renderer.EntityRenderer",//Optifine Compat
+			"net.minecraft.client.renderer.RenderEngine"
 	});
 	
 	/**
@@ -247,6 +250,8 @@ public class DpiFixCoreMod implements IClassTransformer {
     
     public static void updateViewPort(Minecraft mc) 
     {
+    	if(!Display.isCreated())
+    		return;
         ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glMatrixMode(GL11.GL_PROJECTION);
