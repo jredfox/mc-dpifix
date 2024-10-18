@@ -120,7 +120,7 @@ public class DeAWTTransformer implements ClassFileTransformer {
 		{
 			try
 			{
-				System.out.println("Transforming " + className.replace("/", ".") + "#runGame to be compatible with De-AWT");
+				System.out.println("Transforming " + className.replace("/", ".") + " to be compatible with De-AWT");
 				
 				//Return the cached file if it exists
 				if(technicFile.exists())
