@@ -50,6 +50,7 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 			Method addTransformerExclusion = clClazz.getDeclaredMethod("addTransformerExclusion", String.class);
 			addTransformerExclusion.setAccessible(true);
 			addTransformerExclusion.invoke(cl, "jredfox.DpiFix");
+			addTransformerExclusion.invoke(cl, "org.ow2.asm");
 		}
 		catch(Throwable t)
 		{
