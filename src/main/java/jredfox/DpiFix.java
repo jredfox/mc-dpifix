@@ -122,9 +122,9 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
 		maximizeFix = cfg.get("Coremod.MaximizeResFix");
 		guiMouseFix = cfg.get("Coremod.GUI.MouseFix");
-		deawt_windows = cfg.get("Coremod.OneFive.DeAWT.Windows", false);
+		deawt_windows = cfg.get("Coremod.OneFive.DeAWT.Windows");
 		deawt_mac = cfg.get("Coremod.OneFive.DeAWT.Mac");
-		deawt_linux = cfg.get("Coremod.OneFive.DeAWT.Linux", false);
+		deawt_linux = cfg.get("Coremod.OneFive.DeAWT.Linux");
 		fixResourceThread = cfg.get("Coremod.OneFive.ThreadResourcesFix");
 		cfg.get("Coremod.OneFive.DeAWT.Compat.Technic");//Make this generate even when the agent isn't active
 		cfg.save();
