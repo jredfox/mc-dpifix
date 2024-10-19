@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import jml.gamemodelib.GameModeLib;
 import jml.gamemodelib.GameModeLibAgent;
 import jredfox.clfix.LaunchClassLoaderFix;
 import net.minecraftforge.common.ForgeVersion;
@@ -61,8 +62,8 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 		Class IFMLLoadingPluginClazz = oneeight ? net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.class : cpw.mods.fml.relauncher.IFMLLoadingPlugin.class;
 		Class coreModManagerClazz = oneeight ? LaunchClassLoaderFix.forName("net.minecraftforge.fml.relauncher.CoreModManager") : ( (!onefive) ? LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.CoreModManager") : LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.RelaunchLibraryManager"));
 		Class FMLPluginWrapper = LaunchClassLoaderFix.forName(coreModManagerClazz.getName() + "$FMLPluginWrapper");
-		List plugins = (List) GameModeLibAgent.getField(coreModManagerClazz, "loadPlugins").get(null);//TODO: change to an array of possible fields
-		File location = GameModeLibAgent.getFileFromClass(GameModeLibAgent.class);
+		List plugins = (List) GameModeLib.getField(coreModManagerClazz, "loadPlugins").get(null);
+		File location = GameModeLib.getFileFromClass(GameModeLibAgent.class);
 		//1.6.4(SRG) - 1.12.2
 		if(!onesixnotch)
 		{

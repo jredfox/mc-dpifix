@@ -28,6 +28,7 @@ import org.ow2.asm.tree.MethodNode;
 import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
+import jml.gamemodelib.GameModeLib;
 import jml.gamemodelib.GameModeLibAgent;
 
 /**
@@ -49,9 +50,9 @@ public class DeAWTTransformer implements ClassFileTransformer {
 			component.delete();//delete previous caches
 			technicFile.delete();//delete previous caches
 			inst.addTransformer(new DeAWTTransformer());
-			GameModeLibAgent.forName("java.awt.Component");//Force Load the java.awt.Frame Class
+			GameModeLib.forName("java.awt.Component");//Force Load the java.awt.Frame Class
 			if(technic)
-				GameModeLibAgent.forName("net.technicpack.legacywrapper.Frame");//Force Load Technic's Frame Class so we can edit it
+				GameModeLib.forName("net.technicpack.legacywrapper.Frame");//Force Load Technic's Frame Class so we can edit it
 		}
 	}
 	
