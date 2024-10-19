@@ -155,7 +155,7 @@ public class DeAWTTransformer implements ClassFileTransformer {
 
 				//Replace all calls of this.setDefaultCloseOperation(JFrame#EXIT_ON_CLOSE); with this.setDefaultCloseOperation(JFrame#HIDE_ON_CLOSE);
 				//Correct Default Resolution 854x480
-				//Remove Additional this.pack(); calls which can cause invisible JFrame on linux
+				//Remove  Additional this.pack(); calls which can cause invisible JFrame on linux
 				//Removes Additional this.minecraft.setSize() && this.minecraft.setPreferredSize() calls due to race condition bug which causes issues if left in
 				MethodInsnNode closeInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "setDefaultCloseOperation", "(I)V");
 				MethodInsnNode packInsn =  new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "pack", "()V", false);
