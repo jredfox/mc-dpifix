@@ -421,9 +421,9 @@ public class CoreUtils {
 				frame = (FrameNode) index;
 		}
 		InsnList li = new InsnList();
-		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "disabled", "()V", false));
 		if(frame != null)
 			li.add(frame);
+		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "disabled", "()V", false));
 		m.instructions.insert(label, li);
 		return label;
 	}
