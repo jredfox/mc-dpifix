@@ -139,7 +139,6 @@ public class DeAWTTransformer implements ClassFileTransformer {
 							{
 								runGame = m;
 								mcFieldInsn = CoreUtils.previousFieldInsnNode(ab);
-								mcFieldInsn = new FieldInsnNode(mcFieldInsn.getOpcode(), mcFieldInsn.owner, mcFieldInsn.name, mcFieldInsn.desc);
 								break;
 							}
 							ab = ab.getNext();
@@ -157,8 +156,11 @@ public class DeAWTTransformer implements ClassFileTransformer {
 				//Replace all calls of this.setDefaultCloseOperation(JFrame#EXIT_ON_CLOSE); with this.setDefaultCloseOperation(JFrame#HIDE_ON_CLOSE);
 				//Correct Default Resolution 854x480
 				//Remove Additional this.pack(); calls which can cause invisible JFrame on linux
+				//Removes Additional this.minecraft.setSize() && this.minecraft.setPreferredSize() calls due to race condition bug which causes issues if left in
 				MethodInsnNode closeInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "setDefaultCloseOperation", "(I)V");
 				MethodInsnNode packInsn =  new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "pack", "()V", false);
+				MethodInsnNode setSizeInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "setSize", "(II)V", false);
+				MethodInsnNode setPrefSizeInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "setPreferredSize", "(Ljava/awt/Dimension;)V", false);
 				for(MethodNode m : classNode.methods)
 				{
 					AbstractInsnNode ab = m.instructions.getFirst();
@@ -196,6 +198,17 @@ public class DeAWTTransformer implements ClassFileTransformer {
 								m.instructions.remove(ab);
 								ab = prev;
 							}
+							if(flag_rg)
+							{
+								if(ab instanceof MethodInsnNode)
+								{
+									MethodInsnNode mInsn = (MethodInsnNode) ab;
+									if(CoreUtils.equals(setPrefSizeInsn, (MethodInsnNode)ab) || CoreUtils.equals(setSizeInsn, (MethodInsnNode)ab))
+									{
+										ab = CoreUtils.deleteLine(m, ab);
+									}
+								}
+							}
 						}
 						
 						//this.setDefaultCloseOperation(JFrame#HIDE_ON_CLOSE);
@@ -209,11 +222,22 @@ public class DeAWTTransformer implements ClassFileTransformer {
 					}
 				}
 				
+				//this.minecraft.setSize(this.getWidth(), this.getHeight());
 				//this.minecraft.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()));
 				//this.pack();
 				InsnList l = new InsnList();
+				
 				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				l.add(mcFieldInsn);
+				l.add(CoreUtils.copy(mcFieldInsn));
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "getWidth", "()I", false));
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "getHeight", "()I", false));
+				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "setSize", "(II)V", false));
+				l.add(new LabelNode());
+				
+				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				l.add(CoreUtils.copy(mcFieldInsn));
 				l.add(new TypeInsnNode(Opcodes.NEW, "java/awt/Dimension"));
 				l.add(new InsnNode(Opcodes.DUP));
 				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -223,6 +247,7 @@ public class DeAWTTransformer implements ClassFileTransformer {
 				l.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/awt/Dimension", "<init>", "(II)V", false));
 				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/Launcher", "setPreferredSize", "(Ljava/awt/Dimension;)V", false));
 				l.add(new LabelNode());
+				
 				l.add(new VarInsnNode(Opcodes.ALOAD, 0));
 				l.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, className, "pack", "()V", false));
 				l.add(new LabelNode());

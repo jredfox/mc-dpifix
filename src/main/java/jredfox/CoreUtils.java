@@ -15,6 +15,8 @@ import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.AnnotationNode;
 import org.ow2.asm.tree.ClassNode;
 import org.ow2.asm.tree.FieldInsnNode;
+import org.ow2.asm.tree.FrameNode;
+import org.ow2.asm.tree.InsnList;
 import org.ow2.asm.tree.JumpInsnNode;
 import org.ow2.asm.tree.LabelNode;
 import org.ow2.asm.tree.LineNumberNode;
@@ -393,6 +395,37 @@ public class CoreUtils {
     		DpiFix.closeQuietly(in);
     		DpiFix.closeQuietly(out);
     	}
+	}
+	
+	public static AbstractInsnNode copy(FieldInsnNode mcFieldInsn) 
+	{
+		return new FieldInsnNode(mcFieldInsn.getOpcode(), mcFieldInsn.owner, mcFieldInsn.name, mcFieldInsn.desc);
+	}
+	
+	/**
+	 * Deletes an Entire Line not recommended USE WITH EXTREME CAUTION!
+	 * Won't work with if statements, for loops try / catches always
+	 * @return the previous LabelNode normally at the start of the line
+	 */
+	public static LabelNode deleteLine(MethodNode m, AbstractInsnNode spot) 
+	{
+		AbstractInsnNode index = spot;
+		LabelNode label = prevLabel(spot);
+		FrameNode frame = null;
+		while(index != label)
+		{
+			AbstractInsnNode prev = index.getPrevious();
+			m.instructions.remove(index);
+			index = prev;
+			if(index instanceof FrameNode)
+				frame = (FrameNode) index;
+		}
+		InsnList li = new InsnList();
+		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "disabled", "()V", false));
+		if(frame != null)
+			li.add(frame);
+		m.instructions.insert(label, li);
+		return label;
 	}
 
 }
