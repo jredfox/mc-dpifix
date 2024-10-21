@@ -1,13 +1,6 @@
 package jredfox;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.LWJGLException;
@@ -15,24 +8,8 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
-import org.ow2.asm.ClassReader;
 import org.ow2.asm.ClassWriter;
-import org.ow2.asm.Opcodes;
-import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.ClassNode;
-import org.ow2.asm.tree.FieldInsnNode;
-import org.ow2.asm.tree.FieldNode;
-import org.ow2.asm.tree.FrameNode;
-import org.ow2.asm.tree.InsnList;
-import org.ow2.asm.tree.InsnNode;
-import org.ow2.asm.tree.IntInsnNode;
-import org.ow2.asm.tree.JumpInsnNode;
-import org.ow2.asm.tree.LabelNode;
-import org.ow2.asm.tree.LineNumberNode;
-import org.ow2.asm.tree.MethodInsnNode;
-import org.ow2.asm.tree.MethodNode;
-import org.ow2.asm.tree.TypeInsnNode;
-import org.ow2.asm.tree.VarInsnNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
 import net.minecraft.client.Minecraft;
@@ -140,43 +117,17 @@ public class DpiFixCoreMod implements IClassTransformer {
 
 	public static void patchSplash(File mcDataDir)
 	{
-		if(DpiFix.isMacOs && !(new File(mcDataDir, "config/splash.properties.patched").exists()))
+		if(DpiFix.isMacOs)
 		{
-			//create configuration dir
-			File cfgdir = new File(mcDataDir, "config");
-			if(!cfgdir.exists())
-				cfgdir.mkdirs();
-			
-			List<String> li = new ArrayList();
-			String nl = DpiFix.lineSeparator();
-			li.add("#Splash screen properties" + nl +
-					"background=0xFFFFFF" + nl +
-					"memoryGood=0x78CB34\r\n" + nl +
-					"font=0x0\r\n" + nl +
-					"barBackground=0xFFFFFF" + nl +
-					"barBorder=0xC0C0C0" + nl +
-					"memoryLow=0xE42F2F" + nl +
-					"rotate=false" + nl +
-					"memoryWarn=0xE6E84A" + nl +
-					"showMemory=true" + nl +
-					"bar=0xCB3D35" + nl +
-					"enabled=false" + nl +
-					"resourcePackPath=resources" + nl +
-					"logoOffset=0" + nl +
-					"forgeTexture=fml\\:textures/gui/forge.png" + nl +
-					"fontTexture=textures/font/ascii.png"
-					);
-			
-			DpiFix.saveFileLines(li, new File(cfgdir, "splash.properties"));
-			
-			try
+			PropertyConfig splash = new PropertyConfig(new File(mcDataDir, "config/splash.properties"));
+			splash.load();
+			boolean hasPatched = splash.get("dpifix.patched", false);
+			if(!hasPatched)
 			{
-				new File(cfgdir, "splash.properties.patched").createNewFile();
+				splash.properties.setProperty("enabled", "false");
+				splash.properties.setProperty("dpifix.patched", "true");
 			}
-			catch (Exception e) 
-			{
-				e.printStackTrace();
-			}
+			splash.save();
 		}
 	}
 
