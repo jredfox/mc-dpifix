@@ -18,7 +18,7 @@ public class GameModeLib {
 	public static File jarFile;
 	public static boolean hasForge;
 	
-	public static void init() 
+	public static void init()
 	{
 		System.setProperty("gamemodelib.agent", "true");
 		debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
@@ -28,8 +28,8 @@ public class GameModeLib {
 
 	public static void load() 
 	{
-		//Use Mod config useful for when both the javaagent and mod are used at the same time
-		if(Boolean.parseBoolean(System.getProperty("gamemodelib.cfg", "false")))
+		//Use Mod Config useful for when both the javaagent and mod are used at the same time which is actually required in 1.5x version of the mod
+		if( Boolean.parseBoolean(System.getProperty("gamemodelib.cfg", String.valueOf(isInCoreMods()) )) )
 			DpiFix.loadConfig();
 		
 		DpiFix.load();
@@ -45,6 +45,14 @@ public class GameModeLib {
 	{
 		if(DpiFix.highPriority)
 			DpiFix.setHighProcessPriority();
+	}
+	
+	/**
+	 * @return true if forge is installed and the coremod should load 1.5 - 1.12.2 supported
+	 */
+	public static boolean isInCoreMods()
+	{
+		return hasForge && (net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 ? GameModeLib.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile()) : GameModeLib.jarFile.getParent().startsWith(new File("mods").getAbsolutePath()));
 	}
 	
 	public static void removeAgent() 
