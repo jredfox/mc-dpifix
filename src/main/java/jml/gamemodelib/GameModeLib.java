@@ -13,6 +13,18 @@ import java.util.Map;
 import jredfox.DpiFix;
 
 public class GameModeLib {
+	
+	public static boolean debug;
+	public static File jarFile;
+	public static boolean hasForge;
+	
+	public static void init() 
+	{
+		System.setProperty("gamemodelib.agent", "true");
+		debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
+		jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
+		hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
+	}
 
 	public static void load() 
 	{
@@ -33,6 +45,25 @@ public class GameModeLib {
 	{
 		if(DpiFix.highPriority)
 			DpiFix.setHighProcessPriority();
+	}
+	
+	public static void removeAgent() 
+	{
+		try
+		{
+			//Remove agent from classpath so forge doesn't load our "@Mod" when not in coremods or mods folder
+			if(Boolean.parseBoolean(System.getProperty("gamemodelib.removeAgent", "false")) || Boolean.parseBoolean(System.getProperty("gamemodelib.removeModAgent", "true")) && hasForge)
+			{
+				ClassLoader sy = ClassLoader.getSystemClassLoader();
+				ClassLoader parent = GameModeLib.getParentCL(sy);
+				ClassLoader context = Thread.currentThread().getContextClassLoader();
+				GameModeLib.removeAgentClassPath(jarFile, true, sy, parent, (sy == context ? null : context));
+			}
+		}
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
 	}
 	
 	
@@ -119,7 +150,7 @@ public class GameModeLib {
 	                	}
 	                }
 	                
-	                if(GameModeLibAgent.debug) 
+	                if(debug) 
 	                {
 		                for(Object loader : loaders)
 		                	System.out.println("loaders:" + getBase.get(loader).toString());
@@ -153,7 +184,7 @@ public class GameModeLib {
 		}
 		String built = b.toString();
 		System.setProperty("java.class.path", built);
-    	if(GameModeLibAgent.debug)
+    	if(debug)
     		System.out.println(System.getProperty("java.class.path") + "\n");
 	}
 
@@ -178,7 +209,7 @@ public class GameModeLib {
 			if(f.equals(getFileFromURL(url)))
 				it.remove();
 		}
-		if(GameModeLibAgent.debug)
+		if(debug)
 		{
 	        System.out.println("list#size:" + col.size());
 	        String list = l instanceof Collection ? "list:" : "lmap:";

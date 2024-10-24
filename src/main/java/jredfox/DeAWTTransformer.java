@@ -44,7 +44,7 @@ public class DeAWTTransformer implements ClassFileTransformer {
 	
 	public static void init(Instrumentation inst)
 	{
-		if(GameModeLibAgent.hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 && isInCoreMods() && isDeAWT())
+		if(GameModeLib.hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 && isInCoreMods() && isDeAWT())
 		{
 			System.out.println("Registering Agent DeAWTTransformer");
 			component.delete();//delete previous caches
@@ -61,7 +61,7 @@ public class DeAWTTransformer implements ClassFileTransformer {
 	 */
 	public static boolean isInCoreMods()
 	{
-		return GameModeLibAgent.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile());
+		return GameModeLib.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile());
 	}
 	
 	public static boolean isDeAWT()
