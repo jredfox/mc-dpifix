@@ -46,9 +46,10 @@ public class DeAWTTransformer implements ClassFileTransformer {
 	{
 		if(GameModeLib.hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 && isInCoreMods() && isDeAWT())
 		{
-			System.out.println("Registering Agent DeAWTTransformer");
+			System.setProperty("gamemodelib.deawt", "true");
 			component.delete();//delete previous caches
 			technicFile.delete();//delete previous caches
+			System.out.println("Registering Agent DeAWTTransformer");
 			inst.addTransformer(new DeAWTTransformer());
 			GameModeLib.forName("java.awt.Component");//Force Load the java.awt.Frame Class
 			if(technic)
