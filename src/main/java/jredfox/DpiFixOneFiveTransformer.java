@@ -760,6 +760,11 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	
 	public void optifineCompatGuiModList(ClassNode classNode)
 	{
+		if(!DpiFix.modLogoFix)
+			return;
+		
+		System.out.println("Patching GuiModList");
+		
 		//GuiModListOneFive#cleanup
 		MethodNode m = CoreUtils.getMethodNode(classNode, "selectModIndex", "(I)V");
 		InsnList li = new InsnList();

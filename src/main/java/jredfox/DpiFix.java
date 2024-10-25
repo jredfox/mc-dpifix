@@ -104,6 +104,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean deawt_linux;
 	public static boolean guiMouseFix;
 	public static boolean fixResourceThread;
+	public static boolean fixLogoPaths;
+	public static boolean modLogoFix;
 	public static void loadConfig()
 	{
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
@@ -123,10 +125,12 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		fsMouseFixOther = cfg.get("Coremod.FullScreen.MouseFix.OtherOS", false);
 		maximizeFix = cfg.get("Coremod.MaximizeResFix");
 		guiMouseFix = cfg.get("Coremod.GUI.MouseFix");
+		modLogoFix = cfg.get("Coremod.GUI.ModLogoFix");
 		deawt_windows = cfg.get("Coremod.OneFive.DeAWT.Windows");
 		deawt_mac = cfg.get("Coremod.OneFive.DeAWT.Mac");
 		deawt_linux = cfg.get("Coremod.OneFive.DeAWT.Linux");
 		fixResourceThread = cfg.get("Coremod.OneFive.ThreadResourcesFix");
+		fixLogoPaths = cfg.get("Coremod.OneFive.FixLogoPaths");
 		cfg.get("Coremod.OneFive.DeAWT.Compat.Technic");//Make this generate even when the agent isn't active
 		cfg.save();
 	}
@@ -326,7 +330,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		if (arc.equals("x64") || arc.equals("amd64") || arc.equals("x86_64"))
 		{
 			return ARCH.X64;
-		} 
+		}
 		else if (arc.equals("x86") || arc.length() > 3 && arc.startsWith("i") && arc.substring(2, arc.length()).equals("86")) 
 		{
 			return ARCH.X86;
