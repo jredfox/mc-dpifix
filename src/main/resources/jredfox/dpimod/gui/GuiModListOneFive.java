@@ -28,7 +28,6 @@ public class GuiModListOneFive {
 				in = Minecraft.getMinecraft().renderEngine.texturePack.getSelectedTexturePack().getResourceAsStream(logoFile);
 				BufferedImage img = ImageIO.read(in);
 				cachedDim = new Dimension(img.getWidth(), img.getHeight());
-				System.out.println(cachedDim);
 				logoLoc = logoFile;
 			}
 			catch(IOException io)
