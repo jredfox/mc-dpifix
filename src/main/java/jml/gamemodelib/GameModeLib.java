@@ -26,12 +26,14 @@ public class GameModeLib {
 		hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
 	}
 
-	public static void load() 
+	public static void load()
 	{
-		System.out.println("-Dgamemodelib.cfg Default:" + isInCoreMods());
+		boolean isInCoreMods = isInCoreMods();
+		if(debug)
+			System.out.println("-Dgamemodelib.cfg Default:" + isInCoreMods);
 		
 		//Use Mod Config useful for when both the javaagent and mod are used at the same time which is actually required in 1.5x version of the mod
-		if( Boolean.parseBoolean(System.getProperty("gamemodelib.cfg", String.valueOf(isInCoreMods()) )) )
+		if( Boolean.parseBoolean(System.getProperty("gamemodelib.cfg", String.valueOf(isInCoreMods) )) )
 			DpiFix.loadConfig();
 		
 		DpiFix.load();
