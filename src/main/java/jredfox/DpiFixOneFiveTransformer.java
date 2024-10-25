@@ -79,6 +79,15 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			case 11:
 				optifineDisplayCreate(classNode);
 			break;
+			
+			case 12:
+				optifineCompatGuiModList(classNode);
+			break;
+			
+			case 13:
+			case 14:
+				pubMinusFinal(classNode);
+			break;
 
 			default:
 				break;
@@ -747,6 +756,46 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		li.add(new LabelNode());	
 		li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
 		m.instructions.insert(CoreUtils.getMethodInsnNode(m, Opcodes.INVOKESTATIC, "javax/imageio/ImageIO", "setUseCache", "(Z)V", false), li);
+	}
+	
+	public void optifineCompatGuiModList(ClassNode classNode)
+	{
+		//GuiModListOneFive#cleanup
+		MethodNode m = CoreUtils.getMethodNode(classNode, "selectModIndex", "(I)V");
+		InsnList li = new InsnList();
+		li.add(new LabelNode());
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "cleanup", "()V", false));
+		m.instructions.insert(li);
+		
+		//dim = GuiModListOneFive#getDim(logoFile);
+		MethodNode draw = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("drawScreen", "a"), "(IIF)V");
+		AbstractInsnNode targ = CoreUtils.nextLabelNode(CoreUtils.getMethodInsnNode(draw, Opcodes.INVOKEVIRTUAL, "cpw/mods/fml/client/TextureFXManager", "getTextureDimensions", "(Ljava/lang/String;)Ljava/awt/Dimension;", false));
+		InsnList drawList = new InsnList();
+		drawList.add(new VarInsnNode(Opcodes.ALOAD, 6));
+		drawList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "getDim", "(Ljava/lang/String;)Ljava/awt/Dimension;", false));
+		drawList.add(new VarInsnNode(Opcodes.ASTORE, 7));
+		draw.instructions.insert(targ, drawList);
+	}
+	
+	public void pubMinusFinal(ClassNode classNode)
+	{
+		for(FieldNode f : classNode.fields)
+		{
+		    // Get the current access flags
+		    int access = f.access;
+		    
+		    // Remove conflicting access modifiers
+		    access &= ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED);
+		    
+		    // Remove the final modifier
+		    access &= ~Opcodes.ACC_FINAL;
+		    
+		    // Set the public modifier
+		    access |= Opcodes.ACC_PUBLIC;
+		    
+		    // Update the field's access flags
+		    f.access = access;
+		}
 	}
 
 }

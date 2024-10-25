@@ -79,7 +79,10 @@ public class DpiFixCoreMod implements IClassTransformer {
 				"net.minecraft.client.renderer.EntityRenderer",//START Optifine Compat
 				"net.minecraft.client.renderer.RenderEngine",
 				"jredfox.OptifineCompat",
-				"net.minecraftforge.client.ForgeHooksClient"//END Optifine Compat
+				"net.minecraftforge.client.ForgeHooksClient",
+				"cpw.mods.fml.client.GuiModList",
+				"net.minecraft.client.renderer.RenderEngine",
+				"cpw.mods.fml.client.TextureFXManager"//END Optifine Compat
 			};
 		}
 		return new String[] {
