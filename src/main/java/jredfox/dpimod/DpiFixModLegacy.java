@@ -46,27 +46,5 @@ public class DpiFixModLegacy {
 			meta.logoFile = "/" + meta.logoFile;
 		}
 	}
-	
-//	@Init replaces @EventHandler at runtime dynamically if it's needed
-	@Mod.EventHandler
-	public void dpifixinit(FMLInitializationEvent pre)
-	{
-		if(ForgeVersion.getMajorVersion() <= 7 && DpiFix.fixLogoPaths)
-		{
-			for(ModContainer container : Loader.instance().getModObjectList().keySet())
-			{
-				ModMetadata meta = container.getMetadata();
-				String logoFile = meta == null ? "" : meta.logoFile.trim().replace("\"", "").replace("'", "");
-				if(logoFile.isEmpty())
-					continue;
-				
-				if(!logoFile.startsWith("/"))
-				{
-					meta.logoFile = "/" + logoFile;
-					System.out.println("Patched Mod Logo:" + meta.name + " logo:" + meta.logoFile);
-				}
-			}
-		}
-	}
 
 }

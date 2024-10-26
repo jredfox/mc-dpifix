@@ -74,12 +74,6 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 			m.visibleAnnotations.remove(CoreUtils.getAnnotation(m, "Lcpw/mods/fml/common/Mod$EventHandler;"));
 			AnnotationNode preinit = new AnnotationNode("Lcpw/mods/fml/common/Mod$PreInit;");
 			m.visibleAnnotations.add(preinit);
-			
-			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.Init from DpiFixModLegacy#dpifixinit");
-			MethodNode m2 = CoreUtils.getMethodNode(classNode, "dpifixinit", "(Lcpw/mods/fml/common/event/FMLInitializationEvent;)V");
-			m2.visibleAnnotations.remove(CoreUtils.getAnnotation(m2, "Lcpw/mods/fml/common/Mod$EventHandler;"));
-			AnnotationNode init = new AnnotationNode("Lcpw/mods/fml/common/Mod$Init;");
-			m2.visibleAnnotations.add(init);
 		}
 	}
 

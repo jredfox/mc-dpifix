@@ -104,7 +104,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean deawt_linux;
 	public static boolean guiMouseFix;
 	public static boolean fixResourceThread;
-	public static boolean fixLogoPaths;
 	public static boolean modLogoFix;
 	public static void loadConfig()
 	{
@@ -130,7 +129,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		deawt_mac = cfg.get("Coremod.OneFive.DeAWT.Mac");
 		deawt_linux = cfg.get("Coremod.OneFive.DeAWT.Linux");
 		fixResourceThread = cfg.get("Coremod.OneFive.ThreadResourcesFix");
-		fixLogoPaths = cfg.get("Coremod.OneFive.FixLogoPaths");
 		cfg.get("Coremod.OneFive.DeAWT.Compat.Technic");//Make this generate even when the agent isn't active
 		cfg.save();
 	}

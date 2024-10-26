@@ -772,12 +772,17 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "cleanup", "()V", false));
 		m.instructions.insert(li);
 		
-		//dim = GuiModListOneFive#getDim(logoFile);
+		//remove: this.mc.bindTexture();
+		//dim = GuiModListOneFive#getDim(logoFile, this.selectedMod);
 		MethodNode draw = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("drawScreen", "a"), "(IIF)V");
 		AbstractInsnNode targ = CoreUtils.nextLabelNode(CoreUtils.getMethodInsnNode(draw, Opcodes.INVOKEVIRTUAL, "cpw/mods/fml/client/TextureFXManager", "getTextureDimensions", "(Ljava/lang/String;)Ljava/awt/Dimension;", false));
+		CoreUtils.deleteLine(draw, CoreUtils.prevLabelNode(CoreUtils.prevLabelNode(targ)));
+		//TODO: don't assume previous line is bind texture
 		InsnList drawList = new InsnList();
 		drawList.add(new VarInsnNode(Opcodes.ALOAD, 6));
-		drawList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "getDim", "(Ljava/lang/String;)Ljava/awt/Dimension;", false));
+		drawList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		drawList.add(new FieldInsnNode(Opcodes.GETFIELD, "cpw/mods/fml/client/GuiModList", "selectedMod", "Lcpw/mods/fml/common/ModContainer;"));
+		drawList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "getDim", "(Ljava/lang/String;Lcpw/mods/fml/common/ModContainer;)Ljava/awt/Dimension;", false));
 		drawList.add(new VarInsnNode(Opcodes.ASTORE, 7));
 		draw.instructions.insert(targ, drawList);
 	}
