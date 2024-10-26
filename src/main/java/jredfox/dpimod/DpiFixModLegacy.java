@@ -56,10 +56,14 @@ public class DpiFixModLegacy {
 			for(ModContainer container : Loader.instance().getModObjectList().keySet())
 			{
 				ModMetadata meta = container.getMetadata();
-				if(!meta.logoFile.startsWith("/"))
+				String logoFile = meta == null ? "" : meta.logoFile.trim().replace("\"", "").replace("'", "");
+				if(logoFile.isEmpty())
+					continue;
+				
+				if(!logoFile.startsWith("/"))
 				{
-					meta.logoFile = "/" + meta.logoFile;
-					System.out.println("Patched Logo Path:" + meta.name + " logo:" + meta.logoFile);
+					meta.logoFile = "/" + logoFile;
+					System.out.println("Patched Mod Logo:" + meta.name + " logo:" + meta.logoFile);
 				}
 			}
 		}
