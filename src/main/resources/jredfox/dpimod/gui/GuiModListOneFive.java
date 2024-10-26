@@ -69,8 +69,7 @@ public class GuiModListOneFive {
 						}
 						else if(jar.getPath().endsWith(".class"))
 						{
-							String pjar = jar.getPath().replace("\\", "/");
-							File jarDir = new File(pjar.substring(0, pjar.lastIndexOf(containerClazz.getName().replace(".", "/") + ".class")), logoFile);
+							File jarDir = new File(GameModeLib.getDerpJar(jar, containerClazz), logoFile);
 							if(jarDir.exists())
 								in = new FileInputStream(jarDir);
 						}

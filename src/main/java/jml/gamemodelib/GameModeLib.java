@@ -305,6 +305,7 @@ public class GameModeLib {
 	
 	/**
 	 * get a file from a class Does not support Eclipse's Jar In Jar Loader but does support javaw java and URLClassLoaders
+	 * This assumes the file is contained in an archive file such as a zip or a jar. If it's a folder derp jar then it will return the physical path of the .class file
 	 */
 	public static File getFileFromClass(Class clazz)
 	{
@@ -331,6 +332,15 @@ public class GameModeLib {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	/**
+	 * @return The Root Directory of the Jar when the Jar is a Folder
+	 */
+	public static File getDerpJar(File clazzFile, Class clazz)
+	{
+		String pjar = clazzFile.getPath().replace("\\", "/");
+		return new File(pjar.substring(0, pjar.lastIndexOf(clazz.getName().replace(".", "/") + ".class")));
 	}
 
 }
