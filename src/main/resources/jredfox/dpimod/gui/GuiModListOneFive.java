@@ -18,9 +18,10 @@ public class GuiModListOneFive {
 	
     public static Dimension cachedDim = null;
     public static String logoLoc = null;
+    public static final Dimension missingDim = new Dimension(256, 256);
     public static Dimension getDim(String logoFile)
     {
-		if(cachedDim == null)
+		if(cachedDim == null || cachedDim == missingDim)
 		{
 			InputStream in = null;
 			try
@@ -33,6 +34,12 @@ public class GuiModListOneFive {
 			catch(IOException io)
 			{
 				io.printStackTrace();
+				cachedDim = missingDim;//File not found no need to print a stacktrace
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				cachedDim = missingDim;
 			}
 			finally
 			{
@@ -47,9 +54,9 @@ public class GuiModListOneFive {
 		if(logoLoc == null)
 			return;
 		
-        deleteTexture(logoLoc);
         logoLoc = null;
         cachedDim = null;
+        deleteTexture(logoLoc);
         System.gc();
 	}
     
