@@ -1,10 +1,13 @@
 package jredfox.dpimod.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -13,7 +16,6 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.client.GuiModList;
 import cpw.mods.fml.client.TextureFXManager;
 import cpw.mods.fml.common.ModContainer;
 import jml.gamemodelib.GameModeLib;
@@ -26,7 +28,17 @@ public class GuiModListOneFive {
     public static Dimension cachedDim = null;
     public static BufferedImage cachedImg = null;
     public static int cachedImgGL = 0;
-    public static final Dimension missingDim = new Dimension(256, 256);//GuiModList
+    
+    public static final Dimension missingDim = new Dimension(1, 1);//GuiModList
+    public static final BufferedImage missingo = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+    
+    static
+    {
+        Graphics2D g2d = missingo.createGraphics();
+        g2d.setColor(new Color(0, 0, 0, 0)); // RGBA (0, 0, 0, 0) is fully transparent
+        g2d.fillRect(0, 0, 1, 1);
+        g2d.dispose();
+    }
     
     public static Dimension getDim(String logoFile, ModContainer container)
     {
@@ -45,20 +57,32 @@ public class GuiModListOneFive {
 				
 				if(container != null && container.getMod() != null)
 				{
-					Class containerClazz = container.getMod().getClass();
-					File jar = GameModeLib.getFileFromClass(containerClazz);
-					if(jar.getPath().endsWith(".jar") || jar.getPath().endsWith(".zip"))
+					try
 					{
-						URL url = new URL("jar:" + jar.toURI().toURL().toString().replace("file:///", "file:/").replace("file://", "file:/") + "!/" + logoFile);
-						System.out.println(url);
-				        URLConnection connection = url.openConnection();
-				        in = connection.getInputStream();
+						Class containerClazz = container.getMod().getClass();
+						File jar = GameModeLib.getFileFromClass(containerClazz);
+						if(jar.getPath().endsWith(".jar") || jar.getPath().endsWith(".zip"))
+						{
+							URL url = new URL("jar:" + jar.toURI().toURL().toString().replace("file:///", "file:/").replace("file://", "file:/") + "!/" + logoFile);
+							System.out.println(url);
+					        URLConnection connection = url.openConnection();
+					        in = connection.getInputStream();
+						}
+						else if(jar.getPath().endsWith(".class"))
+						{
+							String pjar = jar.getPath().replace("\\", "/");
+							File jarDir = new File(pjar.substring(0, pjar.lastIndexOf(containerClazz.getName().replace(".", "/") + ".class")), logoFile);
+							if(jarDir.exists())
+								in = new FileInputStream(jarDir);
+						}
 					}
-					else if(jar.getPath().endsWith(".class"))
+					catch(IOException io)
 					{
-						String pjar = jar.getPath().replace("\\", "/");
-						File jarDir = new File(pjar.substring(0, pjar.lastIndexOf(containerClazz.getName().replace(".", "/") + ".class")), logoFile);
-						in = new FileInputStream(jarDir);
+						//Don't print file not found exceptions
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
 					}
 				}
 				
@@ -73,30 +97,35 @@ public class GuiModListOneFive {
 			}
 			catch(FileNotFoundException io)
 			{
-				io.printStackTrace();
-				cachedDim = missingDim;//File not found no need to print a stacktrace
+				missingTexture();
 			}
 			catch(IllegalArgumentException i)
 			{
-				i.printStackTrace();
-				cachedDim = missingDim;//File not found no need to print a stacktrace
+				missingTexture();
 			}
 			catch(Exception e)
 			{
 				e.printStackTrace();
-				cachedDim = missingDim;
+				missingTexture();
 			}
 			finally
 			{
 				DpiFix.closeQuietly(in);
 			}
 		}
-		if(cachedDim != null && cachedDim != missingDim && cachedImgGL != 0)
+		if(cachedDim != null && cachedImgGL != 0)
 		{
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, cachedImgGL);
             Minecraft.getMinecraft().renderEngine.resetBoundTexture();
 		}
 		return cachedDim;
+	}
+
+	private static void missingTexture() 
+	{
+		cachedDim = missingDim;
+		cachedImg = missingo;
+		cachedImgGL = Minecraft.getMinecraft().renderEngine.allocateAndSetupTexture(cachedImg);
 	}
 
 	public static void cleanup() 
