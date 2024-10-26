@@ -21,7 +21,6 @@ import jredfox.DpiFix;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderEngine;
 
-//GuiModList
 public class GuiModListOneFive {
 	
     public static Dimension cachedDim = null;

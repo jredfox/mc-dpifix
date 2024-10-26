@@ -126,6 +126,8 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	public final String toggleFullScreenMethod = CoreUtils.getObfString("toggleFullscreen", "k");//func_71352_k
 	public final String resizeMethod = CoreUtils.getObfString("resize", "a");//func_71370_a
 	
+	public final String renderEngine = CoreUtils.getObfString("net/minecraft/client/renderer/RenderEngine", ForgeVersion.getBuildVersion() <= 598 ? "bfy" : ForgeVersion.getMinorVersion() < 8 ? "bgf" : "bge");
+	
     /**
      * get De-AWT boolean based on the OS
      */
@@ -776,8 +778,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		//dim = GuiModListOneFive#getDim(logoFile, this.selectedMod);
 		MethodNode draw = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("drawScreen", "a"), "(IIF)V");
 		AbstractInsnNode targ = CoreUtils.nextLabelNode(CoreUtils.getMethodInsnNode(draw, Opcodes.INVOKEVIRTUAL, "cpw/mods/fml/client/TextureFXManager", "getTextureDimensions", "(Ljava/lang/String;)Ljava/awt/Dimension;", false));
-		CoreUtils.deleteLine(draw, CoreUtils.prevLabelNode(CoreUtils.prevLabelNode(targ)));
-		//TODO: don't assume previous line is bind texture
+		CoreUtils.deleteLine(draw, CoreUtils.getMethodInsnNode(draw, Opcodes.INVOKEVIRTUAL, this.renderEngine, CoreUtils.getObfString("bindTexture", "b"), "(Ljava/lang/String;)V", false));
 		InsnList drawList = new InsnList();
 		drawList.add(new VarInsnNode(Opcodes.ALOAD, 6));
 		drawList.add(new VarInsnNode(Opcodes.ALOAD, 0));

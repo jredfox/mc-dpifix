@@ -231,27 +231,6 @@ public class CoreUtils {
 		return null;
 	}
 	
-	/**
-	 * Gets the MethodInsnNode but if the owner is "*" it can match any class for the owner
-	 */
-	public static MethodInsnNode getMethodInsnNodeLoose(MethodNode node, int opcode, String owner, String name, String desc, boolean itf)
-	{
-		AbstractInsnNode[] arr = node.instructions.toArray();
-		MethodInsnNode compare = newMethodInsnNode(opcode, owner, name, desc, itf);
-		for(AbstractInsnNode ab : arr)
-		{
-			if(ab instanceof MethodInsnNode)
-			{
-				MethodInsnNode insn = (MethodInsnNode) ab;
-				if(compare.getOpcode() == insn.getOpcode() && compare.name.equals(insn.name) && compare.desc.equals(insn.desc) && (compare.owner.equals("*") || compare.owner.equals(insn.owner)) )
-				{
-					return insn;
-				}
-			}
-		}
-		return null;
-	}
-	
 	public static boolean equals(MethodInsnNode obj1, MethodInsnNode obj2)
 	{
 		return obj1.getOpcode() == obj2.getOpcode() && obj1.name.equals(obj2.name) && obj1.desc.equals(obj2.desc) && obj1.owner.equals(obj2.owner);
