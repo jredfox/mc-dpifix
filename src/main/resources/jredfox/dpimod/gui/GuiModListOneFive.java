@@ -64,7 +64,6 @@ public class GuiModListOneFive {
 						if(jar.getPath().endsWith(".jar") || jar.getPath().endsWith(".zip"))
 						{
 							URL url = new URL("jar:" + jar.toURI().toURL().toString().replace("file:///", "file:/").replace("file://", "file:/") + "!/" + logoFile);
-							System.out.println(url);
 					        URLConnection connection = url.openConnection();
 					        in = connection.getInputStream();
 						}
@@ -95,7 +94,7 @@ public class GuiModListOneFive {
 				cachedDim = new Dimension(img.getWidth(), img.getHeight());
 				cachedImgGL = manager.allocateAndSetupTexture(cachedImg);
 			}
-			catch(FileNotFoundException io)
+			catch(IOException io)
 			{
 				missingTexture();
 			}
