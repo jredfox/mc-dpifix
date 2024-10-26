@@ -42,10 +42,10 @@ public class GuiModListOneFive {
     
     public static Dimension getDim(String logoFile, ModContainer container)
     {
+		RenderEngine manager = Minecraft.getMinecraft().renderEngine;
 		if(cachedDim == null)
 		{
 			InputStream in = null;
-			RenderEngine manager = Minecraft.getMinecraft().renderEngine;
 			try
 			{
 				//shave off the full path as we are not using the system class loader
@@ -115,7 +115,7 @@ public class GuiModListOneFive {
 		if(cachedDim != null && cachedImgGL != 0)
 		{
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, cachedImgGL);
-            Minecraft.getMinecraft().renderEngine.resetBoundTexture();
+            manager.resetBoundTexture();
 		}
 		return cachedDim;
 	}
