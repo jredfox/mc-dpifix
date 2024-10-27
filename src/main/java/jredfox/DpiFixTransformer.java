@@ -50,7 +50,6 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 			break;
 			
 			case 3:
-				System.out.println("AT:" + notch_mc);
 				CoreUtils.pubMinusFinal(classNode);
 			break;
 			
@@ -357,7 +356,9 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 			return;
 		
 		//gui = GuiHooks#hookGui(gui);
-		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("displayGuiScreen", "func_71373_a"), "(Lnet/minecraft/client/gui/GuiScreen;)V");//TODO: NOTCHIFY for 1.6.1 - 1.6.4 notch support
+		String displayGuiScreen = CoreUtils.getObfString("displayGuiScreen", !onesixnotch ? "func_71373_a" : "a");
+		String desc = CoreUtils.getObfString("(Lnet/minecraft/client/gui/GuiScreen;)V", !onesixnotch ? "(Lnet/minecraft/client/gui/GuiScreen;)V" : (ForgeVersion.getMinorVersion() == 11 ? "(Lawe;)V" : ForgeVersion.getMinorVersion() == 10 ? "(Lawb;)V" : "(Lavv;)V") );
+		MethodNode m = CoreUtils.getMethodNode(classNode, displayGuiScreen, desc);
 		InsnList li = new InsnList();
 		LabelNode l0 = new LabelNode();
 		li.add(l0);
@@ -390,7 +391,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		list.add(new VarInsnNode(Opcodes.ILOAD, 1));
 		list.add(new VarInsnNode(Opcodes.ILOAD, 2));
 		list.add(new VarInsnNode(Opcodes.FLOAD, 3));
-		list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/GuiScreen", CoreUtils.getObfString("drawScreen", "func_73863_a"), "(IIF)V", false)); //TODO: NOTCHIFY
+		list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/GuiScreen", CoreUtils.getObfString("drawScreen", "func_73863_a"), "(IIF)V", false));
 		LabelNode l1 = new LabelNode();
 		list.add(l1);
 		list.add(new LineNumberNode(131, l1));
