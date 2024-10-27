@@ -352,7 +352,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void hookGui(ClassNode classNode)
 	{
 		//only apply this for forge 1.6x
-		if(!DpiFix.modLogoFix || ForgeVersion.getMajorVersion() > 9)
+		if(!DpiFix.modLogoFix || ForgeVersion.getMajorVersion() != 9)
 			return;
 		
 		//gui = GuiHooks#hookGui(gui);
@@ -406,6 +406,43 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		mv.visitMaxs(4, 4);
 		mv.visitEnd();
 		classNode.methods.add(mv);
+		
+		//1.6.1 support
+		if(ForgeVersion.getMajorVersion() == 8)
+			patchGuiModListOneSixOne(classNode);
+	}
+	
+	public void patchGuiModListOneSixOne(ClassNode classNode)
+	{
+		if(!DpiFix.modLogoFix)
+			return;
+		
+		System.out.println("Patching GuiModList");
+		
+		//GuiModListOneFive#cleanup
+		MethodNode m = CoreUtils.getMethodNode(classNode, "selectModIndex", "(I)V");
+		InsnList li = new InsnList();
+		li.add(new LabelNode());
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "cleanup", "()V", false));
+		m.instructions.insert(li);
+		
+		//remove: this.mc.bindTexture();
+		//dim = GuiModListOneFive#getDim(logoFile, this.selectedMod);
+		String renderEngine = CoreUtils.getObfString("net/minecraft/client/renderer/texture/TextureManager", "bib");
+		MethodNode draw = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("drawScreen", "a"), "(IIF)V");
+		AbstractInsnNode targ = CoreUtils.nextLabelNode(CoreUtils.getMethodInsnNode(draw, Opcodes.INVOKEVIRTUAL, "cpw/mods/fml/client/TextureFXManager", "getTextureDimensions", "(Ljava/lang/String;)Ljava/awt/Dimension;", false));
+		
+		MethodInsnNode bindInsn = CoreUtils.getMethodInsnNode(draw, Opcodes.INVOKEVIRTUAL, renderEngine, CoreUtils.getObfString("bindTexture", "a"), "(Ljava/lang/String;)V", false);
+		if(bindInsn != null)
+			CoreUtils.deleteLine(draw, bindInsn);
+		
+		InsnList drawList = new InsnList();
+		drawList.add(new VarInsnNode(Opcodes.ALOAD, 6));
+		drawList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		drawList.add(new FieldInsnNode(Opcodes.GETFIELD, "cpw/mods/fml/client/GuiModList", "selectedMod", "Lcpw/mods/fml/common/ModContainer;"));
+		drawList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "getDim", "(Ljava/lang/String;Lcpw/mods/fml/common/ModContainer;)Ljava/awt/Dimension;", false));
+		drawList.add(new VarInsnNode(Opcodes.ASTORE, 7));
+		draw.instructions.insert(targ, drawList);
 	}
 
 }

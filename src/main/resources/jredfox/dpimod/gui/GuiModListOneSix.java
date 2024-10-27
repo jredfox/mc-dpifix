@@ -88,7 +88,7 @@ public class GuiModListOneSix extends GuiModList
                 				}
                 				
                 				if(cachedLogo == null)
-                					cachedLogo = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream(logoFile));
+                					cachedLogo = this.readImg(logoFile);
                 				
                     			cachedDim = new Dimension(cachedLogo.getWidth(), cachedLogo.getHeight());
                     			cachedLoc = tm.getDynamicTextureLocation("modlogo", new DynamicTexture(this.cachedLogo));
@@ -167,7 +167,31 @@ public class GuiModListOneSix extends GuiModList
         this.drawButtons(p_571_1_, p_571_2_, p_571_3_);
     }
 
-    public static final ResourceLocation missing_texture = new ResourceLocation("dpi-fix", "missing_texture");
+    public BufferedImage readImg(String logoFile) throws Exception
+    {
+    	InputStream in = null;
+    	try
+    	{
+    		in = this.getClass().getClassLoader().getResourceAsStream(logoFile);
+    		return ImageIO.read(in);
+    	}
+    	catch(Exception t)
+    	{
+    		throw t;
+    	}
+    	finally
+    	{
+    		if(in != null)
+    		{
+    			try 
+    			{
+					in.close();
+				} catch (Exception e) {}
+    		}
+    	}
+	}
+
+	public static final ResourceLocation missing_texture = new ResourceLocation("dpi-fix", "missing_texture");
     public void missingTexture() 
     {
 		this.cachedLoc = missing_texture;
