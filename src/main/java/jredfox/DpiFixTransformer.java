@@ -372,7 +372,8 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 
 	public void patchGuiModList(ClassNode classNode)
 	{
-		if(!DpiFix.modLogoFix)
+		//only apply this for forge 1.6x
+		if(!DpiFix.modLogoFix || ForgeVersion.getMajorVersion() > 9)
 			return;
 		
 		//AT the Class
