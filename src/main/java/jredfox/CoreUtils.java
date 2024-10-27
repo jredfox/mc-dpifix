@@ -21,6 +21,7 @@ import org.ow2.asm.tree.InsnList;
 import org.ow2.asm.tree.JumpInsnNode;
 import org.ow2.asm.tree.LabelNode;
 import org.ow2.asm.tree.LineNumberNode;
+import org.ow2.asm.tree.LocalVariableNode;
 import org.ow2.asm.tree.MethodInsnNode;
 import org.ow2.asm.tree.MethodNode;
 
@@ -427,6 +428,14 @@ public class CoreUtils {
 		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "disabled", "()V", false));
 		m.instructions.insert(label, li);
 		return label;
+	}
+	
+	public static LocalVariableNode getLocalVariableNode(MethodNode m, int i) 
+	{
+		for(LocalVariableNode l : m.localVariables)
+			if(l.index == i)
+				return l;
+		return null;
 	}
 	
 	public static void pubMinusFinal(ClassNode classNode)

@@ -18,6 +18,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.ForgeVersion;
+import net.minecraftforge.common.MinecraftForge;
 
 public class DpiFixCoreMod implements IClassTransformer {
 	
@@ -88,7 +89,9 @@ public class DpiFixCoreMod implements IClassTransformer {
 		return new String[] {
 			"net.minecraft.client.Minecraft", 
 			"net.minecraft.client.gui.LoadingScreenRenderer",
-			"jredfox.dpimod.DpiFixModLegacy"
+			"jredfox.dpimod.DpiFixModLegacy",
+			"net.minecraft.client.renderer.texture.TextureManager",
+			"cpw.mods.fml.client.GuiModList"
 		};
 	}
 

@@ -12,6 +12,8 @@ import org.ow2.asm.tree.IntInsnNode;
 import org.ow2.asm.tree.JumpInsnNode;
 import org.ow2.asm.tree.LabelNode;
 import org.ow2.asm.tree.LdcInsnNode;
+import org.ow2.asm.tree.LineNumberNode;
+import org.ow2.asm.tree.LocalVariableNode;
 import org.ow2.asm.tree.MethodInsnNode;
 import org.ow2.asm.tree.MethodNode;
 import org.ow2.asm.tree.TypeInsnNode;
@@ -36,6 +38,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 				patchFullScreen(notch_mc, classNode);
 				patchMaxResFix( notch_mc, classNode);
             	patchMemCache(notch_mc, classNode);
+            	hookGui(classNode);
 			break;
 			
 			case 1:
@@ -46,11 +49,20 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 				DpiFixAnn.patchAtMod(classNode);
 			break;
 			
+			case 3:
+				System.out.println("AT:" + notch_mc);
+				CoreUtils.pubMinusFinal(classNode);
+			break;
+			
+			case 4:
+				patchGuiModList(classNode);
+			break;
+			
 			default:
 				break;
 		}
 	}
-	
+
 	public void patchMemCache(String mcClazz, ClassNode classNode)
 	{
 		MethodNode clinit = CoreUtils.getMethodNode(classNode, "<clinit>", "()V");
@@ -333,6 +345,60 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 			}
 			ab = ab.getNext();
 		}
+	}
+	
+	/**
+	 * Hook Gui for 1.6x
+	 */
+	public void hookGui(ClassNode classNode)
+	{
+		//only apply this for forge 1.6x
+		if(ForgeVersion.getMajorVersion() > 9)
+			return;
+		
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("displayGuiScreen", "func_71373_a"), "(Lnet/minecraft/client/gui/GuiScreen;)V");//TODO: NOTCHIFY for 1.6.1 - 1.6.4 notch support
+		InsnList li = new InsnList();
+		LabelNode l0 = new LabelNode();
+		li.add(l0);
+		li.add(new VarInsnNode(Opcodes.ALOAD, 1));
+		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiHooks", "hookGui", "(Lnet/minecraft/client/gui/GuiScreen;)Lnet/minecraft/client/gui/GuiScreen;", false));
+		li.add(new VarInsnNode(Opcodes.ASTORE, 1));
+		m.instructions.insert(li);
+		
+		//Patch the Local Variable's Starting label to the beginning of the method
+		CoreUtils.getLocalVariableNode(m, 1).start = l0;
+	}
+
+	public void patchGuiModList(ClassNode classNode)
+	{
+		//AT the Class
+		CoreUtils.pubMinusFinal(classNode);
+		
+		MethodNode mv = new MethodNode(Opcodes.ACC_PUBLIC, "drawButtons", "(IIF)V", null, null);
+		mv.visitCode();
+		InsnList list = new InsnList();
+		LabelNode l0 = new LabelNode();
+		list.add(l0);
+		list.add(new LineNumberNode(130, l0));
+		list.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		list.add(new VarInsnNode(Opcodes.ILOAD, 1));
+		list.add(new VarInsnNode(Opcodes.ILOAD, 2));
+		list.add(new VarInsnNode(Opcodes.FLOAD, 3));
+		list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/GuiScreen", "drawScreen", "(IIF)V", false));
+		LabelNode l1 = new LabelNode();
+		list.add(l1);
+		list.add(new LineNumberNode(131, l1));
+		list.add(new InsnNode(Opcodes.RETURN));
+		LabelNode l2 = new LabelNode();
+		list.add(l2);
+		mv.instructions = list;
+		mv.localVariables.add(new LocalVariableNode("this", "Lcpw/mods/fml/client/GuiModList;", null, l0, l2, 0));
+		mv.localVariables.add(new LocalVariableNode("x", "I", null, l0, l2, 1));
+		mv.localVariables.add(new LocalVariableNode("y", "I", null, l0, l2, 2));
+		mv.localVariables.add(new LocalVariableNode("pt", "F", null, l0, l2, 3));
+		mv.visitMaxs(4, 4);
+		mv.visitEnd();
+		classNode.methods.add(mv);
 	}
 
 }
