@@ -191,7 +191,6 @@ public class GuiModListOneSix extends GuiModList
     {
     	if(this.cachedLoc != null && this.cachedLoc != missing_texture)
     		this.deleteTexture(this.cachedLoc);
-    	
     	this.cachedLoc = null;
     	this.cachedDim = null;
     	this.cachedLogo = null;

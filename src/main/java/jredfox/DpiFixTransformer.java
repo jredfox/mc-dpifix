@@ -353,7 +353,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void hookGui(ClassNode classNode)
 	{
 		//only apply this for forge 1.6x
-		if(ForgeVersion.getMajorVersion() > 9)
+		if(!DpiFix.modLogoFix || ForgeVersion.getMajorVersion() > 9)
 			return;
 		
 		//gui = GuiHooks#hookGui(gui);
@@ -372,6 +372,9 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 
 	public void patchGuiModList(ClassNode classNode)
 	{
+		if(!DpiFix.modLogoFix)
+			return;
+		
 		//AT the Class
 		CoreUtils.pubMinusFinal(classNode);
 		

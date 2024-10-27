@@ -46,5 +46,25 @@ public class DpiFixModLegacy {
 			meta.logoFile = "/" + meta.logoFile;
 		}
 	}
+	
+	@Mod.EventHandler
+	public void modinit(FMLInitializationEvent e)
+	{
+		//Patch 1.6x Mod's Logo Path since they may still try to use the 1.5.2 format of prepending the "/"
+		if(DpiFix.modLogoFix && ForgeVersion.getMajorVersion() > 7 && ForgeVersion.getMajorVersion() < 10)
+		{
+			for(ModContainer con : Loader.instance().getModList())
+			{
+				ModMetadata meta = con.getMetadata();
+				String logoFile = meta.logoFile;
+				if(logoFile.startsWith("/"))
+				{
+					logoFile = logoFile.substring(1).replace("\"", "").replace("'", "").trim();
+					if(!logoFile.isEmpty())
+						meta.logoFile = logoFile;
+				}
+			}
+		}
+	}
 
 }
