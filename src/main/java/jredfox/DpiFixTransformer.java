@@ -375,6 +375,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		//AT the Class
 		CoreUtils.pubMinusFinal(classNode);
 		
+		//public void drawButtons(int x, int y, float pt) { super.drawScreen(x, y, pt); }
 		MethodNode mv = new MethodNode(Opcodes.ACC_PUBLIC, "drawButtons", "(IIF)V", null, null);
 		mv.visitCode();
 		InsnList list = new InsnList();
