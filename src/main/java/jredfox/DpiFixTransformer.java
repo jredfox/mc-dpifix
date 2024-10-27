@@ -356,6 +356,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		if(ForgeVersion.getMajorVersion() > 9)
 			return;
 		
+		//gui = GuiHooks#hookGui(gui);
 		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("displayGuiScreen", "func_71373_a"), "(Lnet/minecraft/client/gui/GuiScreen;)V");//TODO: NOTCHIFY for 1.6.1 - 1.6.4 notch support
 		InsnList li = new InsnList();
 		LabelNode l0 = new LabelNode();
@@ -384,7 +385,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		list.add(new VarInsnNode(Opcodes.ILOAD, 1));
 		list.add(new VarInsnNode(Opcodes.ILOAD, 2));
 		list.add(new VarInsnNode(Opcodes.FLOAD, 3));
-		list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/GuiScreen", "drawScreen", "(IIF)V", false));
+		list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/GuiScreen", CoreUtils.getObfString("drawScreen", "func_73863_a"), "(IIF)V", false)); //TODO: NOTCHIFY
 		LabelNode l1 = new LabelNode();
 		list.add(l1);
 		list.add(new LineNumberNode(131, l1));
