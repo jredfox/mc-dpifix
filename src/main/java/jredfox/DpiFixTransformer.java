@@ -352,10 +352,11 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void hookGui(ClassNode classNode)
 	{
 		//only apply this for forge 1.6x
-		if(!DpiFix.modLogoFix || ForgeVersion.getMajorVersion() != 9)
+		if(!DpiFix.modLogoFix || ForgeVersion.getMajorVersion() > 9)
 			return;
 		
 		//gui = GuiHooks#hookGui(gui);
+		boolean onesixone = ForgeVersion.getMajorVersion() == 8;
 		String displayGuiScreen = CoreUtils.getObfString("displayGuiScreen", !onesixnotch ? "func_71373_a" : "a");
 		String desc = CoreUtils.getObfString("(Lnet/minecraft/client/gui/GuiScreen;)V", !onesixnotch ? "(Lnet/minecraft/client/gui/GuiScreen;)V" : (ForgeVersion.getMinorVersion() == 11 ? "(Lawe;)V" : ForgeVersion.getMinorVersion() == 10 ? "(Lawb;)V" : "(Lavv;)V") );
 		MethodNode m = CoreUtils.getMethodNode(classNode, displayGuiScreen, desc);
@@ -363,7 +364,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		LabelNode l0 = new LabelNode();
 		li.add(l0);
 		li.add(new VarInsnNode(Opcodes.ALOAD, 1));
-		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiHooks", "hookGui", "(Lnet/minecraft/client/gui/GuiScreen;)Lnet/minecraft/client/gui/GuiScreen;", false));
+		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/" + (onesixone ? "GuiHooksOneSixOne" : "GuiHooksOneSix"), "hookGui", "(Lnet/minecraft/client/gui/GuiScreen;)Lnet/minecraft/client/gui/GuiScreen;", false));
 		li.add(new VarInsnNode(Opcodes.ASTORE, 1));
 		m.instructions.insert(li);
 		
@@ -406,43 +407,6 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		mv.visitMaxs(4, 4);
 		mv.visitEnd();
 		classNode.methods.add(mv);
-		
-		//1.6.1 support
-		if(ForgeVersion.getMajorVersion() == 8)
-			patchGuiModListOneSixOne(classNode);
-	}
-	
-	public void patchGuiModListOneSixOne(ClassNode classNode)
-	{
-		if(!DpiFix.modLogoFix)
-			return;
-		
-		System.out.println("Patching GuiModList");
-		
-		//GuiModListOneFive#cleanup
-		MethodNode m = CoreUtils.getMethodNode(classNode, "selectModIndex", "(I)V");
-		InsnList li = new InsnList();
-		li.add(new LabelNode());
-		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "cleanup", "()V", false));
-		m.instructions.insert(li);
-		
-		//remove: this.mc.bindTexture();
-		//dim = GuiModListOneFive#getDim(logoFile, this.selectedMod);
-		String renderEngine = CoreUtils.getObfString("net/minecraft/client/renderer/texture/TextureManager", "bib");
-		MethodNode draw = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("drawScreen", "a"), "(IIF)V");
-		AbstractInsnNode targ = CoreUtils.nextLabelNode(CoreUtils.getMethodInsnNode(draw, Opcodes.INVOKEVIRTUAL, "cpw/mods/fml/client/TextureFXManager", "getTextureDimensions", "(Ljava/lang/String;)Ljava/awt/Dimension;", false));
-		
-		MethodInsnNode bindInsn = CoreUtils.getMethodInsnNode(draw, Opcodes.INVOKEVIRTUAL, renderEngine, CoreUtils.getObfString("bindTexture", "a"), "(Ljava/lang/String;)V", false);
-		if(bindInsn != null)
-			CoreUtils.deleteLine(draw, bindInsn);
-		
-		InsnList drawList = new InsnList();
-		drawList.add(new VarInsnNode(Opcodes.ALOAD, 6));
-		drawList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		drawList.add(new FieldInsnNode(Opcodes.GETFIELD, "cpw/mods/fml/client/GuiModList", "selectedMod", "Lcpw/mods/fml/common/ModContainer;"));
-		drawList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "getDim", "(Ljava/lang/String;Lcpw/mods/fml/common/ModContainer;)Ljava/awt/Dimension;", false));
-		drawList.add(new VarInsnNode(Opcodes.ASTORE, 7));
-		draw.instructions.insert(targ, drawList);
 	}
 
 }
