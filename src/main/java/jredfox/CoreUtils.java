@@ -15,6 +15,7 @@ import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.AnnotationNode;
 import org.ow2.asm.tree.ClassNode;
 import org.ow2.asm.tree.FieldInsnNode;
+import org.ow2.asm.tree.FieldNode;
 import org.ow2.asm.tree.FrameNode;
 import org.ow2.asm.tree.InsnList;
 import org.ow2.asm.tree.JumpInsnNode;
@@ -426,6 +427,27 @@ public class CoreUtils {
 		li.add(newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/CoreUtils", "disabled", "()V", false));
 		m.instructions.insert(label, li);
 		return label;
+	}
+	
+	public static void pubMinusFinal(ClassNode classNode)
+	{
+		for(FieldNode f : classNode.fields)
+		{
+		    // Get the current access flags
+		    int access = f.access;
+		    
+		    // Remove conflicting access modifiers
+		    access &= ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED);
+		    
+		    // Remove the final modifier
+		    access &= ~Opcodes.ACC_FINAL;
+		    
+		    // Set the public modifier
+		    access |= Opcodes.ACC_PUBLIC;
+		    
+		    // Update the field's access flags
+		    f.access = access;
+		}
 	}
 
 }

@@ -86,7 +86,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			
 			case 13:
 			case 14:
-				pubMinusFinal(classNode);
+				CoreUtils.pubMinusFinal(classNode);
 			break;
 
 			default:
@@ -786,27 +786,6 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		drawList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/GuiModListOneFive", "getDim", "(Ljava/lang/String;Lcpw/mods/fml/common/ModContainer;)Ljava/awt/Dimension;", false));
 		drawList.add(new VarInsnNode(Opcodes.ASTORE, 7));
 		draw.instructions.insert(targ, drawList);
-	}
-	
-	public void pubMinusFinal(ClassNode classNode)
-	{
-		for(FieldNode f : classNode.fields)
-		{
-		    // Get the current access flags
-		    int access = f.access;
-		    
-		    // Remove conflicting access modifiers
-		    access &= ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED);
-		    
-		    // Remove the final modifier
-		    access &= ~Opcodes.ACC_FINAL;
-		    
-		    // Set the public modifier
-		    access |= Opcodes.ACC_PUBLIC;
-		    
-		    // Update the field's access flags
-		    f.access = access;
-		}
 	}
 
 }
