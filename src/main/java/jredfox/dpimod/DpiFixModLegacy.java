@@ -56,6 +56,12 @@ public class DpiFixModLegacy {
 			for(ModContainer con : Loader.instance().getModList())
 			{
 				ModMetadata meta = con.getMetadata();
+				if(meta.logoFile == null)
+				{
+					meta.logoFile = "";
+					continue;
+				}
+				
 				String logoFile = meta.logoFile;
 				if(logoFile.startsWith("/"))
 				{
