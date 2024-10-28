@@ -31,7 +31,7 @@ public class DpiFixModLegacy {
 	{
 		//The Coremod not loading can only mean one of two things they are in 1.5x or they deleted or modified the meta-inf
 		if(!DpiFix.coremodLoaded)
-			throw new IllegalArgumentException("Dpi-Fix Mod Must be put in your coremods Folder!");//GuiModList
+			throw new IllegalArgumentException("Dpi-Fix Mod Must be put in your coremods Folder!");
 	}
 
 //	@PreInit replaces @EventHandler at runtime dynamically if it's needed
