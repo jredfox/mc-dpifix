@@ -364,7 +364,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		LabelNode l0 = new LabelNode();
 		li.add(l0);
 		li.add(new VarInsnNode(Opcodes.ALOAD, 1));
-		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/" + (onesixone ? "GuiHooksOneSixOne" : "GuiHooksOneSix"), "hookGui", "(Lnet/minecraft/client/gui/GuiScreen;)Lnet/minecraft/client/gui/GuiScreen;", false));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/dpimod/gui/" + (onesixone ? "GuiHooksOneSixOne" : "GuiHooksOneSix"), "hookGui", "(Lnet/minecraft/client/gui/GuiScreen;)Lnet/minecraft/client/gui/GuiScreen;", false));
 		li.add(new VarInsnNode(Opcodes.ASTORE, 1));
 		m.instructions.insert(li);
 		
@@ -392,7 +392,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		list.add(new VarInsnNode(Opcodes.ILOAD, 1));
 		list.add(new VarInsnNode(Opcodes.ILOAD, 2));
 		list.add(new VarInsnNode(Opcodes.FLOAD, 3));
-		list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/GuiScreen", CoreUtils.getObfString("drawScreen", "func_73863_a"), "(IIF)V", false));
+		list.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/gui/GuiScreen", CoreUtils.getObfString("drawScreen", "func_73863_a"), "(IIF)V", false));
 		LabelNode l1 = new LabelNode();
 		list.add(l1);
 		list.add(new LineNumberNode(131, l1));
