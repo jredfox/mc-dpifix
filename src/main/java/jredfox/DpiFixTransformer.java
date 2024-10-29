@@ -419,8 +419,8 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		if(!DpiFix.mainMenu || ForgeVersion.getMajorVersion() > 9)
 			return;
 		
-		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("rotateAndBlurSkybox", "func_73968_a"), "(F)V"); //TODO:Notchify
-		MethodInsnNode targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/texture/TextureManager", CoreUtils.getObfString("bindTexture", "func_110577_a"), "(Lnet/minecraft/util/ResourceLocation;)V", false);//TODO: Notchify
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("rotateAndBlurSkybox", !onesixnotch ? "func_73968_a" : "a" ), "(F)V");
+		MethodInsnNode targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, !onesixnotch ? "net/minecraft/client/renderer/texture/TextureManager" : (ForgeVersion.getMinorVersion() == 11 ? "bim" : ForgeVersion.getMinorVersion() == 10 ? "bij" : "bib"), CoreUtils.getObfString("bindTexture", !onesixnotch ? "func_110577_a" : "a"), !onesixnotch ? "(Lnet/minecraft/util/ResourceLocation;)V" : (ForgeVersion.getMinorVersion() == 11 ? (ForgeVersion.getBuildVersion() > 878 ? "(Lbjo;)V" : "(Lbjp;)V") : ForgeVersion.getMinorVersion() == 10 ? "(Lbjl;)V" : "(Lbjd;)V"), false);
 		InsnList li = new InsnList();
 		li.add(new LabelNode());
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 3553));
