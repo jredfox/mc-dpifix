@@ -426,12 +426,12 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 3553));
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 10241));
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 9729));
-		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glTexParameteri", "(III)V", false));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glTexParameteri", "(III)V", false));
 		li.add(new LabelNode());
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 3553));
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 10240));
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 9729));
-		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glTexParameteri", "(III)V", false));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glTexParameteri", "(III)V", false));
 		m.instructions.insert(targ, li);
 	}
 	
