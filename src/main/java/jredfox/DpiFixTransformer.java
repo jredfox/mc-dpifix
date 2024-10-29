@@ -57,6 +57,10 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 				patchGuiModList(classNode);
 			break;
 			
+			case 5:
+				patchGuiMainMenu(classNode);
+			break;
+			
 			default:
 				break;
 		}
@@ -408,5 +412,27 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		mv.visitEnd();
 		classNode.methods.add(mv);
 	}
-
+	
+	public void patchGuiMainMenu(ClassNode classNode)
+	{
+		//only apply this for forge 1.6x
+		if(!DpiFix.mainMenu || ForgeVersion.getMajorVersion() > 9)
+			return;
+		
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("rotateAndBlurSkybox", "func_73968_a"), "(F)V"); //TODO:Notchify
+		MethodInsnNode targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/texture/TextureManager", CoreUtils.getObfString("bindTexture", "func_110577_a"), "(Lnet/minecraft/util/ResourceLocation;)V", false);//TODO: Notchify
+		InsnList li = new InsnList();
+		li.add(new LabelNode());
+		li.add(new IntInsnNode(Opcodes.SIPUSH, 3553));
+		li.add(new IntInsnNode(Opcodes.SIPUSH, 10241));
+		li.add(new IntInsnNode(Opcodes.SIPUSH, 9729));
+		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glTexParameteri", "(III)V", false));
+		li.add(new LabelNode());
+		li.add(new IntInsnNode(Opcodes.SIPUSH, 3553));
+		li.add(new IntInsnNode(Opcodes.SIPUSH, 10240));
+		li.add(new IntInsnNode(Opcodes.SIPUSH, 9729));
+		li.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glTexParameteri", "(III)V", false));
+		m.instructions.insert(targ, li);
+	}
+	
 }

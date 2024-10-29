@@ -91,7 +91,8 @@ public class DpiFixCoreMod implements IClassTransformer {
 			"net.minecraft.client.gui.LoadingScreenRenderer",
 			"jredfox.dpimod.DpiFixModLegacy",
 			"net.minecraft.client.renderer.texture.TextureManager",
-			"cpw.mods.fml.client.GuiModList"
+			"cpw.mods.fml.client.GuiModList",
+			"net.minecraft.client.gui.GuiMainMenu"
 		};
 	}
 
