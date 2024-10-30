@@ -61,6 +61,10 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 				patchGuiMainMenu(classNode);
 			break;
 			
+			case 6:
+				patchOptifineNonWindows(classNode);
+			break;
+			
 			default:
 				break;
 		}
@@ -435,6 +439,31 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 9729));
 		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL11", "glTexParameteri", "(III)V", false));
 		m.instructions.insert(targ, li);
+	}
+	
+	/**
+	 * Disables Optifine's Calls of Display#setResizable(false); for non windows
+	 */
+	public void patchOptifineNonWindows(ClassNode classNode)
+	{
+		if(DpiFix.isWindows)
+			return;
+		
+		System.out.println("Patching Config for Optifine Compatibility on Non Windows");
+		MethodInsnNode insn = CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setResizable", "(Z)V", false);
+		for(MethodNode m : classNode.methods)
+		{
+			AbstractInsnNode ab = m.instructions.getFirst();
+			while(ab != null)
+			{
+				if(ab instanceof MethodInsnNode && CoreUtils.equals(insn, (MethodInsnNode) ab))
+				{
+					if(ab.getPrevious().getOpcode() == Opcodes.ICONST_0)
+						ab = CoreUtils.deleteLine(m, ab);
+				}
+				ab = ab.getNext();
+			}
+		}
 	}
 	
 }
