@@ -41,7 +41,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
 	{
 		int index = cls.indexOf(transformedName);
-		if(index != -1)
+		if(index != -1 && basicClass != null)
 		{
 			try
 			{

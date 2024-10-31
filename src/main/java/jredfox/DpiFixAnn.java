@@ -19,7 +19,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 	
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
 	{
-		if(transformedName.equals("jredfox.dpimod.DpiFixModLegacy"))
+		if(transformedName.equals("jredfox.dpimod.DpiFixModLegacy") && basicClass != null)
 		{
 			try
 			{
