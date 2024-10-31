@@ -251,6 +251,27 @@ public class CoreUtils {
 		return null;
 	}
 	
+	public static void dumpFileErr(String name, byte[] bytes)
+	{
+		if(Boolean.parseBoolean(System.getProperty("asm.dump", "false")))
+		{
+			try 
+			{
+				System.err.println("Error Transforming:" + name);
+				if(bytes != null)
+					dumpFile(name, bytes);
+			}
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			System.err.println("Error Transforming:" + name + " Add -Dasm.dump=true to the JVM args to print the classes");
+		}
+	}
+	
 	/**
 	 * dumps a file from memory
 	 * @throws IOException 

@@ -18,7 +18,6 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.ForgeVersion;
-import net.minecraftforge.common.MinecraftForge;
 
 public class DpiFixCoreMod implements IClassTransformer {
 	
@@ -58,6 +57,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 			}
 			catch(Throwable t)
 			{
+				CoreUtils.dumpFileErr(transformedName, basicClass);
 				t.printStackTrace();
 			}
 		}

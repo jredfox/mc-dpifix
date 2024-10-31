@@ -30,6 +30,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 			}
 			catch(Throwable t)
 			{
+				CoreUtils.dumpFileErr(transformedName, basicClass);
 				t.printStackTrace();
 			}
 		}
