@@ -13,11 +13,13 @@ import java.security.ProtectionDomain;
 
 import org.ow2.asm.ClassWriter;
 import org.ow2.asm.Opcodes;
+import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.ClassNode;
 import org.ow2.asm.tree.FieldInsnNode;
 import org.ow2.asm.tree.FieldNode;
 import org.ow2.asm.tree.InsnList;
 import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.IntInsnNode;
 import org.ow2.asm.tree.LabelNode;
 import org.ow2.asm.tree.MethodInsnNode;
 import org.ow2.asm.tree.MethodNode;
@@ -144,6 +146,46 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 				if(targ == null)
 					targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, "net/minecraft/launchwrapper/LaunchClassLoader", "addClassLoaderExclusion", "(Ljava/lang/String;)V", false);
 				m.instructions.insert(CoreUtils.prevLabelNode(targ), l);
+				
+				//Transform Entire Class to call dm (dummy map) ds (dummy set) so no matter what foamfix or another mod does with reflection it should retain no memory leak as they won't get used
+				FieldInsnNode cachedClassesInsn = new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/launchwrapper/LaunchClassLoader", "cachedClasses", "Ljava/util/Map;");
+				FieldInsnNode packageManifestsInsn = new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/launchwrapper/LaunchClassLoader", "packageManifests", "Ljava/util/Map;");
+				FieldInsnNode resourceCache = new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/launchwrapper/LaunchClassLoader", "resourceCache", "Ljava/util/Map;");
+				FieldInsnNode negativeResourceCache = new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/launchwrapper/LaunchClassLoader", "negativeResourceCache", "Ljava/util/Set;");
+				
+				for(MethodNode method : classNode.methods)
+				{
+					if(!method.name.equals("<init>"))
+					{
+						AbstractInsnNode ab = method.instructions.getFirst();
+						while(ab != null)
+						{
+							if(!(ab instanceof FieldInsnNode))
+							{
+								ab = ab.getNext();
+								continue;
+							}
+							
+							FieldInsnNode insn = (FieldInsnNode) ab;
+							if(CoreUtils.equals(cachedClassesInsn, insn) || CoreUtils.equals(packageManifestsInsn, insn) || CoreUtils.equals(resourceCache, insn))
+								insn.name = "dm";
+							else if(CoreUtils.equals(negativeResourceCache, insn))
+								insn.name = "ds";
+							
+							ab = ab.getNext();
+						}
+					}
+					else
+					{
+						//Sets 1,000 to 0 initial capacity of resourceCache
+						FieldInsnNode put = CoreUtils.getFieldInsnNode(method, Opcodes.PUTFIELD, "net/minecraft/launchwrapper/LaunchClassLoader", "resourceCache", "Ljava/util/Map;");
+						if(put != null && put.getPrevious() != null && put.getPrevious().getPrevious() instanceof IntInsnNode)
+						{
+							IntInsnNode insn = (IntInsnNode) put.getPrevious().getPrevious();
+							insn.operand = 0;
+						}
+					}
+				}
 				
 				byte[] clazzBytes = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS), className);
 				CoreUtils.toFile(clazzBytes, lcl);
