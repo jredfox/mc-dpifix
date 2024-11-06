@@ -10,8 +10,6 @@ import java.io.OutputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
-import java.util.Map;
-import java.util.Set;
 
 import org.ow2.asm.ClassWriter;
 import org.ow2.asm.Opcodes;
@@ -140,7 +138,12 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 					l.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/launchwrapper/LaunchClassLoader", "negativeResourceCache", "Ljava/util/Set;"));
 				}
 				l.add(new LabelNode());
-				m.instructions.insert(CoreUtils.prevLabelNode(CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, "net/minecraft/launchwrapper/LaunchClassLoader", "addClassLoaderExclusion", "(Ljava/lang/String;)V", false)), l);
+				
+				//Inject Before Thread#currentThread#setContextClassLoader and if not found launchwrapper 1.12 for example then inject before this#addClassLoaderExclusion
+				MethodInsnNode targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, "java/lang/Thread", "setContextClassLoader", "(Ljava/lang/ClassLoader;)V", false);
+				if(targ == null)
+					targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, "net/minecraft/launchwrapper/LaunchClassLoader", "addClassLoaderExclusion", "(Ljava/lang/String;)V", false);
+				m.instructions.insert(CoreUtils.prevLabelNode(targ), l);
 				
 				byte[] clazzBytes = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS), className);
 				CoreUtils.toFile(clazzBytes, lcl);

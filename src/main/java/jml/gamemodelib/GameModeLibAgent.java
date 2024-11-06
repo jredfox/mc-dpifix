@@ -1,6 +1,5 @@
 package jml.gamemodelib;
 
-import java.io.File;
 import java.lang.instrument.Instrumentation;
 
 import jredfox.DeAWTTransformer;
