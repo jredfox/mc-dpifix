@@ -32,17 +32,39 @@ import jredfox.CoreUtils;
 public class LaunchWrapperTransformer implements ClassFileTransformer {
 	
 	public static File lcl = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/net/minecraft/launchwrapper/LaunchClassLoader.class").getAbsoluteFile();
-
+	public static File dm = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/jredfox/clfix/DummyMap.class").getAbsoluteFile();
+	public static File ds = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/jredfox/clfix/DummySet.class").getAbsoluteFile();
+	
 	public static void init(Instrumentation inst)
 	{
 		lcl.delete();
+		dm.delete();
+		ds.delete();
 		inst.addTransformer(new LaunchWrapperTransformer());
 		GameModeLib.forName("net.minecraft.launchwrapper.LaunchClassLoader");//Force Load LaunchClassLoader Class
+		GameModeLib.forName("jredfox.clfix.DummyMap");//Force Load DummyMap
+		GameModeLib.forName("jredfox.clfix.DummySet");//Force Load DummySet
 	}
 	
 	@Override
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytes)
 	{
+		//Cache DummyMap / DummySet to prevent ClassNotFoundException If the Java Agent Gets Removed from the Class Path
+		if(className.equals("jredfox/clfix/DummyMap"))
+		{
+			if(bytes == null && dm.exists())
+				return toByteArray(dm);
+			else if(bytes != null)
+				CoreUtils.toFile(bytes, dm);
+		}
+		else if(className.equals("jredfox/clfix/DummySet"))
+		{
+			if(bytes == null && ds.exists())
+				return toByteArray(ds);
+			else if(bytes != null)
+				CoreUtils.toFile(bytes, ds);
+		}
+		
 		if(bytes == null)
 			return null;
 		

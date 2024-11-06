@@ -24,7 +24,7 @@ public class GameModeLibAgent {
 			t.printStackTrace();//Handle Natives not found for the OS
 		}
 		
-//		GameModeLib.removeAgent(); //TODO: Re-Implement removal of JavaAgent and instead save the DummyMap / DummySet In Memory so it can find it later
+		GameModeLib.removeAgent();
 	}
 
 	public static void agentmain(String agentArgs, Instrumentation inst) 
