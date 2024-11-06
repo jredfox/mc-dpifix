@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.instrument.Instrumentation;
 
 import jredfox.DeAWTTransformer;
+import jredfox.clfix.LaunchWrapperTransformer;
 
 public class GameModeLibAgent {
 	
@@ -16,6 +17,7 @@ public class GameModeLibAgent {
 			GameModeLib.fixDPI();
 			GameModeLib.setHighPriority();
 			DeAWTTransformer.init(inst);
+			LaunchWrapperTransformer.init(inst);
 		}
 		catch(Throwable t)
 		{

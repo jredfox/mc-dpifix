@@ -10,6 +10,11 @@ public class DummyMap<K,V> extends HashMap<K,V> {
 		super(0);
 	}
 	
+	public DummyMap(int capacity)
+	{
+		super(0);
+	}
+	
 	@Override
 	public int size()
 	{

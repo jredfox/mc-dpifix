@@ -479,5 +479,21 @@ public class CoreUtils {
 		    f.access = access;
 		}
 	}
+	
+	public static void addFieldNodeIf(ClassNode classNode, FieldNode feild) 
+	{
+		for(FieldNode f : classNode.fields)
+			if(f.name.equals(feild.name))
+				return;
+		classNode.fields.add(feild);
+	}
+	
+	public static boolean hasFieldNode(ClassNode classNode, String name)
+	{
+		for(FieldNode f : classNode.fields)
+			if(f.name.equals(name))
+				return true;
+		return false;
+	}
 
 }
