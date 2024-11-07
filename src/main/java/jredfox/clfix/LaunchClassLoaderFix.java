@@ -22,7 +22,6 @@ import java.util.Set;
 /**
  * Fix LaunchClassLoader Memory Leaks Supports launchwrapper 1.3 - 1.12
  * V2.0.0 Is alot more robust then V1.0.0 In EvilNotchLib as it handles all possible ClassLoaders & Shadow Variables
- * Does not Override FoamFix please Use EvilNotchLib for MC 1.12.2 if you plan to install FoamFix
  * @author jredfox
  */
 public class LaunchClassLoaderFix {
