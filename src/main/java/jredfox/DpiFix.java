@@ -28,6 +28,7 @@ import jredfox.clfix.LaunchClassLoaderFix;
 public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relauncher.IFMLLoadingPlugin {
 
 	public static boolean agentmode = Boolean.parseBoolean(System.getProperty("gamemodelib.agent", "false"));
+	public static boolean syncCfg = agentmode ? Boolean.parseBoolean(System.getProperty("gamemodelib.cfg", "false")) : true;
 	public static boolean dpifix = agentmode ? Boolean.parseBoolean(System.getProperty("gamemodelib.dpi", "false")) : true;
 	public static boolean highPriority = agentmode ? Boolean.parseBoolean(System.getProperty("gamemodelib.high", "false")) : true;
 	public static int nicenessMac = agentmode ? toNiceness(Integer.parseInt(System.getProperty("gamemodelib.niceness.mac", "-5"))) : -5;
@@ -111,10 +112,14 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
 		cfg.load();
 		
-		dpifix = cfg.get("Process.DpiFix");
-		highPriority = cfg.get("Process.HighPriority");
-		nicenessMac = toNiceness(cfg.getInt("Process.HighPriority.Niceness.Mac", -5));
-		nicenessLinux = toNiceness(cfg.getInt("Process.HighPriority.Niceness.Linux", -5));
+		//Don't Overwrite Process Booleans from Java Agent
+		if(syncCfg)
+		{
+			dpifix = cfg.get("Process.DpiFix");
+			highPriority = cfg.get("Process.HighPriority");
+			nicenessMac = toNiceness(cfg.getInt("Process.HighPriority.Niceness.Mac", -5));
+			nicenessLinux = toNiceness(cfg.getInt("Process.HighPriority.Niceness.Linux", -5));
+		}
 		
 		coremod = cfg.get("CoreMod.Enabled");
 		fsSaveFix = cfg.get("Coremod.FullScreen.SaveFix");

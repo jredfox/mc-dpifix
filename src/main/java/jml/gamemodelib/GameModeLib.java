@@ -21,16 +21,14 @@ public class GameModeLib {
 	public static void init()
 	{
 		System.setProperty("gamemodelib.agent", "true");
+		if(System.getProperty("gamemodelib.cfg") == null)
+			System.setProperty("gamemodelib.cfg", String.valueOf(isInCoreMods()) );
 	}
 
 	public static void load()
 	{
-		boolean isInCoreMods = isInCoreMods();
-		if(debug)
-			System.out.println("-Dgamemodelib.cfg Default:" + isInCoreMods);
-		
 		//Use Mod Config useful for when both the javaagent and mod are used at the same time which is actually required in 1.5x version of the mod
-		if( Boolean.parseBoolean(System.getProperty("gamemodelib.cfg", String.valueOf(isInCoreMods) )) )
+		if( Boolean.parseBoolean(System.getProperty("gamemodelib.cfg", "false")) )
 			DpiFix.loadConfig();
 		
 		DpiFix.load();
