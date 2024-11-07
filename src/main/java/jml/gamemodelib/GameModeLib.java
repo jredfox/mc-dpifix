@@ -18,6 +18,11 @@ public class GameModeLib {
 	public static File jarFile;
 	public static boolean hasForge;
 	
+	static
+	{
+		reinit();
+	}
+	
 	public static void init()
 	{
 		System.setProperty("gamemodelib.agent", "true");
@@ -29,13 +34,10 @@ public class GameModeLib {
 	/**
 	 * Called When Java Agent May Not Have Ran & Even The CoreMod May Not have even Ran either
 	 */
-	public static void errModInit()
+	public static void reinit()
 	{
-		if(!DpiFix.agentmode)
-		{
-			jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
-			hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
-		}
+		jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
+		hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
 	}
 
 	public static void load()
