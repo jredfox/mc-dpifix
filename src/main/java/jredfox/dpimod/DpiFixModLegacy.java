@@ -22,11 +22,13 @@ public class DpiFixModLegacy {
 	
 	public DpiFixModLegacy()
 	{
-		//The Coremod not loading can only mean one of two things they are in 1.5x or they deleted or modified the meta-inf
+		//The Coremod not loading can only means they are in 1.5x or they deleted or modified the meta-inf or are in java agent only mode while forge is loaded
 		if(!DpiFix.coremodLoaded)
 		{
 			if(DpiFix.onefive && GameModeLib.isInMods())
 				throw new IllegalArgumentException("Dpi-Fix Mod Must be put in your coremods Folder!");
+			else if(!DpiFix.agentmode)
+				throw new IllegalArgumentException("Dpi-Fix CoreMod Cannot Be Loaded! Someone Must have Tampered with the META-INF. PLEASE RE-INSTALL DPI-Fix Mod");
 			else
 				System.err.println("Dpi-Fix is in Java Agent Only Mode! This Means all CoreMod Functionality and All @Mod 1.5x Functionality Does not Work on Forge");
 		}
