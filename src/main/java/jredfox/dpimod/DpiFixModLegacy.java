@@ -38,6 +38,7 @@ public class DpiFixModLegacy {
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent pre)
 	{
+		System.out.println("hasNatives:" + DpiFix.hasNatives + " hasRenicer:" + DpiFix.hasRenicer + " hasChangeNiceness:" + DpiFix.hasChangeNiceness);
 		DpiFixModProxy.modInit(this.getClass().getClassLoader());
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{

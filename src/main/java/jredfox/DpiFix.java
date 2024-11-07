@@ -32,8 +32,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean highPriority = agentmode ? Boolean.parseBoolean(System.getProperty("gamemodelib.high", "false")) : true;
 	public static int nicenessMac = agentmode ? toNiceness(Integer.parseInt(System.getProperty("gamemodelib.niceness.mac", "-5"))) : -5;
 	public static int nicenessLinux = agentmode ? toNiceness(Integer.parseInt(System.getProperty("gamemodelib.niceness.linux", "-5"))) : -5;
+	public static boolean hasNatives = Boolean.parseBoolean(System.getProperty("dpifix.hasNatives", "false"));
 	public static boolean coremodLoaded = Boolean.parseBoolean(System.getProperty("dpifix.coremod.loaded", "false"));
-	public static boolean hasNatives = true;
 	
 	public DpiFix()
 	{
@@ -153,6 +153,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				if(in == null)
 				{
 					System.err.println("Error Missing Natives:" + strNativeName + " ISA:" + arch);
+					System.getProperty("dpifix.hasNatives", "false");
 					hasNatives = false;
 					return;
 				}
@@ -173,6 +174,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		try
 		{
 			System.load(fnative.getPath());
+			System.getProperty("dpifix.hasNatives", "true");
+			hasNatives = true;
 		}
 		catch (Throwable t) 
 		{
@@ -190,13 +193,12 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	
 	public static File renicer = new File("/usr/local/bin/renicer_bin/renicer");
 	public static File changeNiceness = new File("/usr/local/bin/change_niceness");
-	public static boolean hasRenicer;
-	public static boolean hasChangeNiceness;
+	public static boolean hasRenicer = renicer.exists();
+	public static boolean hasChangeNiceness = changeNiceness.exists();
 	public static void loadChangeNiceness()
 	{
 		if(isLinux)
 		{
-			hasRenicer = renicer.exists();
 			if(!hasRenicer)
 			{
 				System.err.println("renicer command not found! To get High Process Priority Please install it from https://github.com/jredfox/renicer/releases");
@@ -204,7 +206,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 		else if(isMacOs)
 		{
-			hasChangeNiceness = changeNiceness.exists();
 			if(!hasChangeNiceness)
 			{
 				System.err.println("change_niceness command not found! To get High Process Priority Please install it from https://github.com/jredfox/change_niceness/releases");
@@ -237,7 +238,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		{
 			try
 			{
-				String pid = getPIDMac();
+				String pid = getPIDUnix();
 				System.out.print("Setting High Priority " + pid + " niceness:" + nicenessMac + "\n");
 				Runtime.getRuntime().exec(changeNiceness.getPath() + " " + nicenessMac + " " + pid);
 			}
@@ -265,7 +266,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	 * avoids a java bug which causes java to hang for 5,000MS on macOS monetary when trying to get the PID
 	 * While this method is expensive 5-29ms it's compatible with java 6 or higher
 	 */
-	public static String getPIDMac() throws IOException 
+	public static String getPIDUnix() throws IOException 
 	{
 		BufferedReader reader = null;
 		try
@@ -300,7 +301,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	public static boolean isWindows = osName.startsWith("windows");
 	public static boolean isLinux = osName.contains("linux") || osName.contains("nux") || osName.contains("aix");
 	public static boolean isMacOs = !isLinux && (osName.contains("mac") || osName.contains("osx") || osName.contains("darwin"));
-//	public static boolean isChromeOs = osName.contains("google") || osName.contains("chromeos") || osName.contains("pixelbook");;
+//	public static boolean isChromeOs = osName.contains("google") || osName.contains("chromeos") || osName.contains("pixelbook");
 	
 	public static boolean isWindows7()
 	{
