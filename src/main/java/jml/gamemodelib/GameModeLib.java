@@ -14,30 +14,13 @@ import jredfox.DpiFix;
 
 public class GameModeLib {
 	
-	public static boolean debug;
-	public static File jarFile;
-	public static boolean hasForge;
-	
-	static
-	{
-		reinit();
-	}
+	public static boolean debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
+	public static File jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
+	public static boolean hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
 	
 	public static void init()
 	{
 		System.setProperty("gamemodelib.agent", "true");
-		debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
-		jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
-		hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
-	}
-	
-	/**
-	 * Called When Java Agent May Not Have Ran & Even The CoreMod May Not have even Ran either
-	 */
-	public static void reinit()
-	{
-		jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
-		hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
 	}
 
 	public static void load()
