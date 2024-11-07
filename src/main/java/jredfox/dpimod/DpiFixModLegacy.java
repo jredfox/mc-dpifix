@@ -22,9 +22,6 @@ public class DpiFixModLegacy {
 	
 	public DpiFixModLegacy()
 	{
-		System.out.println("dpifix:" + DpiFix.dpifix + " highPriority:" + DpiFix.highPriority + "\nnicenessMac:" + DpiFix.nicenessMac + " nicenessLinux:" + DpiFix.nicenessLinux);
-		System.out.println("hasNatives:" + DpiFix.hasNatives + " hasRenicer:" + DpiFix.hasRenicer + " hasChangeNiceness:" + DpiFix.hasChangeNiceness);
-		
 		//The Coremod not loading can only means they are in 1.5x or they deleted or modified the meta-inf or are in java agent only mode while forge is loaded
 		if(!DpiFix.coremodLoaded)
 		{
