@@ -1,21 +1,14 @@
 package jredfox.dpimod;
 
-import java.awt.Color;
-import java.awt.Frame;
-import java.lang.reflect.Field;
-
-import javax.swing.JFrame;
-
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.FMLModContainer;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import jml.gamemodelib.GameModeLib;
 import jredfox.DpiFix;
-import jredfox.OptifineCompat;
 import net.minecraftforge.common.ForgeVersion;
 
 @Mod(
@@ -27,12 +20,13 @@ import net.minecraftforge.common.ForgeVersion;
 	)
 public class DpiFixModLegacy {
 	
-	public DpiFixModLegacy() throws Exception
+	public DpiFixModLegacy()
 	{
 		//The Coremod not loading can only mean one of two things they are in 1.5x or they deleted or modified the meta-inf
 		if(!DpiFix.coremodLoaded)
 		{
-			if(DpiFix.onefive || !DpiFix.agentmode)
+			GameModeLib.errModInit();
+			if(DpiFix.onefive && GameModeLib.isInMods())
 				throw new IllegalArgumentException("Dpi-Fix Mod Must be put in your coremods Folder!");
 			else
 				System.err.println("Dpi-Fix is in Java Agent Only Mode! This Means all CoreMod Functionality Does not Work on Forge");

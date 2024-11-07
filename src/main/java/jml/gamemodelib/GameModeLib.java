@@ -25,6 +25,18 @@ public class GameModeLib {
 		jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
 		hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
 	}
+	
+	/**
+	 * Called When Java Agent May Not Have Ran & Even The CoreMod May Not have even Ran either
+	 */
+	public static void errModInit()
+	{
+		if(!DpiFix.agentmode)
+		{
+			jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
+			hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
+		}
+	}
 
 	public static void load()
 	{
@@ -57,6 +69,11 @@ public class GameModeLib {
 	public static boolean isInCoreMods()
 	{
 		return hasForge && (net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 ? GameModeLib.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile()) : GameModeLib.jarFile.getParent().startsWith(new File("mods").getAbsolutePath()));
+	}
+	
+	public static boolean isInMods()
+	{
+		return hasForge && GameModeLib.jarFile.getParent().startsWith(new File("mods").getAbsolutePath());
 	}
 	
 	public static void removeAgent() 
