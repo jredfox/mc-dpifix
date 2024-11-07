@@ -153,7 +153,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 				if(in == null)
 				{
 					System.err.println("Error Missing Natives:" + strNativeName + " ISA:" + arch);
-					System.getProperty("dpifix.hasNatives", "false");
+					System.setProperty("dpifix.hasNatives", "false");
 					hasNatives = false;
 					return;
 				}
@@ -174,7 +174,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		try
 		{
 			System.load(fnative.getPath());
-			System.getProperty("dpifix.hasNatives", "true");
+			System.setProperty("dpifix.hasNatives", "true");
 			hasNatives = true;
 		}
 		catch (Throwable t) 
