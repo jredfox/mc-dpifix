@@ -3,7 +3,7 @@
   "modid": "dpi-fix",
   "name": "DPI-Fix",
   "description": "Fixes DPI, FullScreen and Sets High Process Priority",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "mcversion": "",
   "url": "https://www.curseforge.com/minecraft/mc-mods/dpi-fix",
   "updateUrl": "",
