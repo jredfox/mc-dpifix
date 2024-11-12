@@ -44,15 +44,7 @@ public class LaunchClassLoaderFix {
 			
 			String clazzLoaderName = "net.minecraft.launchwrapper.LaunchClassLoader";
 			Class clazzLoaderClazz = forName(clazzLoaderName);
-			ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
-			ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
-			ClassLoader contextLoader = getContextClassLoader();
-			
-			Map<String, ClassLoader> loaders = new HashMap(5);
-			loaders.put(toNString(classLoader), classLoader);
-			loaders.put(toNString(clforge), clforge);
-			loaders.put(toNString(currentLoader), currentLoader);
-			loaders.put(toNString(contextLoader), contextLoader);
+			Map<String, ClassLoader> loaders = getClassLoaders(launch, clforge);
 			for(ClassLoader cl : loaders.values())
 			{
 				if(cl == null)
@@ -80,7 +72,7 @@ public class LaunchClassLoaderFix {
 			t.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Disables FoamFix's Flawed Fix trying to Fix LaunchClassLoader RAM Leak
 	 */
@@ -165,66 +157,33 @@ public class LaunchClassLoaderFix {
 		Class launch = forName("net.minecraft.launchwrapper.Launch");
 		if(launch == null)
 			return;
-		
 		Class clazzLoaderClazz = forName("net.minecraft.launchwrapper.LaunchClassLoader");
-		ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
-		ClassLoader context = getContextClassLoader();
-		ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
-		
-		verify(classLoader, clazzLoaderClazz);
-		verify(context, clazzLoaderClazz);
-		verify(currentLoader, clazzLoaderClazz);
-		verify(clforge, clazzLoaderClazz);
-	}
-
-	private static void verify(ClassLoader classLoader, Class clazzLoaderClazz) 
-	{
-		if(!instanceOf(clazzLoaderClazz, classLoader))
-			return;
-		System.out.println("Verifying CL:" + classLoader);
-		Map cachedClasses = (Map) getPrivate(classLoader, clazzLoaderClazz, "cachedClasses");
-		Map resourceCache = (Map) getPrivate(classLoader, clazzLoaderClazz, "resourceCache");
-		Map packageManifests = (Map) getPrivate(classLoader, clazzLoaderClazz, "packageManifests");
-		Set negativeResourceCache = (Set) getPrivate(classLoader, clazzLoaderClazz, "negativeResourceCache");
-		
-		if(cachedClasses != null && !(cachedClasses instanceof DummyMap))
+		Map<String, ClassLoader> cls = getClassLoaders(launch, clforge);
+		for(ClassLoader classLoader : cls.values())
 		{
-			System.err.println("LaunchClassLoader#cachedClasses is Unoptimized! size:" + cachedClasses.size() + " Class:" + cachedClasses.getClass());
+			System.out.println("Verifying CL:" + classLoader);
+			Map cachedClasses = (Map) getPrivate(classLoader, clazzLoaderClazz, "cachedClasses");
+			Map resourceCache = (Map) getPrivate(classLoader, clazzLoaderClazz, "resourceCache");
+			Map packageManifests = (Map) getPrivate(classLoader, clazzLoaderClazz, "packageManifests");
+			Set negativeResourceCache = (Set) getPrivate(classLoader, clazzLoaderClazz, "negativeResourceCache");
+			
+			if(cachedClasses != null && !(cachedClasses instanceof DummyMap))
+			{
+				System.err.println("LaunchClassLoader#cachedClasses is Unoptimized! size:" + cachedClasses.size() + " Class:" + cachedClasses.getClass());
+			}
+			if(resourceCache != null && !(resourceCache instanceof DummyMap))
+			{
+				System.err.println("LaunchClassLoader#resourceCache is Unoptimized! size:" + resourceCache.size() + " Class:" + resourceCache.getClass());
+			}
+			if(packageManifests != null && !(packageManifests instanceof DummyMap))
+			{
+				System.err.println("LaunchClassLoader#packageManifests is Unoptimized! size:" + packageManifests.size() + " Class:" + packageManifests.getClass());
+			}
+			if(negativeResourceCache != null && !(negativeResourceCache instanceof DummySet))
+			{
+				System.err.println("LaunchClassLoader#negativeResourceCache is Unoptimized! size:" + negativeResourceCache.size() + " Class:" + negativeResourceCache.getClass());
+			}
 		}
-		if(resourceCache != null && !(resourceCache instanceof DummyMap))
-		{
-			System.err.println("LaunchClassLoader#resourceCache is Unoptimized! size:" + resourceCache.size() + " Class:" + resourceCache.getClass());
-		}
-		if(packageManifests != null && !(packageManifests instanceof DummyMap))
-		{
-			System.err.println("LaunchClassLoader#packageManifests is Unoptimized! size:" + packageManifests.size() + " Class:" + packageManifests.getClass());
-		}
-		if(negativeResourceCache != null && !(negativeResourceCache instanceof DummySet))
-		{
-			System.err.println("LaunchClassLoader#negativeResourceCache is Unoptimized! size:" + negativeResourceCache.size() + " Class:" + negativeResourceCache.getClass());
-		}
-	}
-
-	private static void fixFields(Field... fields) throws IllegalArgumentException, IllegalAccessException
-	{
-		for(Field f : fields) 
-		{
-			f.setAccessible(true);
-			modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-		}
-	}
-
-	private static ClassLoader getContextClassLoader() 
-	{
-		try
-		{
-			return Thread.currentThread().getContextClassLoader();
-		}
-		catch(Throwable t)
-		{
-			t.printStackTrace();
-		}
-		return null;
 	}
 
 	private static void setDummyMap(Object classLoader, Class clazzLoaderClazz, String mapName)
@@ -251,6 +210,34 @@ public class LaunchClassLoaderFix {
 		setPrivate(classLoader, new DummySet(), clazzLoaderClazz, setName);
 	}
 	
+	public static Map<String, ClassLoader> getClassLoaders(Class launch, ClassLoader clforge) 
+	{
+		Map<String, ClassLoader> loaders = new HashMap(5);
+		ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
+		ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
+		ClassLoader contextLoader = getContextClassLoader();
+		
+		loaders.put(toNString(classLoader), classLoader);
+		loaders.put(toNString(clforge), clforge);
+		loaders.put(toNString(currentLoader), currentLoader);
+		loaders.put(toNString(contextLoader), contextLoader);
+		
+		return loaders;
+	}
+
+	private static ClassLoader getContextClassLoader() 
+	{
+		try
+		{
+			return Thread.currentThread().getContextClassLoader();
+		}
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
+		return null;
+	}
+	
     public static String toNString(Object o) {
         return o == null ? "0" : (o.getClass().getName() + "@" + System.identityHashCode(o));
     }
@@ -266,6 +253,15 @@ public class LaunchClassLoaderFix {
 		catch(Throwable t)
 		{
 			t.printStackTrace();
+		}
+	}
+	
+	private static void fixFields(Field... fields) throws IllegalArgumentException, IllegalAccessException
+	{
+		for(Field f : fields) 
+		{
+			f.setAccessible(true);
+			modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
 		}
 	}
 
