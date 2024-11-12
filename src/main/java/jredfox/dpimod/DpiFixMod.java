@@ -1,7 +1,7 @@
 package jredfox.dpimod;
 
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 @Mod(
@@ -21,9 +21,9 @@ public class DpiFixMod {
 	}
 	
 	@Mod.EventHandler
-	public void postinit(FMLPostInitializationEvent e)
+	public void loadcomplete(FMLLoadCompleteEvent e)
 	{
-		DpiFixModProxy.modPostInit(this.getClass().getClassLoader());
+		DpiFixModProxy.modLoadComplete(this.getClass().getClassLoader());
 	}
 
 }

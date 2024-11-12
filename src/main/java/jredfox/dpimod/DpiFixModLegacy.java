@@ -6,8 +6,10 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import jml.gamemodelib.GameModeLib;
 import jredfox.DpiFix;
 import net.minecraftforge.common.ForgeVersion;
@@ -75,11 +77,19 @@ public class DpiFixModLegacy {
 		}
 	}
 	
-//	@PostInit replaces @EventHandler at runtime dynamically if it's needed
+	//1.5 - 1.6.4's load complete doesn't exist use server start event instead while anoying you have to load a world to find out if it theoritically no mods from 1.5-1.6.4 messes with it
 	@Mod.EventHandler
-	public void modpostinit(FMLPostInitializationEvent e)
+	public void modloadcomplete(FMLServerAboutToStartEvent e)
 	{
-		DpiFixModProxy.modPostInit(this.getClass().getClassLoader());
+		if(ForgeVersion.getMajorVersion() < 10)
+			DpiFixModProxy.modLoadComplete(this.getClass().getClassLoader());
+	}
+	
+	//1.7.2 - 1.7.10's LoadComplete Method earlier versions uses FMLServerAboutToStartEvent
+	@Mod.EventHandler
+	public void modloadcomplete(FMLLoadCompleteEvent e)
+	{
+		DpiFixModProxy.modLoadComplete(this.getClass().getClassLoader());
 	}
 
 }
