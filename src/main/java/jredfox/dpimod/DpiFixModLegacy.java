@@ -6,6 +6,7 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import jml.gamemodelib.GameModeLib;
 import jredfox.DpiFix;
@@ -39,6 +40,7 @@ public class DpiFixModLegacy {
 	public void preinit(FMLPreInitializationEvent pre)
 	{
 		DpiFixModProxy.modInit(this.getClass().getClassLoader());
+		
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{
 			ModContainer container = (ModContainer) FMLCommonHandler.instance().findContainerFor(this);
@@ -71,6 +73,13 @@ public class DpiFixModLegacy {
 				}
 			}
 		}
+	}
+	
+//	@PostInit replaces @EventHandler at runtime dynamically if it's needed
+	@Mod.EventHandler
+	public void modpostinit(FMLPostInitializationEvent e)
+	{
+		DpiFixModProxy.modPostInit(this.getClass().getClassLoader());
 	}
 
 }

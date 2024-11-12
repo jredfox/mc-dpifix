@@ -156,6 +156,54 @@ public class LaunchClassLoaderFix {
 		//StopMemoryOverflow just in case
 		stopMemoryOverflow(clforge);
 	}
+	
+	/**
+	 * Verifies that LaunchClassLoader Map / Set are instances of the Dummy Version. Only Checks LaunchClassLoader.class values
+	 */
+	public static void verify(ClassLoader clforge)
+	{
+		Class launch = forName("net.minecraft.launchwrapper.Launch");
+		if(launch == null)
+			return;
+		
+		Class clazzLoaderClazz = forName("net.minecraft.launchwrapper.LaunchClassLoader");
+		ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
+		ClassLoader context = getContextClassLoader();
+		ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
+		
+		verify(classLoader, clazzLoaderClazz);
+		verify(context, clazzLoaderClazz);
+		verify(currentLoader, clazzLoaderClazz);
+		verify(clforge, clazzLoaderClazz);
+	}
+
+	private static void verify(ClassLoader classLoader, Class clazzLoaderClazz) 
+	{
+		if(!instanceOf(clazzLoaderClazz, classLoader))
+			return;
+		System.out.println("Verifying CL:" + classLoader);
+		Map cachedClasses = (Map) getPrivate(classLoader, clazzLoaderClazz, "cachedClasses");
+		Map resourceCache = (Map) getPrivate(classLoader, clazzLoaderClazz, "resourceCache");
+		Map packageManifests = (Map) getPrivate(classLoader, clazzLoaderClazz, "packageManifests");
+		Set negativeResourceCache = (Set) getPrivate(classLoader, clazzLoaderClazz, "negativeResourceCache");
+		
+		if(cachedClasses != null && !(cachedClasses instanceof DummyMap))
+		{
+			System.err.println("LaunchClassLoader#cachedClasses is Unoptimized! size:" + cachedClasses.size() + " Class:" + cachedClasses.getClass());
+		}
+		if(resourceCache != null && !(resourceCache instanceof DummyMap))
+		{
+			System.err.println("LaunchClassLoader#resourceCache is Unoptimized! size:" + resourceCache.size() + " Class:" + resourceCache.getClass());
+		}
+		if(packageManifests != null && !(packageManifests instanceof DummyMap))
+		{
+			System.err.println("LaunchClassLoader#packageManifests is Unoptimized! size:" + packageManifests.size() + " Class:" + packageManifests.getClass());
+		}
+		if(negativeResourceCache != null && !(negativeResourceCache instanceof DummySet))
+		{
+			System.err.println("LaunchClassLoader#negativeResourceCache is Unoptimized! size:" + negativeResourceCache.size() + " Class:" + negativeResourceCache.getClass());
+		}
+	}
 
 	private static void fixFields(Field... fields) throws IllegalArgumentException, IllegalAccessException
 	{

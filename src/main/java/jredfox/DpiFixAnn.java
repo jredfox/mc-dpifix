@@ -14,7 +14,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 	
 	public DpiFixAnn()
 	{
-		LaunchClassLoaderFix.stopMemoryOverflow(null);
+		LaunchClassLoaderFix.stopMemoryOverflow(this.getClass().getClassLoader());
 	}
 	
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
@@ -71,10 +71,16 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 		if(ForgeVersion.getMajorVersion() <= 7)
 		{
 			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.PreInit from DpiFixModLegacy#preinit");
-			MethodNode m = CoreUtils.getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");
-			m.visibleAnnotations.remove(CoreUtils.getAnnotation(m, "Lcpw/mods/fml/common/Mod$EventHandler;"));
+			MethodNode m1 = CoreUtils.getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");
+			m1.visibleAnnotations.remove(CoreUtils.getAnnotation(m1, "Lcpw/mods/fml/common/Mod$EventHandler;"));
 			AnnotationNode preinit = new AnnotationNode("Lcpw/mods/fml/common/Mod$PreInit;");
-			m.visibleAnnotations.add(preinit);
+			m1.visibleAnnotations.add(preinit);
+			
+			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.PostInit from DpiFixModLegacy#modpostinit");
+			MethodNode m2 = CoreUtils.getMethodNode(classNode, "modpostinit", "(Lcpw/mods/fml/common/event/FMLPostInitializationEvent;)V");
+			m2.visibleAnnotations.remove(CoreUtils.getAnnotation(m2, "Lcpw/mods/fml/common/Mod$EventHandler;"));
+			AnnotationNode postinit = new AnnotationNode("Lcpw/mods/fml/common/Mod$PostInit;");
+			m2.visibleAnnotations.add(postinit);
 		}
 	}
 

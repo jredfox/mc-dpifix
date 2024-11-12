@@ -10,5 +10,11 @@ public class DpiFixModProxy {
 		System.out.println("DPI-Fix Mod Init");
 		LaunchClassLoaderFix.stopMemoryOverflowFoamFix(clforge);
 	}
+	
+	public static void modPostInit(ClassLoader clforge)
+	{
+		System.out.println("DPI-Fix Mod PostInit");
+		LaunchClassLoaderFix.verify(clforge);
+	}
 
 }

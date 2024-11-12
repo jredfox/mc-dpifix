@@ -23,7 +23,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 	
 	public DpiFixCoreMod()
 	{
-		LaunchClassLoaderFix.stopMemoryOverflow(null);
+		LaunchClassLoaderFix.stopMemoryOverflow(this.getClass().getClassLoader());
 	}
 	
 	/**
