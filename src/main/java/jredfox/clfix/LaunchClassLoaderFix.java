@@ -168,21 +168,13 @@ public class LaunchClassLoaderFix {
 			Set negativeResourceCache = (Set) getPrivate(classLoader, clazzLoaderClazz, "negativeResourceCache");
 			
 			if(cachedClasses != null && !(cachedClasses instanceof DummyMap))
-			{
 				System.err.println("LaunchClassLoader#cachedClasses is Unoptimized! size:" + cachedClasses.size() + " Class:" + cachedClasses.getClass());
-			}
 			if(resourceCache != null && !(resourceCache instanceof DummyMap))
-			{
 				System.err.println("LaunchClassLoader#resourceCache is Unoptimized! size:" + resourceCache.size() + " Class:" + resourceCache.getClass());
-			}
 			if(packageManifests != null && !(packageManifests instanceof DummyMap))
-			{
 				System.err.println("LaunchClassLoader#packageManifests is Unoptimized! size:" + packageManifests.size() + " Class:" + packageManifests.getClass());
-			}
 			if(negativeResourceCache != null && !(negativeResourceCache instanceof DummySet))
-			{
 				System.err.println("LaunchClassLoader#negativeResourceCache is Unoptimized! size:" + negativeResourceCache.size() + " Class:" + negativeResourceCache.getClass());
-			}
 		}
 	}
 
@@ -225,7 +217,7 @@ public class LaunchClassLoaderFix {
 		return loaders;
 	}
 
-	private static ClassLoader getContextClassLoader() 
+	public static ClassLoader getContextClassLoader() 
 	{
 		try
 		{
