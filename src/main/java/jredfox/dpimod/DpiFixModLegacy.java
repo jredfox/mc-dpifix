@@ -77,7 +77,8 @@ public class DpiFixModLegacy {
 		}
 	}
 	
-	//1.5 - 1.6.4's load complete doesn't exist use server start event instead while anoying you have to load a world to find out if it theoritically no mods from 1.5-1.6.4 messes with it
+	//1.5 - 1.6.4's load complete doesn't exist use server start event instead while annoying you have to load a world to find out if it theoretically no mods from 1.5-1.6.4 messes with it
+	//replaced @Mod.EventHandler with @Mod.FMLServerAboutToStartEvent at runtime if needed
 	@Mod.EventHandler
 	public void modloadcomplete(FMLServerAboutToStartEvent e)
 	{
