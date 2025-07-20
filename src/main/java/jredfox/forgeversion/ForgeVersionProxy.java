@@ -21,7 +21,7 @@ import org.objectweb.asm.tree.MethodNode;
  * Class Is Portable, Free to Use, Copy, Re-Distribute and Modify for your own project.
  * If you modify this and it's not a bug fix please refactor for your own mods to prevent class collisions
  * @report bugs to github.com/jredfox/mc-dpifix/issues
- * @compiling needs SideOnly Side classes from both 1.4.5 and 1.5.2 to compile. Do not include inside SideOnly or Side.CLIENT inside your mod's jar. Detection is automatic and won't trigger incorrect classloading
+ * @compiling needs SideOnly Side classes from 1.4.5, 1.5.2 and 1.8's to compile. Do not include inside SideOnly or Side.CLIENT inside your mod's jar. Detection is automatic and won't trigger incorrect classloading
  * @author jredfox
  */
 public class ForgeVersionProxy {
