@@ -52,7 +52,7 @@ public class GameModeLib {
 	 */
 	public static boolean isInCoreMods()
 	{
-		return hasForge && (ForgeVersionProxy.getMajorVersion() < 8 ? GameModeLib.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile()) : GameModeLib.jarFile.getParent().startsWith(new File("mods").getAbsolutePath()));
+		return hasForge && (ForgeVersionProxy.onefive ? GameModeLib.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile()) : GameModeLib.jarFile.getParent().startsWith(new File("mods").getAbsolutePath()));
 	}
 	
 	public static boolean isInMods()

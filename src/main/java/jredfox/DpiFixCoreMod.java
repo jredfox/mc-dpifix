@@ -29,7 +29,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 	/**
 	 * Check if we are in 1.5x so we can configure the transformer for 1.5x
 	 */
-	public static boolean onefive = ForgeVersionProxy.getMajorVersion() < 8;//TODO:fix
+	public static boolean onefive = ForgeVersionProxy.onefive;
 	
 	public static List<String> cls =  DpiFix.asStringList( getCls() );
 	

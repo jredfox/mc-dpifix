@@ -36,7 +36,7 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 		String exclusions = "jredfox.DpiFix";
 		
 		//setup booleans
-		boolean onefive = ForgeVersionProxy.getMajorVersion() < 8;//TODO: swap with boolean
+		boolean onefive = ForgeVersionProxy.onefive;
 		boolean onesixnotch = ForgeVersionProxy.getNotchNames();
 		boolean oneeight = ForgeVersionProxy.getMajorVersion() >= 11;
 		

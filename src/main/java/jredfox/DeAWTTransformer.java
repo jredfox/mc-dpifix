@@ -44,7 +44,7 @@ public class DeAWTTransformer implements ClassFileTransformer {
 	
 	public static void init(Instrumentation inst)
 	{
-		if(ForgeVersionProxy.hasForge && ForgeVersionProxy.getMajorVersion() < 8 && isInCoreMods() && isDeAWT())
+		if(GameModeLib.hasForge && ForgeVersionProxy.isClient && ForgeVersionProxy.onefive && isInCoreMods() && isDeAWT())
 		{
 			System.setProperty("gamemodelib.deawt", "true");
 			component.delete();//delete previous caches
