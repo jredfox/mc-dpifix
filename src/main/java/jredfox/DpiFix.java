@@ -19,7 +19,6 @@ import java.util.Map;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import jml.gamemodelib.GameModeLib;
 import jml.gamemodelib.GameModeLibAgent;
-import jredfox.clfix.LaunchClassLoaderFix;
 import jredfox.forgeversion.ForgeVersionProxy;
 
 /**
