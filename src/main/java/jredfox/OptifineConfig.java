@@ -2,7 +2,6 @@ package jredfox;
 
 import java.awt.Dimension;
 
-import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.DisplayMode;
 
 /**

@@ -29,7 +29,6 @@ import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
 import jml.gamemodelib.GameModeLib;
-import jml.gamemodelib.GameModeLibAgent;
 
 /**
  * Temporarily Disables all Frame#setVisible, Canvas#setVisible, Applet#setVisible To Prevent Flashy frames Until Minecraft#startGame gets called

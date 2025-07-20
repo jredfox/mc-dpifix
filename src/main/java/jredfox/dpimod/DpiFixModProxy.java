@@ -1,6 +1,5 @@
 package jredfox.dpimod;
 
-import jredfox.DpiFix;
 import jredfox.clfix.LaunchClassLoaderFix;
 import jredfox.forgeversion.ForgeVersionProxy;
 

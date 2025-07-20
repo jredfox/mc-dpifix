@@ -215,16 +215,22 @@ public class ForgeVersionProxy {
 		initMcVersion();
 		notchNames = majorVersion < 9 || majorVersion == 9 && minorVersion <= 11 && buildVersion < 937;
 		isObf = (majorVersion < 7 && buildVersion < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
-		isClient = majorVersion < 8 ? legacyIsClient() : cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null;
+		isClient = sideCheck();
 	}
 	
-	private static boolean legacyIsClient()
+	/**
+	 * Accurately Check 1.3.2 - 1.12.2 For the real boolean of isClient when {@link #hasForge} is true
+	 */
+	private static boolean sideCheck()
 	{
 		try
 		{
-			//1.4.6 - 1.5.2
-			if(majorVersion > 6 || majorVersion == 6 && buildVersion >= 451)
-				SideCheckOF.checkClient();
+			//1.8 - 1.12.2
+			if(majorVersion > 10)
+				SideCheckModern.checkClient();
+			//1.4.6 - 1.7.10
+			else if(majorVersion > 6 || majorVersion == 6 && buildVersion >= 451)
+				SideCheckOld.checkClient();
 			//1.3.2 - 1.4.5
 			else
 				SideCheckLegacy.checkClient();
@@ -232,11 +238,27 @@ public class ForgeVersionProxy {
 		}
 		catch(Throwable t)
 		{
+			t.printStackTrace();
 			return false;
 		}
 	}
+	
+	public static class SideCheckModern
+	{
+		@net.minecraftforge.fml.relauncher.SideOnly(net.minecraftforge.fml.relauncher.Side.CLIENT)
+		public static void checkClient()
+		{
+			
+		}
+		
+		@net.minecraftforge.fml.relauncher.SideOnly(net.minecraftforge.fml.relauncher.Side.SERVER)
+		public static void checkServer()
+		{
+			
+		}
+	}
 
-	public static class SideCheckOF
+	public static class SideCheckOld
 	{
 		@cpw.mods.fml.relauncher.SideOnly(cpw.mods.fml.relauncher.Side.CLIENT)
 		public static void checkClient()

@@ -1,9 +1,6 @@
 package jredfox;
 
-import java.lang.reflect.Method;
-
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.ow2.asm.Opcodes;
 import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.ClassNode;
@@ -21,7 +18,6 @@ import org.ow2.asm.tree.MethodNode;
 import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
-import jredfox.clfix.LaunchClassLoaderFix;
 import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixOneFiveTransformer implements IDpiFixTransformer {

@@ -1,18 +1,13 @@
 package jredfox;
 
-import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.lang.reflect.Method;
 
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
 
 import jredfox.clfix.LaunchClassLoaderFix;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.GameSettings;
 
 public class OptifineCompat {
 	
