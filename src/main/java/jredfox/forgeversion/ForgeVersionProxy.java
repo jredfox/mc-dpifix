@@ -238,7 +238,6 @@ public class ForgeVersionProxy {
 		}
 		catch(Throwable t)
 		{
-			t.printStackTrace();
 			return false;
 		}
 	}
