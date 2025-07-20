@@ -10,7 +10,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import jml.gamemodelib.GameModeLib;
 import jml.gamemodelib.GameModeLibAgent;
 import jredfox.clfix.LaunchClassLoaderFix;
-import net.minecraftforge.common.ForgeVersion;
+import jredfox.forgeversion.ForgeVersionProxy;
 
 /**
  * DpiFixWrapper is a wrapper for DpiFix that will correctly add it to CoreModManager without annotation or security conflicts
@@ -36,9 +36,9 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 		String exclusions = "jredfox.DpiFix";
 		
 		//setup booleans
-		boolean onefive = ForgeVersion.getMajorVersion() < 8;
-		boolean onesixnotch = ForgeVersion.getMajorVersion() < 9 || ForgeVersion.getMajorVersion() == 9 && ForgeVersion.getMinorVersion() <= 11 && ForgeVersion.getBuildVersion() < 937;
-		boolean oneeight = ForgeVersion.getMajorVersion() >= 11;
+		boolean onefive = ForgeVersionProxy.getMajorVersion() < 8;//TODO: swap with boolean
+		boolean onesixnotch = ForgeVersionProxy.getNotchNames();
+		boolean oneeight = ForgeVersionProxy.getMajorVersion() >= 11;
 		
 		//Add Exclusion List 1.5 - 1.12.2
 		try

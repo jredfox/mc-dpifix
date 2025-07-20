@@ -12,12 +12,12 @@ import org.ow2.asm.ClassWriter;
 import org.ow2.asm.tree.ClassNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
+import jredfox.forgeversion.ForgeVersionProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.common.ForgeVersion;
 
 public class DpiFixCoreMod implements IClassTransformer {
 	
@@ -29,7 +29,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 	/**
 	 * Check if we are in 1.5x so we can configure the transformer for 1.5x
 	 */
-	public static boolean onefive = ForgeVersion.getMajorVersion() < 8;
+	public static boolean onefive = ForgeVersionProxy.getMajorVersion() < 8;//TODO:fix
 	
 	public static List<String> cls =  DpiFix.asStringList( getCls() );
 	
@@ -168,7 +168,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		}
 	}
 	
-	public static boolean oldGuiScreen = ForgeVersion.getMajorVersion() < 10;
+	public static boolean oldGuiScreen = ForgeVersionProxy.getMajorVersion() < 10;
 	
     /**
      * Will set the focus to ingame if the Minecraft window is the active with focus. Also clears any GUI screen

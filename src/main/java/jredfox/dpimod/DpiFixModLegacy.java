@@ -11,7 +11,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import jml.gamemodelib.GameModeLib;
 import jredfox.DpiFix;
-import net.minecraftforge.common.ForgeVersion;
+import jredfox.forgeversion.ForgeVersionProxy;
 
 @Mod(
 		modid = DpiFixModVars.MODID,
@@ -27,7 +27,7 @@ public class DpiFixModLegacy {
 		//The Coremod not loading can only means they are in 1.5x or they deleted or modified the meta-inf or are in java agent only mode while forge is loaded
 		if(!DpiFix.coremodLoaded)
 		{
-			if(DpiFix.onefive && GameModeLib.isInMods())
+			if(ForgeVersionProxy.onefive && GameModeLib.isInMods())
 				throw new IllegalArgumentException("Dpi-Fix Mod Must be put in your coremods Folder!");
 			else if(!DpiFix.agentmode)
 				throw new IllegalArgumentException("Dpi-Fix CoreMod Cannot Be Loaded! Someone Must have Tampered with the META-INF. PLEASE RE-INSTALL DPI-Fix Mod");
@@ -42,7 +42,7 @@ public class DpiFixModLegacy {
 	{
 		DpiFixModProxy.modInit(this.getClass().getClassLoader());
 		
-		if(ForgeVersion.getMajorVersion() <= 7)
+		if(ForgeVersionProxy.getMajorVersion() <= 7)
 		{
 			ModContainer container = (ModContainer) FMLCommonHandler.instance().findContainerFor(this);
 			ModMetadata meta = container.getMetadata();
@@ -54,7 +54,7 @@ public class DpiFixModLegacy {
 	public void modinit(FMLInitializationEvent e)
 	{
 		//Patch 1.6x Mod's Logo Path since they may still try to use the 1.5.2 format of prepending the "/"
-		if(DpiFix.modLogoFix && ForgeVersion.getMajorVersion() > 7 && ForgeVersion.getMajorVersion() < 10)
+		if(DpiFix.modLogoFix && ForgeVersionProxy.getMajorVersion() > 7 && ForgeVersionProxy.getMajorVersion() < 10)
 		{
 			for(ModContainer con : Loader.instance().getModList())
 			{
@@ -81,7 +81,7 @@ public class DpiFixModLegacy {
 	@Mod.EventHandler
 	public void modloadcomplete(FMLServerAboutToStartEvent e)
 	{
-		if(ForgeVersion.getMajorVersion() < 10)
+		if(ForgeVersionProxy.getMajorVersion() < 10)
 			DpiFixModProxy.modLoadComplete(this.getClass().getClassLoader());
 	}
 	

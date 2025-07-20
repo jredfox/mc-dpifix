@@ -8,7 +8,7 @@ import org.ow2.asm.tree.ClassNode;
 import org.ow2.asm.tree.MethodNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
-import net.minecraftforge.common.ForgeVersion;
+import jredfox.forgeversion.ForgeVersionProxy;
 
 public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer {
 	
@@ -42,7 +42,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 	 */
 	public static void patchAtMod(ClassNode classNode) 
 	{
-		if(ForgeVersion.getMajorVersion() < 10)
+		if(ForgeVersionProxy.getMajorVersion() < 10)
 		{
 			//Remove acceptableRemoteVersions = "*"
 			AnnotationNode atmod = CoreUtils.getAnnotation(classNode, "Lcpw/mods/fml/common/Mod;");
@@ -69,7 +69,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 		
 		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent e)
 		//Add @cpw.mods.fml.common.Mod.ServerAboutToStart to modloadcomplete(FMLServerAboutToStartEvent e)
-		if(ForgeVersion.getMajorVersion() <= 7)
+		if(ForgeVersionProxy.getMajorVersion() <= 7)
 		{
 			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.PreInit from DpiFixModLegacy#preinit");
 			MethodNode m1 = CoreUtils.getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");

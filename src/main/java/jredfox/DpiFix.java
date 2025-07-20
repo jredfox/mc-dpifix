@@ -20,6 +20,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import jml.gamemodelib.GameModeLib;
 import jml.gamemodelib.GameModeLibAgent;
 import jredfox.clfix.LaunchClassLoaderFix;
+import jredfox.forgeversion.ForgeVersionProxy;
 
 /**
  * TODO: macos intel(x64) and silicon (arm64)
@@ -66,7 +67,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			t.printStackTrace();
 		}
 		
-		if(onefive && !agentmode && highPriority)
+		if(ForgeVersionProxy.onefive && !agentmode && highPriority)
 		{
 			IllegalArgumentException e = new IllegalArgumentException("DPI-Fix High Process Priority for 1.5x Requies java agent mode!\nAdd these JVM Flags: -javaagent:coremods/" + GameModeLib.getFileFromClass(GameModeLibAgent.class).getName());
 			e.printStackTrace();
@@ -89,9 +90,6 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	}
 
 	//ASM config
-	public static boolean hasForge = LaunchClassLoaderFix.forName("net.minecraftforge.common.ForgeVersion") != null;
-	public static boolean onefive = hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8;
-	public static boolean isClient = onefive ? DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null : DpiFix.class.getClassLoader().getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null;
 	public static boolean coremod;
 	public static boolean fsSaveFix;
 	public static boolean fsTabFix;
@@ -365,8 +363,8 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 
 	@Override
 	public String[] getASMTransformerClass() {
-		String cof = onefive ? "OF" : "";
-		return (coremod && isClient) ? new String[]{"jredfox.DpiFixCoreMod" + cof} : new String[] {"jredfox.DpiFixAnn" + cof};
+		String cof = ForgeVersionProxy.onefive ? "OF" : "";
+		return (coremod && ForgeVersionProxy.isClient) ? new String[]{"jredfox.DpiFixCoreMod" + cof} : new String[] {"jredfox.DpiFixAnn" + cof};
 	}
 
 	//___________________________________________START Dummy Methods for IMPL of Coremod______________________________\\

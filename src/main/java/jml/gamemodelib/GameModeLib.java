@@ -11,12 +11,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import jredfox.DpiFix;
+import jredfox.forgeversion.ForgeVersionProxy;
 
 public class GameModeLib {
 	
 	public static boolean debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
 	public static File jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
-	public static boolean hasForge = GameModeLib.forName("net.minecraftforge.common.ForgeVersion", GameModeLibAgent.class.getClassLoader()) != null;
+	public static boolean hasForge = ForgeVersionProxy.hasForge;
 	
 	public static void init()
 	{
@@ -51,7 +52,7 @@ public class GameModeLib {
 	 */
 	public static boolean isInCoreMods()
 	{
-		return hasForge && (net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 ? GameModeLib.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile()) : GameModeLib.jarFile.getParent().startsWith(new File("mods").getAbsolutePath()));
+		return hasForge && (ForgeVersionProxy.getMajorVersion() < 8 ? GameModeLib.jarFile.getParentFile().equals(new File("coremods").getAbsoluteFile()) : GameModeLib.jarFile.getParent().startsWith(new File("mods").getAbsolutePath()));
 	}
 	
 	public static boolean isInMods()

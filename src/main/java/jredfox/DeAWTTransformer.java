@@ -29,6 +29,7 @@ import org.ow2.asm.tree.TypeInsnNode;
 import org.ow2.asm.tree.VarInsnNode;
 
 import jml.gamemodelib.GameModeLib;
+import jredfox.forgeversion.ForgeVersionProxy;
 
 /**
  * Temporarily Disables all Frame#setVisible, Canvas#setVisible, Applet#setVisible To Prevent Flashy frames Until Minecraft#startGame gets called
@@ -43,7 +44,7 @@ public class DeAWTTransformer implements ClassFileTransformer {
 	
 	public static void init(Instrumentation inst)
 	{
-		if(GameModeLib.hasForge && net.minecraftforge.common.ForgeVersion.getMajorVersion() < 8 && isInCoreMods() && isDeAWT())
+		if(ForgeVersionProxy.hasForge && ForgeVersionProxy.getMajorVersion() < 8 && isInCoreMods() && isDeAWT())
 		{
 			System.setProperty("gamemodelib.deawt", "true");
 			component.delete();//delete previous caches

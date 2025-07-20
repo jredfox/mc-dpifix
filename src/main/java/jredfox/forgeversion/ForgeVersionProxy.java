@@ -59,6 +59,10 @@ public class ForgeVersionProxy {
      */
     public static boolean isClient;
     /**
+     * Are We running on 1.5x or below
+     */
+    public static boolean onefive;
+    /**
      * The ForgeVersionProxy Version
      */
     public static final String PROXY_VERSION = "1.0.0";
@@ -216,6 +220,7 @@ public class ForgeVersionProxy {
 		notchNames = majorVersion < 9 || majorVersion == 9 && minorVersion <= 11 && buildVersion < 937;
 		isObf = (majorVersion < 7 && buildVersion < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
 		isClient = sideCheck();
+		onefive = majorVersion < 8;
 	}
 	
 	/**
