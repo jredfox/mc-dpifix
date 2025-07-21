@@ -5,16 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.ow2.asm.ClassReader;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.FieldInsnNode;
+import org.ow2.asm.tree.FieldNode;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.IntInsnNode;
+import org.ow2.asm.tree.LdcInsnNode;
+import org.ow2.asm.tree.MethodNode;
 
 /**
  * Safely Get the Forge Version 1.3.2 - 1.12.2 without loading the ModContainer class.
@@ -69,8 +69,11 @@ public class ForgeVersionProxy {
     private static Boolean isClient;
     /**
      * The ForgeVersionProxy Version
+     * ChangeLog 1.0.1
+     * - Fixed isClient returning true for servers when java agent was present and the main(String[]) args had already started
+     * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false during the java agent's methods
      */
-    public static final String PROXY_VERSION = "1.0.0";
+    public static final String PROXY_VERSION = "1.0.1";
 	
 	static
 	{
