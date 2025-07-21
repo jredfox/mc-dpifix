@@ -69,7 +69,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 		
 		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent e)
 		//Add @cpw.mods.fml.common.Mod.ServerAboutToStart to modloadcomplete(FMLServerAboutToStartEvent e)
-		if(ForgeVersionProxy.getMajorVersion() <= 7)
+		if(ForgeVersionProxy.onefive)
 		{
 			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.PreInit from DpiFixModLegacy#preinit");
 			MethodNode m1 = CoreUtils.getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");
