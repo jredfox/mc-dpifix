@@ -363,7 +363,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 	@Override
 	public String[] getASMTransformerClass() {
 		String cof = ForgeVersionProxy.onefive ? "OF" : "";
-		return (coremod && ForgeVersionProxy.isClient) ? new String[]{"jredfox.DpiFixCoreMod" + cof} : new String[] {"jredfox.DpiFixAnn" + cof};
+		return (coremod && ForgeVersionProxy.getIsClient()) ? new String[]{"jredfox.DpiFixCoreMod" + cof} : new String[] {"jredfox.DpiFixAnn" + cof};
 	}
 
 	//___________________________________________START Dummy Methods for IMPL of Coremod______________________________\\

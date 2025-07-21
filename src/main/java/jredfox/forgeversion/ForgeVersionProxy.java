@@ -43,7 +43,7 @@ public class ForgeVersionProxy {
     /**
      * When false forge build numbers will be 0 {@link #majorVersion}, {@link #minorVersion}, {@link #revisionVersion}, {@link #buildVersion}
      * {@link #mcVersion} will be "1.2.5" and the Extension booleans will be the best guess
-     * such as {@link #notchNames} will be true {@link #isObf} will be true and {@link #isClient} will be determined based on the Existence of the Main class
+     * such as {@link #notchNames} will be true {@link #isObf} will be true and {@link #isClient} will be determined based on the Existence of the Main class and LWJGL
      */
     public static boolean hasForge;
     /**
@@ -55,13 +55,18 @@ public class ForgeVersionProxy {
      */
     public static boolean isObf;
     /**
-     * Are we running on the client or the server?
-     */
-    public static boolean isClient;
-    /**
      * Are We running on 1.5x or below
      */
     public static boolean onefive;
+    /**
+     * Are we most likely running on the client (Main Client Class & LWJGL library exists)
+     * Use {@link #getIsClient()} for Your ASM Plugin this is for the java agent and isn't garenteed to be correct
+     */
+    public static boolean isClientAgent;
+    /**
+     * Are we running on the client or the server?
+     */
+    private static Boolean isClient;
     /**
      * The ForgeVersionProxy Version
      */
@@ -114,14 +119,31 @@ public class ForgeVersionProxy {
     	return notchNames;
     }
     
-    public static boolean getIsClient()
-    {
-    	return isClient;
-    }
-    
     public static boolean getIsObf()
     {
     	return isObf;
+    }
+    
+	/**
+	 * @return True if and only if fired after the main(String[]) method has started
+	 * and we are a client. Use {@link #isClientAgent} for usage during a javaagent which isn't guaranteed 100% of the time
+	 * if the presence of LWJGL exists on the server side.
+	 * This Will work inside your CoreMod Plugin's Constructor but not during javaagent's methods.
+	 */
+    public static boolean getIsClient()
+    {
+    	if(isClient == null)
+    		isClient = sideCheck();
+    	return isClient != null ? isClient : false;
+    }
+    
+    /**
+     * @return True if the presence of the Client's Main Class exists and LWJGL is present.
+     * If you need a guaranteed boolean after the main(String[]) method has started then use {@link #getIsClient()} instead
+     */
+    public static boolean getIsClientAgent()
+    {
+    	return isClientAgent;
     }
     
     public static String getProxyVersion()
@@ -135,6 +157,7 @@ public class ForgeVersionProxy {
 	{
 		hasForge = true;
 		ClassLoader cl = ForgeVersionProxy.class.getClassLoader();
+		
 		ClassNode c;
 		try 
 		{
@@ -146,7 +169,10 @@ public class ForgeVersionProxy {
 				mcVersion = "1.2.5";
 				notchNames = true;
 				isObf = true;
-				isClient = cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null || cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null;
+				boolean client = (cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null || cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null)
+						&& (cl.getResource("org/lwjgl/LWJGLException.class") != null || cl.getResource("org/lwjgl/Version.class") != null);
+				isClientAgent = client;
+				isClient = client;
 				return;
 			}
 			
@@ -219,20 +245,22 @@ public class ForgeVersionProxy {
 		initMcVersion();
 		notchNames = majorVersion < 9 || majorVersion == 9 && minorVersion <= 11 && buildVersion < 937;
 		isObf = (majorVersion < 7 && buildVersion < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
-		isClient = sideCheck();
 		onefive = majorVersion < 8;
+		isClientAgent = (onefive ? cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null : cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null)
+				&& (cl.getResource("org/lwjgl/LWJGLException.class") != null || cl.getResource("org/lwjgl/Version.class") != null);
 	}
 	
 	/**
 	 * Accurately Check 1.3.2 - 1.12.2 For the real boolean of isClient when {@link #hasForge} is true
+	 * @return null when Side is null due to firing inside a java agent
 	 */
-	private static boolean sideCheck()
+	private static Boolean sideCheck()
 	{
 		try
 		{
 			//1.8 - 1.12.2
 			if(majorVersion > 10)
-				SideCheckModern.checkClient();
+				return SideCheckModern.checkClient();
 			//1.4.6 - 1.7.10
 			else if(majorVersion > 6 || majorVersion == 6 && buildVersion >= 451)
 				SideCheckOld.checkClient();
@@ -243,22 +271,23 @@ public class ForgeVersionProxy {
 		}
 		catch(Throwable t)
 		{
+			t.printStackTrace();
 			return false;
 		}
 	}
 	
 	public static class SideCheckModern
 	{
-		@net.minecraftforge.fml.relauncher.SideOnly(net.minecraftforge.fml.relauncher.Side.CLIENT)
-		public static void checkClient()
+		public static Boolean checkClient()
 		{
-			
+			net.minecraftforge.fml.relauncher.Side side = net.minecraftforge.fml.relauncher.FMLLaunchHandler.side();
+			return side == null ? null : side == net.minecraftforge.fml.relauncher.Side.CLIENT;
 		}
 		
-		@net.minecraftforge.fml.relauncher.SideOnly(net.minecraftforge.fml.relauncher.Side.SERVER)
-		public static void checkServer()
+		public static boolean checkServer()
 		{
-			
+			net.minecraftforge.fml.relauncher.Side side = net.minecraftforge.fml.relauncher.FMLLaunchHandler.side();
+			return side == null ? null : side == net.minecraftforge.fml.relauncher.Side.SERVER;
 		}
 	}
 
