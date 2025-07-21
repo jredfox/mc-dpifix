@@ -310,8 +310,20 @@ public class GameModeLib {
 	 */
 	public static File getFileFromClass(Class clazz)
 	{
-		URL jarURL = clazz.getProtectionDomain().getCodeSource().getLocation();//get the path of the currently running jar
-		return getFileFromURL(jarURL);
+		try
+		{
+			URL jarURL = clazz.getProtectionDomain().getCodeSource().getLocation();//get the path of the currently running jar
+			if(jarURL != null)
+				return getFileFromURL(jarURL);
+		}
+		catch(NullPointerException e)
+		{
+			e.printStackTrace();
+		}
+		
+		//FallBack to safe getter in case the location is null for certain class loaders
+		URL u = GameModeLib.class.getClassLoader().getResource(clazz.getName().replace('.', '/') + ".class");
+		return getFileFromURL(u);
 	}
 	
 	private static File getFileFromURL(URL jarURL) 
