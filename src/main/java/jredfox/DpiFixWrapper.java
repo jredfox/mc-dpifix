@@ -51,7 +51,7 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 		boolean onesixnotch = ForgeVersionProxy.getNotchNames();
 		boolean oneeight = ForgeVersionProxy.getMajorVersion() >= 11;
 		
-		//Add Exclusion List 1.5 - 1.12.2
+		//Add Exclusion List 1.3.2 - 1.12.2
 		try
 		{
 			ClassLoader cl = this.getClass().getClassLoader();
@@ -68,7 +68,7 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 			t.printStackTrace();
 		}
 		
-		//Works for 1.5 - 1.12.2
+		//Works for 1.3.2 - 1.12.2
 		Class IFMLLoadingPluginClazz = oneeight ? net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.class : cpw.mods.fml.relauncher.IFMLLoadingPlugin.class;
 		Class coreModManagerClazz = oneeight ? LaunchClassLoaderFix.forName("net.minecraftforge.fml.relauncher.CoreModManager") : ( (!onefive) ? LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.CoreModManager") : LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.RelaunchLibraryManager"));
 		Class FMLPluginWrapper = LaunchClassLoaderFix.forName(coreModManagerClazz.getName() + "$FMLPluginWrapper");
@@ -99,7 +99,7 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 			ctr.setAccessible(true);
 			plugins.add(ctr.newInstance(name, new DpiFix(), location, new String[0] ));
 		}
-		//1.5 - 1.6.1
+		//1.3.2 - 1.6.1
 		else
 		{
 			plugins.add(new DpiFix());

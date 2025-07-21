@@ -249,7 +249,7 @@ public class ForgeVersionProxy {
 		notchNames = majorVersion < 9 || majorVersion == 9 && minorVersion <= 11 && buildVersion < 937;
 		isObf = (majorVersion < 7 && buildVersion < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
 		onefive = majorVersion < 8;
-		isClientAgent = (onefive ? cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null : cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null)
+		isClientAgent = (onefive ? (cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null) : (cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null))
 				&& (cl.getResource("org/lwjgl/LWJGLException.class") != null || cl.getResource("org/lwjgl/Version.class") != null);
 	}
 	
