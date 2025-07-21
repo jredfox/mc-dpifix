@@ -15,8 +15,22 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 	public DpiFixAnn()
 	{
 		LaunchClassLoaderFix.stopMemoryOverflow(this.getClass().getClassLoader());
+		this.failsafe();
 	}
 	
+	/**
+	 * Re-Enables JFrame GUI if we are not on the client and are 1.5.2 or below
+	 */
+	public void failsafe() 
+	{
+		if(ForgeVersionProxy.onefive && !ForgeVersionProxy.getIsClient() && DpiFix.agentmode)
+		{
+			System.out.println("Re-Enabling JFrame GUIs SERVER SIDE");
+			DeAWTProxy.setVisible(true);
+		}
+	}
+
+	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
 	{
 		if(transformedName.equals("jredfox.dpimod.DpiFixModLegacy") && basicClass != null)
@@ -36,7 +50,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 		}
 		return basicClass;
 	}
-	
+
 	/**
 	 * Patches the @Mod annotation for versions < 1.7.2
 	 */

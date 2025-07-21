@@ -24,6 +24,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 	public DpiFixCoreMod()
 	{
 		LaunchClassLoaderFix.stopMemoryOverflow(this.getClass().getClassLoader());
+		this.failsafe();
 	}
 	
 	public static List<String> cls =  DpiFix.asStringList( getCls() );
@@ -97,6 +98,18 @@ public class DpiFixCoreMod implements IClassTransformer {
 		if(this.i) return;
 		this.dpifixTransformer = ForgeVersionProxy.onefive ? new DpiFixOneFiveTransformer() : new DpiFixTransformer();
 		this.i = true;
+	}
+	
+	/**
+	 * Re-Enables JFrame GUI if we are not on the client and are 1.5.2 or below
+	 */
+	public void failsafe() 
+	{
+		if(ForgeVersionProxy.onefive && !ForgeVersionProxy.getIsClient() && DpiFix.agentmode)
+		{
+			System.err.println("Re-Enabling JFrame GUIs WITH CLIENT TRANSFORMER?????");
+			DeAWTProxy.setVisible(true);
+		}
 	}
 
 	//##############################  START Functions  ##############################\\
