@@ -283,13 +283,13 @@ public class ForgeVersionProxy {
 		public static Boolean checkClient()
 		{
 			net.minecraftforge.fml.relauncher.Side side = net.minecraftforge.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : side == net.minecraftforge.fml.relauncher.Side.CLIENT;
+			return side == null ? null : (side == net.minecraftforge.fml.relauncher.Side.CLIENT);
 		}
 		
 		public static Boolean checkServer()
 		{
 			net.minecraftforge.fml.relauncher.Side side = net.minecraftforge.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : side != net.minecraftforge.fml.relauncher.Side.CLIENT;
+			return side == null ? null : (side != net.minecraftforge.fml.relauncher.Side.CLIENT);
 		}
 	}
 
@@ -298,13 +298,13 @@ public class ForgeVersionProxy {
 		public static Boolean checkClient()
 		{
 			cpw.mods.fml.relauncher.Side side = cpw.mods.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : side == cpw.mods.fml.relauncher.Side.CLIENT;
+			return side == null ? null : (side == cpw.mods.fml.relauncher.Side.CLIENT);
 		}
 		
 		public static Boolean checkServer()
 		{
 			cpw.mods.fml.relauncher.Side side = cpw.mods.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : side != cpw.mods.fml.relauncher.Side.CLIENT;
+			return side == null ? null : (side != cpw.mods.fml.relauncher.Side.CLIENT);
 		}
 	}
 	
