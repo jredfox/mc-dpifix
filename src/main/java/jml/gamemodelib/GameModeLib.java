@@ -65,7 +65,7 @@ public class GameModeLib {
 		try
 		{
 			//Remove agent from classpath so forge doesn't load our "@Mod" when not in coremods or mods folder
-			if(Boolean.parseBoolean(System.getProperty("gamemodelib.removeAgent", "false")) || Boolean.parseBoolean(System.getProperty("gamemodelib.removeModAgent", "true")) && hasForge)
+			if(Boolean.parseBoolean(System.getProperty("gamemodelib.removeAgent", "false")) || hasForge && Boolean.parseBoolean(System.getProperty("gamemodelib.removeModAgent", "true")))
 			{
 				ClassLoader sy = ClassLoader.getSystemClassLoader();
 				ClassLoader parent = GameModeLib.getParentCL(sy);

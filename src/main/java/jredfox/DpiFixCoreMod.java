@@ -26,11 +26,6 @@ public class DpiFixCoreMod implements IClassTransformer {
 		LaunchClassLoaderFix.stopMemoryOverflow(this.getClass().getClassLoader());
 	}
 	
-	/**
-	 * Check if we are in 1.5x so we can configure the transformer for 1.5x
-	 */
-	public static boolean onefive = ForgeVersionProxy.onefive;
-	
 	public static List<String> cls =  DpiFix.asStringList( getCls() );
 	
 	public IDpiFixTransformer dpifixTransformer = null;
@@ -66,7 +61,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 	
 	private static String[] getCls() 
 	{
-		if(onefive)
+		if(ForgeVersionProxy.onefive)
 		{
 			return new String[] {
 				"net.minecraft.client.Minecraft", 
@@ -100,7 +95,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 	public void init() 
 	{
 		if(this.i) return;
-		this.dpifixTransformer = onefive ? new DpiFixOneFiveTransformer() : new DpiFixTransformer();
+		this.dpifixTransformer = ForgeVersionProxy.onefive ? new DpiFixOneFiveTransformer() : new DpiFixTransformer();
 		this.i = true;
 	}
 

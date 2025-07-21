@@ -313,13 +313,13 @@ public class ForgeVersionProxy {
 		public static Boolean checkClient()
 		{
 			String side = cpw.mods.fml.relauncher.FMLRelauncher.side();
-			return side == null ? null : side.equalsIgnoreCase("CLIENT");
+			return side == null ? null : side.toString().equalsIgnoreCase("CLIENT");
 		}
 		
 		public static Boolean checkServer()
 		{
 			String side = cpw.mods.fml.relauncher.FMLRelauncher.side();
-			return side == null ? null : !side.equalsIgnoreCase("CLIENT");
+			return side == null ? null : !side.toString().equalsIgnoreCase("CLIENT");
 		}
 	}
 
