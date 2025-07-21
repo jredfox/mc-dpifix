@@ -128,7 +128,7 @@ public class ForgeVersionProxy {
 	 * @return True if and only if fired after the main(String[]) method has started
 	 * and we are a client. Use {@link #isClientAgent} for usage during a javaagent which isn't guaranteed 100% of the time
 	 * if the presence of LWJGL exists on the server side.
-	 * This Will work inside your CoreMod Plugin's Constructor but not during javaagent's methods.
+	 * This Method Will work inside your CoreMod Plugin's Constructor but not during javaagent's methods.
 	 */
     public static boolean getIsClient()
     {
@@ -261,13 +261,12 @@ public class ForgeVersionProxy {
 			//1.8 - 1.12.2
 			if(majorVersion > 10)
 				return SideCheckModern.checkClient();
-			//1.4.6 - 1.7.10
-			else if(majorVersion > 6 || majorVersion == 6 && buildVersion >= 451)
-				SideCheckOld.checkClient();
-			//1.3.2 - 1.4.5
+			//1.6.1 - 1.7.10
+			else if(!onefive)
+				return SideCheckOld.checkClient();
+			//1.3.2 - 1.5.2
 			else
-				SideCheckLegacy.checkClient();
-			return true;
+				return SideCheckLegacy.checkClient();
 		}
 		catch(Throwable t)
 		{
@@ -284,40 +283,40 @@ public class ForgeVersionProxy {
 			return side == null ? null : side == net.minecraftforge.fml.relauncher.Side.CLIENT;
 		}
 		
-		public static boolean checkServer()
+		public static Boolean checkServer()
 		{
 			net.minecraftforge.fml.relauncher.Side side = net.minecraftforge.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : side == net.minecraftforge.fml.relauncher.Side.SERVER;
+			return side == null ? null : side != net.minecraftforge.fml.relauncher.Side.CLIENT;
 		}
 	}
 
 	public static class SideCheckOld
 	{
-		@cpw.mods.fml.relauncher.SideOnly(cpw.mods.fml.relauncher.Side.CLIENT)
-		public static void checkClient()
+		public static Boolean checkClient()
 		{
-			
+			cpw.mods.fml.relauncher.Side side = cpw.mods.fml.relauncher.FMLLaunchHandler.side();
+			return side == null ? null : side == cpw.mods.fml.relauncher.Side.CLIENT;
 		}
 		
-		@cpw.mods.fml.relauncher.SideOnly(cpw.mods.fml.relauncher.Side.SERVER)
-		public static void checkServer()
+		public static Boolean checkServer()
 		{
-			
+			cpw.mods.fml.relauncher.Side side = cpw.mods.fml.relauncher.FMLLaunchHandler.side();
+			return side == null ? null : side != cpw.mods.fml.relauncher.Side.CLIENT;
 		}
 	}
 	
 	public static class SideCheckLegacy
 	{
-		@cpw.mods.fml.common.asm.SideOnly(cpw.mods.fml.common.Side.CLIENT)
-		public static void checkClient()
+		public static Boolean checkClient()
 		{
-			
+			String side = cpw.mods.fml.relauncher.FMLRelauncher.side();
+			return side == null ? null : side.equalsIgnoreCase("CLIENT");
 		}
 		
-		@cpw.mods.fml.common.asm.SideOnly(cpw.mods.fml.common.Side.SERVER)
-		public static void checkServer()
+		public static Boolean checkServer()
 		{
-			
+			String side = cpw.mods.fml.relauncher.FMLRelauncher.side();
+			return side == null ? null : !side.equalsIgnoreCase("CLIENT");
 		}
 	}
 

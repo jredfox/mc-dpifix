@@ -22,6 +22,9 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 	public DpiFixWrapper() throws Exception
 	{
 		this.wrap();
+		System.out.println("ForgeVersion:" + ForgeVersionProxy.getVersion() + " mc:" + ForgeVersionProxy.mcVersion);
+		System.out.println("isClient:" + ForgeVersionProxy.getIsClient() + " isObf:" + ForgeVersionProxy.isObf);
+		System.out.println("isClientAgent:" + ForgeVersionProxy.isClientAgent);
 	}
 
 	/**

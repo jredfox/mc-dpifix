@@ -9,6 +9,7 @@ public class DpiFixModProxy {
 	{
 		System.out.println("ForgeVersion:" + ForgeVersionProxy.getVersion() + " mc:" + ForgeVersionProxy.mcVersion);
 		System.out.println("isClient:" + ForgeVersionProxy.getIsClient() + " isObf:" + ForgeVersionProxy.isObf);
+		System.out.println("isClientAgent:" + ForgeVersionProxy.isClientAgent);
 		
 		System.out.println("DPI-Fix Mod Init");
 		LaunchClassLoaderFix.stopMemoryOverflowFoamFix(clforge);
