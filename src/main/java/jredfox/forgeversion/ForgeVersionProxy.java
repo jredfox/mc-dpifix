@@ -90,8 +90,8 @@ public class ForgeVersionProxy {
      * ChangeLog 1.0.1
      * - Fixed isClient returning true for servers when java agent was present and the main(String[]) args had already started
      * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false during the java agent's methods
-     * - Added hasForgeASM to determine if Forge has CoreModCapabilities reliable even in java agent
-     * - Added Support for Forge MC 1.1 - 1.2.5!
+     * - Added hasForgeASM to determine if Forge has CoreMod Capabilities reliable even in java agent
+     * - Added Support for Forge MC 1.1 - 1.2.5 when compiled with {@link #OLD_LEGACY_SUPP} is true
      * - Changed {@link #mcVersion} to "1.0.0" when {@link #hasForge} is false
      */
     public static final String PROXY_VERSION = "1.0.1";
@@ -214,7 +214,8 @@ public class ForgeVersionProxy {
 				mcVersion = "1.0.0";
 				notchNames = true;
 				isObf = true;
-				boolean client = (cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null || cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null)
+				ClassLoader sysCL = cl.getSystemClassLoader();
+				boolean client = (sysCL.getResource("net/minecraft/client/Minecraft.class") != null || sysCL.getResource("net/minecraft/client/main/Main.class") != null)
 						&& (cl.getResource("org/lwjgl/LWJGLException.class") != null || cl.getResource("org/lwjgl/Version.class") != null);
 				isClientAgent = client;
 				isClient = client;
