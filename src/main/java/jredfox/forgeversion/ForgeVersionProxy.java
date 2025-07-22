@@ -332,13 +332,15 @@ public class ForgeVersionProxy {
 		public static Boolean checkClient()
 		{
 			net.minecraftforge.fml.relauncher.Side side = net.minecraftforge.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : (side == net.minecraftforge.fml.relauncher.Side.CLIENT);
+			checkSide(side);
+			return side == net.minecraftforge.fml.relauncher.Side.CLIENT;
 		}
 		
 		public static Boolean checkServer()
 		{
 			net.minecraftforge.fml.relauncher.Side side = net.minecraftforge.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : (side != net.minecraftforge.fml.relauncher.Side.CLIENT);
+			checkSide(side);
+			return side != net.minecraftforge.fml.relauncher.Side.CLIENT;
 		}
 	}
 
@@ -347,13 +349,15 @@ public class ForgeVersionProxy {
 		public static Boolean checkClient()
 		{
 			cpw.mods.fml.relauncher.Side side = cpw.mods.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : (side == cpw.mods.fml.relauncher.Side.CLIENT);
+			checkSide(side);
+			return side == cpw.mods.fml.relauncher.Side.CLIENT;
 		}
 		
 		public static Boolean checkServer()
 		{
 			cpw.mods.fml.relauncher.Side side = cpw.mods.fml.relauncher.FMLLaunchHandler.side();
-			return side == null ? null : (side != cpw.mods.fml.relauncher.Side.CLIENT);
+			checkSide(side);
+			return side != cpw.mods.fml.relauncher.Side.CLIENT;
 		}
 	}
 	
@@ -362,14 +366,24 @@ public class ForgeVersionProxy {
 		public static Boolean checkClient()
 		{
 			Object side = cpw.mods.fml.relauncher.FMLRelauncher.side();
-			return side == null ? null : side.toString().equalsIgnoreCase("CLIENT");
+			checkSide(side);
+			return side.toString().equalsIgnoreCase("CLIENT");
 		}
 		
 		public static Boolean checkServer()
 		{
 			Object side = cpw.mods.fml.relauncher.FMLRelauncher.side();
-			return side == null ? null : !side.toString().equalsIgnoreCase("CLIENT");
+			checkSide(side);
+			return !side.toString().equalsIgnoreCase("CLIENT");
 		}
+	}
+	
+	private static void checkSide(Object side) 
+	{
+		if(side == null)
+			throw new RuntimeException("ForgeVersionProxy#isClient can only be determined after the main(String[]) method has started!\n"
+					+ "Use ForgeVersionProxy#isClientAgent Instead!\n"
+					+ "Not only is this to prevent isClient from being false for your Java Agent but also to prevent pre-mature class loading of java.awt.Component");
 	}
 
 	public static void initMcVersion()
