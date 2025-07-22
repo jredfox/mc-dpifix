@@ -17,7 +17,7 @@ import org.ow2.asm.tree.LdcInsnNode;
 import org.ow2.asm.tree.MethodNode;
 
 /**
- * Safely Get the Forge Version 1.3.2 - 1.12.2 without loading the ModContainer class.
+ * Safely Get the Forge Version 1.1 - 1.12.2 without loading the ModContainer class.
  * Class Is Portable, Free to Use, Copy, Re-Distribute and Modify for your own project.
  * If you modify this and it's not a bug fix please refactor for your own mods to prevent class collisions
  * @report 
@@ -147,6 +147,7 @@ public class ForgeVersionProxy {
 	 * and we are a client. Use {@link #isClientAgent} for usage during a javaagent which isn't guaranteed 100% of the time
 	 * if the presence of LWJGL exists on the server side.
 	 * This Method Will work inside your CoreMod Plugin's Constructor but not during javaagent's methods.
+	 * @note MC 1.1 - MC 1.2.5 Will simply return {@link #isClientAgent}
 	 */
     public static boolean getIsClient()
     {
@@ -275,7 +276,8 @@ public class ForgeVersionProxy {
 	
 	/**
 	 * Accurately Check 1.3.2 - 1.12.2 For the real boolean of isClient when {@link #hasForge} is true
-	 * @return null when Side is null due to firing inside a java agent
+	 * @return null when Side is null due to firing inside a java agent.
+	 * Returns {@value #isClientAgent} for MC 1.1 - 1.2.5
 	 */
 	private static Boolean sideCheck()
 	{
@@ -288,8 +290,11 @@ public class ForgeVersionProxy {
 			else if(!onefive)
 				return SideCheckOld.checkClient();
 			//1.3.2 - 1.5.2
-			else
+			else if(majorVersion > 3)
 				return SideCheckLegacy.checkClient();
+			//1.1 - 1.2.5
+			else
+				return isClientAgent;
 		}
 		catch(Throwable t)
 		{
