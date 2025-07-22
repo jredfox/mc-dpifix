@@ -92,6 +92,7 @@ public class ForgeVersionProxy {
      * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false during the java agent's methods
      * - Added hasForgeASM to determine if Forge has CoreModCapabilities reliable even in java agent
      * - Added Support for Forge MC 1.1 - 1.2.5!
+     * - Changed {@link #mcVersion} to "1.0.0" when {@link #hasForge} is false
      */
     public static final String PROXY_VERSION = "1.0.1";
 	
