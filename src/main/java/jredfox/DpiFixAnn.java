@@ -36,7 +36,6 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
 	{
-		this.makeDeAWTProxy(name, basicClass);
 		if(transformedName.equals("jredfox.dpimod.DpiFixModLegacy") && basicClass != null)
 		{
 			try
