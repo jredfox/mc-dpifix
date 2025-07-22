@@ -1,17 +1,11 @@
 package jredfox.dpimod;
 
-import jredfox.DeAWTProxy;
 import jredfox.clfix.LaunchClassLoaderFix;
-import jredfox.forgeversion.ForgeVersionProxy;
 
 public class DpiFixModProxy {
 	
 	public static void modInit(ClassLoader clforge) 
 	{
-		System.out.println("ForgeVersion:" + ForgeVersionProxy.getVersion() + " mc:" + ForgeVersionProxy.mcVersion);
-		System.out.println("isClient:" + ForgeVersionProxy.getIsClient() + " isObf:" + ForgeVersionProxy.isObf);
-		System.out.println("isClientAgent:" + ForgeVersionProxy.isClientAgent);
-		
 		System.out.println("DPI-Fix Mod Init");
 		LaunchClassLoaderFix.stopMemoryOverflowFoamFix(clforge);
 	}

@@ -54,34 +54,6 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 		return basicClass;
 	}
 
-	private void makeDeAWTProxy(String name, byte[] basicClass)
-	{
-		if(name.equals("jredfox.DeAWTProxy"))
-		{
-			ClassNode classNode = CoreUtils.getClassNode(basicClass);
-			for(MethodNode m : classNode.methods)
-			{
-				for(AbstractInsnNode a : m.instructions.toArray())
-				{
-					if(a instanceof FieldInsnNode)
-					{
-						FieldInsnNode f = (FieldInsnNode)a;
-						if(f.owner.equals("jredfox/DeAWTProxy") && !f.name.equals("hasField"))
-						{
-							f.owner = "java/awt/Component";
-						}
-					}
-				}
-			}
-			ClassWriter cw = CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS);
-			try {
-				CoreUtils.dumpFile(name + "_make", cw.toByteArray());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 	/**
 	 * Patches the @Mod annotation for versions < 1.7.2
 	 */
@@ -127,6 +99,34 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 			m2.visibleAnnotations.remove(CoreUtils.getAnnotation(m2, "Lcpw/mods/fml/common/Mod$EventHandler;"));
 			AnnotationNode lc = new AnnotationNode("Lcpw/mods/fml/common/Mod$ServerAboutToStart;");
 			m2.visibleAnnotations.add(lc);
+		}
+	}
+	
+	private void makeDeAWTProxy(String name, byte[] basicClass)
+	{
+		if(name.equals("jredfox.DeAWTProxy"))
+		{
+			ClassNode classNode = CoreUtils.getClassNode(basicClass);
+			for(MethodNode m : classNode.methods)
+			{
+				for(AbstractInsnNode a : m.instructions.toArray())
+				{
+					if(a instanceof FieldInsnNode)
+					{
+						FieldInsnNode f = (FieldInsnNode)a;
+						if(f.owner.equals("jredfox/DeAWTProxy") && !f.name.equals("hasField"))
+						{
+							f.owner = "java/awt/Component";
+						}
+					}
+				}
+			}
+			ClassWriter cw = CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS);
+			try {
+				CoreUtils.dumpFile(name + "_make", cw.toByteArray());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

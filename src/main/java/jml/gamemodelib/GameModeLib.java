@@ -24,16 +24,6 @@ public class GameModeLib {
 		System.setProperty("gamemodelib.agent", "true");
 		if(System.getProperty("gamemodelib.cfg") == null)
 			System.setProperty("gamemodelib.cfg", String.valueOf(isInCoreMods()) );
-		try
-		{
-			System.out.println("_ForgeVersion:" + ForgeVersionProxy.getVersion() + " mc:" + ForgeVersionProxy.mcVersion);
-			System.out.println("_isClientAgent:" + ForgeVersionProxy.isClientAgent + " isObf:" + ForgeVersionProxy.isObf);
-			System.out.println("_jar --> " + GameModeLib.jarFile);
-		}
-		catch(Throwable t)
-		{
-			t.printStackTrace();
-		}
 	}
 
 	public static void load()
