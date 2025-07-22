@@ -194,13 +194,10 @@ public class ForgeVersionProxy {
 
 	public static void init() 
 	{
-		hasForge = true;
 		ClassLoader cl = ForgeVersionProxy.class.getClassLoader();
-		
-		ClassNode c;
 		try 
 		{
-			c = getClassNode(cl.getResourceAsStream("net/minecraftforge/common/ForgeVersion.class"));
+			ClassNode c = getClassNode(cl.getResourceAsStream("net/minecraftforge/common/ForgeVersion.class"));
 			
 			//Re-Direct ClassNode to ForgeHooks which had the forge versions for MC 1.1 - 1.2.5
 			if(c == null && getOldLegacySupp())
@@ -223,6 +220,7 @@ public class ForgeVersionProxy {
 				return;
 			}
 			
+			hasForge = true;
 			boolean modified = false;
 			for(Object of : c.fields)
 			{
