@@ -20,8 +20,17 @@ import org.ow2.asm.tree.MethodNode;
  * Safely Get the Forge Version 1.3.2 - 1.12.2 without loading the ModContainer class.
  * Class Is Portable, Free to Use, Copy, Re-Distribute and Modify for your own project.
  * If you modify this and it's not a bug fix please refactor for your own mods to prevent class collisions
- * @report bugs to github.com/jredfox/mc-dpifix/issues
- * @compiling needs SideOnly Side classes from 1.4.5, 1.5.2 and 1.8's to compile. Do not include inside SideOnly or Side.CLIENT inside your mod's jar. Detection is automatic and won't trigger incorrect classloading
+ * @report 
+ * 	bugs to github.com/jredfox/mc-dpifix/issues
+ * @compiling 
+ * Needs These classes below as a proxy to compile. Do not include them into your compiled jar! 
+ * Doing so may cause crashes between versions due to class collisions! 
+ * Detection is automatic and won't trigger loading any classes for the wrong mc version
+ * -	net.minecraftforge.fml.relauncher.FMLLaunchHandler (1.12.2)
+ * -	cpw.mods.fml.relauncher.FMLLaunchHandler (1.7.10)
+ * -	cpw.mods.fml.relauncher.FMLRelauncher (1.5.2)
+ * -	cpw.mods.fml.relauncher.Side (1.7.10)
+ * -	net.minecraftforge.fml.relauncher.Side (1.12.2)
  * @author jredfox
  */
 public class ForgeVersionProxy {
@@ -211,7 +220,7 @@ public class ForgeVersionProxy {
 				}
 			}
 			
-			//Handle ForgeVersion whan the class has been AT (Access Transformed) or modified and are no longer final fields
+			//Handle ForgeVersion when the class has been AT (Access Transformed) or modified and are no longer final fields
 			if(modified)
 			{
 				MethodNode m = getMethodNode(c, "<clinit>", "()V");
@@ -312,13 +321,13 @@ public class ForgeVersionProxy {
 	{
 		public static Boolean checkClient()
 		{
-			String side = cpw.mods.fml.relauncher.FMLRelauncher.side();
+			Object side = cpw.mods.fml.relauncher.FMLRelauncher.side();
 			return side == null ? null : side.toString().equalsIgnoreCase("CLIENT");
 		}
 		
 		public static Boolean checkServer()
 		{
-			String side = cpw.mods.fml.relauncher.FMLRelauncher.side();
+			Object side = cpw.mods.fml.relauncher.FMLRelauncher.side();
 			return side == null ? null : !side.toString().equalsIgnoreCase("CLIENT");
 		}
 	}
