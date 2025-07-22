@@ -381,7 +381,7 @@ public class ForgeVersionProxy {
 	private static void checkSide(Object side) 
 	{
 		if(side == null)
-			throw new RuntimeException("ForgeVersionProxy#isClient can only be determined after the main(String[]) method has started!\n"
+			throw new RuntimeException("ForgeVersionProxy#isClient can only be determined after the main(String[] args) method has started!\n"
 					+ "Use ForgeVersionProxy#isClientAgent Instead!\n"
 					+ "Not only is this to prevent isClient from being false for your Java Agent but also to prevent pre-mature class loading of java.awt.Component");
 	}

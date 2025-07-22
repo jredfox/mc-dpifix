@@ -27,8 +27,7 @@ public class GameModeLib {
 		try
 		{
 			System.out.println("_ForgeVersion:" + ForgeVersionProxy.getVersion() + " mc:" + ForgeVersionProxy.mcVersion);
-//			System.out.println("_isClient:" + ForgeVersionProxy.getIsClient() + " isObf:" + ForgeVersionProxy.isObf);
-			System.out.println("_isClientAgent:" + ForgeVersionProxy.isClientAgent);
+			System.out.println("_isClientAgent:" + ForgeVersionProxy.isClientAgent + " isObf:" + ForgeVersionProxy.isObf);
 			System.out.println("_jar --> " + GameModeLib.jarFile);
 		}
 		catch(Throwable t)

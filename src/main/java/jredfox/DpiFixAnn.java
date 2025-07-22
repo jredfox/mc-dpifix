@@ -23,7 +23,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 	 */
 	public void failsafe() 
 	{
-		if(ForgeVersionProxy.onefive && !ForgeVersionProxy.getIsClient() && DpiFix.agentmode)
+		if(ForgeVersionProxy.onefive && DpiFix.agentmode && !ForgeVersionProxy.getIsClient() && Boolean.parseBoolean(System.getProperty("gamemodelib.deawt", "false")))
 		{
 			System.out.println("Re-Enabling JFrame GUIs SERVER SIDE");
 			DeAWTProxy.setVisible(true);
