@@ -77,10 +77,16 @@ public class ForgeVersionProxy {
      */
     private static Boolean isClient;
     /**
+     * When True ForgeVersionProxy Supports Forge for MC 1.1 - 1.2.5!
+     * Set this to false when compiling if you don't want or need that support
+     */
+    public static final boolean OLD_LEGACY_SUPP = true;
+    /**
      * The ForgeVersionProxy Version
      * ChangeLog 1.0.1
      * - Fixed isClient returning true for servers when java agent was present and the main(String[]) args had already started
      * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false during the java agent's methods
+     * - Added Support for Forge MC 1.1 - 1.2.5!
      */
     public static final String PROXY_VERSION = "1.0.1";
 	
@@ -174,6 +180,11 @@ public class ForgeVersionProxy {
 		try 
 		{
 			c = getClassNode(cl.getResourceAsStream("net/minecraftforge/common/ForgeVersion.class"));
+			
+			//Re-Direct ClassNode to ForgeHooks which had the forge versions for MC 1.1 - 1.2.5
+			if(c == null && OLD_LEGACY_SUPP)
+				c = getClassNode(cl.getResourceAsStream("forge/ForgeHooks.class"));
+			
 			if(c == null)
 			{
 				System.err.println("Unable to Parse ForgeVersion.class via ClassNode! Either Forge isn't installed or your MC Version is 1.2.5 or older which isn't supported!");
