@@ -73,11 +73,11 @@ public class ForgeVersionProxy {
     public static boolean onefive;
     /**
      * Are we most likely running on the client (Main Client Class & LWJGL library exists)
-     * Use {@link #getIsClient()} for Your ASM Plugin this is for the java agent and isn't garenteed to be correct
+     * Use {@link #getIsClient()} for Your ASM Plugin this is for the java agent and isn't guaranteed to be correct
      */
     public static boolean isClientAgent;
     /**
-     * Are we running on the client or the server?
+     * Are we running on the client or the server? DO NOT USE IN YOUR JAVA AGENT it will be false and cause java.awt.Component to load!
      */
     private static Boolean isClient;
     /**
@@ -89,7 +89,7 @@ public class ForgeVersionProxy {
      * The ForgeVersionProxy Version
      * ChangeLog 1.0.1
      * - Fixed isClient returning true for servers when java agent was present and the main(String[]) args had already started
-     * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false during the java agent's methods
+     * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false and print a RuntimeException during a java agent notifying the coder of their error
      * - Added hasForgeASM to determine if Forge has CoreMod Capabilities reliable even in java agent
      * - Added Support for Forge MC 1.1 - 1.2.5 when compiled with {@link #OLD_LEGACY_SUPP} is true
      * - Changed {@link #mcVersion} to "1.0.0" when {@link #hasForge} is false
@@ -168,10 +168,10 @@ public class ForgeVersionProxy {
     }
     
 	/**
-	 * @return True if and only if fired after the main(String[]) method has started
+	 * @return True if and only if fired after the main(String[] args) method has started
 	 * and we are a client. Use {@link #isClientAgent} for usage during a javaagent which isn't guaranteed 100% of the time
 	 * if the presence of LWJGL exists on the server side.
-	 * This Method Will work inside your CoreMod Plugin's Constructor but not during javaagent's methods.
+	 * This Method Will work inside your CoreMod Plugin's Constructor but not during javaagent's methods. This method will cause java.awt.Component to load and then it cannot be transformed
 	 * @note MC 1.1 - MC 1.2.5 Will simply return {@link #isClientAgent}
 	 */
     public static boolean getIsClient()

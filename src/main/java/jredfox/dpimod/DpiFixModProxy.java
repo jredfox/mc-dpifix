@@ -8,7 +8,6 @@ public class DpiFixModProxy {
 	
 	public static void modInit(ClassLoader clforge) 
 	{
-		DeAWTProxy.getVisible();
 		System.out.println("ForgeVersion:" + ForgeVersionProxy.getVersion() + " mc:" + ForgeVersionProxy.mcVersion);
 		System.out.println("isClient:" + ForgeVersionProxy.getIsClient() + " isObf:" + ForgeVersionProxy.isObf);
 		System.out.println("isClientAgent:" + ForgeVersionProxy.isClientAgent);
