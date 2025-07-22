@@ -160,7 +160,7 @@ public class ForgeVersionProxy {
     
     /**
      * @return True if the presence of the Client's Main Class exists and LWJGL is present.
-     * If you need a guaranteed boolean after the main(String[]) method has started then use {@link #getIsClient()} instead
+     * If you need a guaranteed boolean after the main(String[] args) method has started then use {@link #getIsClient()} instead
      */
     public static boolean getIsClientAgent()
     {
@@ -168,9 +168,8 @@ public class ForgeVersionProxy {
     }
     
 	/**
-	 * @return True if and only if fired after the main(String[] args) method has started
-	 * and we are a client. Use {@link #isClientAgent} for usage during a javaagent which isn't guaranteed 100% of the time
-	 * if the presence of LWJGL exists on the server side.
+	 * @return True if and only if fired after the main(String[] args) method has started and we are a client. 
+	 * Use {@link #isClientAgent} for usage during a javaagent which isn't guaranteed 100% of the time if the presence of LWJGL exists on the server side.
 	 * This Method Will work inside your CoreMod Plugin's Constructor but not during javaagent's methods. This method will cause java.awt.Component to load and then it cannot be transformed
 	 * @note MC 1.1 - MC 1.2.5 Will simply return {@link #isClientAgent}
 	 */
