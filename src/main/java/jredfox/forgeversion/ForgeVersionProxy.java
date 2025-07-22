@@ -56,6 +56,10 @@ public class ForgeVersionProxy {
      */
     public static boolean hasForge;
     /**
+     * True when {@link #hasForge} and forge has ASM CoreMod Capabilities. Use this instead of {@link #hasForge} if you compiled with {@link #OLD_LEGACY_SUPP} with true
+     */
+    public static boolean hasForgeASM;
+    /**
      * Use this for ASM to determine if your transformer should use notch names vs SRG names
      */
     public static boolean notchNames;
@@ -77,10 +81,10 @@ public class ForgeVersionProxy {
      */
     private static Boolean isClient;
     /**
-     * When True ForgeVersionProxy Supports Forge for MC 1.1 - 1.2.5!
+     * When Compiled with true ForgeVersionProxy Supports Forge for MC 1.1 - 1.2.5!
      * Set this to false when compiling if you don't want or need that support
      */
-    public static final boolean OLD_LEGACY_SUPP = true;
+    public static final boolean OLD_LEGACY_SUPP = false;
     /**
      * The ForgeVersionProxy Version
      * ChangeLog 1.0.1
@@ -132,6 +136,16 @@ public class ForgeVersionProxy {
     	return mcpVersion;
     }
     
+    public static boolean getHasForge()
+    {
+    	return hasForge;
+    }
+    
+    public static boolean getHasForgeASM()
+    {
+    	return hasForgeASM;
+    }
+    
     public static boolean getNotchNames()
     {
     	return notchNames;
@@ -140,6 +154,15 @@ public class ForgeVersionProxy {
     public static boolean getIsObf()
     {
     	return isObf;
+    }
+    
+    /**
+     * @return True if the presence of the Client's Main Class exists and LWJGL is present.
+     * If you need a guaranteed boolean after the main(String[]) method has started then use {@link #getIsClient()} instead
+     */
+    public static boolean getIsClientAgent()
+    {
+    	return isClientAgent;
     }
     
 	/**
@@ -156,13 +179,9 @@ public class ForgeVersionProxy {
     	return isClient != null ? isClient : false;
     }
     
-    /**
-     * @return True if the presence of the Client's Main Class exists and LWJGL is present.
-     * If you need a guaranteed boolean after the main(String[]) method has started then use {@link #getIsClient()} instead
-     */
-    public static boolean getIsClientAgent()
+    public static boolean getOldLegacySupp()
     {
-    	return isClientAgent;
+    	return OLD_LEGACY_SUPP;
     }
     
     public static String getProxyVersion()
@@ -183,12 +202,12 @@ public class ForgeVersionProxy {
 			c = getClassNode(cl.getResourceAsStream("net/minecraftforge/common/ForgeVersion.class"));
 			
 			//Re-Direct ClassNode to ForgeHooks which had the forge versions for MC 1.1 - 1.2.5
-			if(c == null && OLD_LEGACY_SUPP)
+			if(c == null && getOldLegacySupp())
 				c = getClassNode(cl.getResourceAsStream("forge/ForgeHooks.class"));
 			
 			if(c == null)
 			{
-				System.err.println("Unable to Parse ForgeVersion.class via ClassNode! Either Forge isn't installed or your MC Version is 1.2.5 or older which isn't supported!");
+				System.err.println("Unable to Parse ForgeVersion.class via ClassNode! Either Forge isn't installed or your MC Version is isn't supported!");
 				hasForge = false;
 				mcVersion = "1.2.5";
 				notchNames = true;
@@ -267,6 +286,7 @@ public class ForgeVersionProxy {
 		}
 		
 		initMcVersion();
+		hasForgeASM = majorVersion > 3;
 		notchNames = majorVersion < 9 || majorVersion == 9 && minorVersion <= 11 && buildVersion < 937;
 		isObf = (majorVersion < 7 && buildVersion < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
 		onefive = majorVersion < 8;

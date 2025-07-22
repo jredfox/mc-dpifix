@@ -17,7 +17,7 @@ public class GameModeLib {
 	
 	public static boolean debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
 	public static File jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
-	public static boolean hasForge = ForgeVersionProxy.hasForgeASM();
+	public static boolean hasForge = ForgeVersionProxy.hasForgeASM;
 	
 	public static void init()
 	{
