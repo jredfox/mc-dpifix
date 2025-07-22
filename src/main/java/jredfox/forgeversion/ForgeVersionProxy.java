@@ -204,7 +204,10 @@ public class ForgeVersionProxy {
 			
 			//Re-Direct ClassNode to ForgeHooks which had the forge versions for MC 1.1 - 1.2.5
 			if(c == null && getOldLegacySupp())
-				c = getClassNode(cl.getResourceAsStream("forge/ForgeHooks.class"));
+			{
+				InputStream legacyIn = cl.getResourceAsStream("forge/ForgeHooks.class");
+				c = getClassNode(legacyIn != null ? legacyIn : cl.getResourceAsStream("net/minecraft/src/forge/ForgeHooks.class"));
+			}
 			
 			if(c == null)
 			{
