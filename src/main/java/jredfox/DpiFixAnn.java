@@ -1,10 +1,13 @@
 package jredfox;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.ow2.asm.ClassWriter;
+import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.AnnotationNode;
 import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.FieldInsnNode;
 import org.ow2.asm.tree.MethodNode;
 
 import jredfox.clfix.LaunchClassLoaderFix;
@@ -33,6 +36,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) 
 	{
+		this.makeDeAWTProxy(name, basicClass);
 		if(transformedName.equals("jredfox.dpimod.DpiFixModLegacy") && basicClass != null)
 		{
 			try
@@ -49,6 +53,34 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 			}
 		}
 		return basicClass;
+	}
+
+	private void makeDeAWTProxy(String name, byte[] basicClass)
+	{
+		if(name.equals("jredfox.DeAWTProxy"))
+		{
+			ClassNode classNode = CoreUtils.getClassNode(basicClass);
+			for(MethodNode m : classNode.methods)
+			{
+				for(AbstractInsnNode a : m.instructions.toArray())
+				{
+					if(a instanceof FieldInsnNode)
+					{
+						FieldInsnNode f = (FieldInsnNode)a;
+						if(f.owner.equals("jredfox/DeAWTProxy") && !f.name.equals("hasField"))
+						{
+							f.owner = "java/awt/Component";
+						}
+					}
+				}
+			}
+			ClassWriter cw = CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS);
+			try {
+				CoreUtils.dumpFile(name + "_make", cw.toByteArray());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**

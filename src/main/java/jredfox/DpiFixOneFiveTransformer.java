@@ -299,7 +299,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		startList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "hide", "(Lnet/minecraft/client/Minecraft;)V", false));
 		startList.add(new LabelNode());
 		//only inject the code if the agent has transformed java.awt.Component
-		if(DpiFix.agentmode && Boolean.parseBoolean(System.getProperty("gamemodelib.deawt", "false")) )
+		if(DpiFix.agentmode && DeAWTProxy.hasField)
 		{
 			startList.add(new InsnNode(Opcodes.ICONST_1));
 			startList.add(new FieldInsnNode(Opcodes.PUTSTATIC, "java/awt/Component", "canSetVisible", "Z"));
