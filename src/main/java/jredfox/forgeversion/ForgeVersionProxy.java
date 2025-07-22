@@ -290,9 +290,10 @@ public class ForgeVersionProxy {
 		
 		initMcVersion();
 		int major = majorVersion;
+		int build = buildVersion;
 		hasForgeASM = major > 3;
-		notchNames = major < 9 || major == 9 && minorVersion <= 11 && buildVersion < 937;
-		isObf = (major < 7 && buildVersion < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
+		notchNames = major < 9 || major == 9 && minorVersion <= 11 && build < 937;
+		isObf = (major < 7 && build < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
 		onefive = major < 8;
 		isClientAgent = (onefive ? (cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null) : (cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null))
 				&& (cl.getResource("org/lwjgl/LWJGLException.class") != null || cl.getResource("org/lwjgl/Version.class") != null);
@@ -394,10 +395,11 @@ public class ForgeVersionProxy {
 		if(mcVersion != null)
 			return;
 		
+		int build = buildVersion;
 		switch(majorVersion)
 		{
 			case 1:
-				if(buildVersion < 30)
+				if(build < 30)
 					mcVersion = "1.1";
 				else
 					mcVersion = "1.2.3";
@@ -420,26 +422,26 @@ public class ForgeVersionProxy {
 			break;
 			
 			case 6:
-				if(buildVersion <= 329)
+				if(build <= 329)
 					mcVersion = "1.4.1";
-				else if(buildVersion <= 355)
+				else if(build <= 355)
 					mcVersion = "1.4.2";
-				else if(buildVersion <= 358)
+				else if(build <= 358)
 					mcVersion = "1.4.3";
-				else if(buildVersion <= 378)
+				else if(build <= 378)
 					mcVersion = "1.4.4";
-				else if(buildVersion <= 448)
+				else if(build <= 448)
 					mcVersion = "1.4.5";
-				else if(buildVersion <= 489)
+				else if(build <= 489)
 					mcVersion = "1.4.6";
 				else
 					mcVersion = "1.4.7";
 			break;
 			
 			case 7:
-				if(buildVersion <= 598)
+				if(build <= 598)
 					mcVersion = "1.5";
-				else if(buildVersion <= 682)
+				else if(build <= 682)
 					mcVersion = "1.5.1";
 				else
 					mcVersion = "1.5.2";
@@ -450,9 +452,9 @@ public class ForgeVersionProxy {
 			break;
 			
 			case 9:
-				if(buildVersion <= 871)
+				if(build <= 871)
 					mcVersion = "1.6.2";
-				else if(minorVersion <= 11 && buildVersion <= 878)
+				else if(minorVersion <= 11 && build <= 878)
 					mcVersion = "1.6.3";
 				else
 					mcVersion = "1.6.4";
