@@ -90,6 +90,7 @@ public class ForgeVersionProxy {
      * ChangeLog 1.0.1
      * - Fixed isClient returning true for servers when java agent was present and the main(String[]) args had already started
      * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false during the java agent's methods
+     * - Added hasForgeASM to determine if Forge has CoreModCapabilities reliable even in java agent
      * - Added Support for Forge MC 1.1 - 1.2.5!
      */
     public static final String PROXY_VERSION = "1.0.1";
@@ -319,7 +320,7 @@ public class ForgeVersionProxy {
 		catch(Throwable t)
 		{
 			t.printStackTrace();
-			return false;
+			return null;
 		}
 	}
 	
