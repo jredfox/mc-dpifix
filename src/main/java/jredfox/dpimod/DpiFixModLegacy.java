@@ -54,7 +54,8 @@ public class DpiFixModLegacy {
 	public void modinit(FMLInitializationEvent e)
 	{
 		//Patch 1.6x Mod's Logo Path since they may still try to use the 1.5.2 format of prepending the "/"
-		if(DpiFix.modLogoFix && ForgeVersionProxy.majorVersion > 7 && ForgeVersionProxy.majorVersion < 10)
+		int major = ForgeVersionProxy.majorVersion;
+		if(DpiFix.modLogoFix && major > 7 && major < 10)
 		{
 			for(ModContainer con : Loader.instance().getModList())
 			{

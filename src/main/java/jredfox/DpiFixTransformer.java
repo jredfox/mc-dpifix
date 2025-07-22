@@ -359,12 +359,13 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	 */
 	public void hookGui(ClassNode classNode)
 	{
+		int major = ForgeVersionProxy.majorVersion;
 		//only apply this for forge 1.6x
-		if(!DpiFix.modLogoFix || ForgeVersionProxy.majorVersion > 9)
+		if(!DpiFix.modLogoFix || major > 9)
 			return;
 		
 		//gui = GuiHooks#hookGui(gui);
-		boolean onesixone = ForgeVersionProxy.majorVersion == 8;
+		boolean onesixone = major == 8;
 		String displayGuiScreen = CoreUtils.getObfString("displayGuiScreen", !onesixnotch ? "func_71373_a" : "a");
 		String desc = CoreUtils.getObfString("(Lnet/minecraft/client/gui/GuiScreen;)V", !onesixnotch ? "(Lnet/minecraft/client/gui/GuiScreen;)V" : (ForgeVersionProxy.minorVersion == 11 ? "(Lawe;)V" : ForgeVersionProxy.minorVersion == 10 ? "(Lawb;)V" : "(Lavv;)V") );
 		MethodNode m = CoreUtils.getMethodNode(classNode, displayGuiScreen, desc);

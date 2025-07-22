@@ -289,10 +289,11 @@ public class ForgeVersionProxy {
 		}
 		
 		initMcVersion();
-		hasForgeASM = majorVersion > 3;
-		notchNames = majorVersion < 9 || majorVersion == 9 && minorVersion <= 11 && buildVersion < 937;
-		isObf = (majorVersion < 7 && buildVersion < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
-		onefive = majorVersion < 8;
+		int major = majorVersion;
+		hasForgeASM = major > 3;
+		notchNames = major < 9 || major == 9 && minorVersion <= 11 && buildVersion < 937;
+		isObf = (major < 7 && buildVersion < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
+		onefive = major < 8;
 		isClientAgent = (onefive ? (cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null) : (cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null))
 				&& (cl.getResource("org/lwjgl/LWJGLException.class") != null || cl.getResource("org/lwjgl/Version.class") != null);
 	}
@@ -306,14 +307,17 @@ public class ForgeVersionProxy {
 	{
 		try
 		{
+			//Reduce GETFIELD calls
+			int major = majorVersion;
+			
 			//1.8 - 1.12.2
-			if(majorVersion > 10)
+			if(major > 10)
 				return SideCheckModern.checkClient();
 			//1.6.1 - 1.7.10
 			else if(!onefive)
 				return SideCheckOld.checkClient();
 			//1.3.2 - 1.5.2
-			else if(majorVersion > 3)
+			else if(major > 3)
 				return SideCheckLegacy.checkClient();
 			//1.1 - 1.2.5
 			else
