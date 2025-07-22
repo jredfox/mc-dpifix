@@ -17,13 +17,24 @@ public class GameModeLib {
 	
 	public static boolean debug = Boolean.parseBoolean(System.getProperty("gamemodelib.debug", "false"));
 	public static File jarFile = GameModeLib.getFileFromClass(GameModeLibAgent.class);
-	public static boolean hasForge = ForgeVersionProxy.hasForge;
+	public static boolean hasForge = ForgeVersionProxy.hasForgeASM();
 	
 	public static void init()
 	{
 		System.setProperty("gamemodelib.agent", "true");
 		if(System.getProperty("gamemodelib.cfg") == null)
 			System.setProperty("gamemodelib.cfg", String.valueOf(isInCoreMods()) );
+		try
+		{
+			System.out.println("_ForgeVersion:" + ForgeVersionProxy.getVersion() + " mc:" + ForgeVersionProxy.mcVersion);
+			System.out.println("_isClient:" + ForgeVersionProxy.getIsClient() + " isObf:" + ForgeVersionProxy.isObf);
+			System.out.println("_isClientAgent:" + ForgeVersionProxy.isClientAgent);
+			System.out.println("_jar --> " + GameModeLib.jarFile);
+		}
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
 	}
 
 	public static void load()
