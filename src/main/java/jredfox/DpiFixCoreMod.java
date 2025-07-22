@@ -163,7 +163,7 @@ public class DpiFixCoreMod implements IClassTransformer {
 		}
 	}
 	
-	public static boolean oldGuiScreen = ForgeVersionProxy.getMajorVersion() < 10;
+	public static boolean oldGuiScreen = ForgeVersionProxy.majorVersion < 10;
 	
     /**
      * Will set the focus to ingame if the Minecraft window is the active with focus. Also clears any GUI screen

@@ -59,7 +59,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 	 */
 	public static void patchAtMod(ClassNode classNode) 
 	{
-		if(ForgeVersionProxy.getMajorVersion() < 10)
+		if(ForgeVersionProxy.majorVersion < 10)
 		{
 			//Remove acceptableRemoteVersions = "*"
 			AnnotationNode atmod = CoreUtils.getAnnotation(classNode, "Lcpw/mods/fml/common/Mod;");

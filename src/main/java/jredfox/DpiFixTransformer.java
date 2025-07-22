@@ -98,8 +98,8 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void patchFullScreen(String notch_mc, ClassNode classNode) 
 	{
 		//Universal AT 1.6 - 1.12.2
-		String notch_leftClickCounter = (ForgeVersionProxy.getMinorVersion() == 11 ? "W" : ForgeVersionProxy.getMinorVersion() == 10 ? "W" : "V");
-		String notch_fullscreen = (ForgeVersionProxy.getMinorVersion() == 11 ? "P" : ForgeVersionProxy.getMinorVersion() == 10 ? "P" : "O");
+		String notch_leftClickCounter = (ForgeVersionProxy.minorVersion == 11 ? "W" : ForgeVersionProxy.minorVersion == 10 ? "W" : "V");
+		String notch_fullscreen = (ForgeVersionProxy.minorVersion == 11 ? "P" : ForgeVersionProxy.minorVersion == 10 ? "P" : "O");
 		for(FieldNode f : classNode.fields)
 		{
 			if(f.name.equals(CoreUtils.getObfString("leftClickCounter", onesixnotch ? notch_leftClickCounter : "field_71429_W")) || f.name.equals(CoreUtils.getObfString("fullscreen", onesixnotch ? notch_fullscreen : "field_71431_Q")) )
@@ -194,7 +194,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		}
 		
 		//DpiFixCoreMod.patchSplash(this.mcDataDir);
-		if(DpiFix.fsSplashFix && ForgeVersionProxy.getMajorVersion() >= 10 && ForgeVersionProxy.getBuildVersion() >= 1389)
+		if(DpiFix.fsSplashFix && ForgeVersionProxy.majorVersion >= 10 && ForgeVersionProxy.buildVersion >= 1389)
 		{
 			MethodNode in = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("init", "func_71384_a"), "()V");
 			if(in == null)
@@ -225,14 +225,14 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 			InsnList fspost = new InsnList();
 			fspost.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			fspost.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "fsMousePost", "(Lnet/minecraft/client/Minecraft;)V", false));
-			AbstractInsnNode spot = CoreUtils.getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, onesixnotch ? (ForgeVersionProxy.getMinorVersion() == 11 ? "lv" : ForgeVersionProxy.getMinorVersion() == 10 ? "lu" : "ls") : "net/minecraft/profiler/Profiler", CoreUtils.getObfString("endSection", onesixnotch ? "b" : "func_76319_b"), "()V", false);
+			AbstractInsnNode spot = CoreUtils.getLastMethodInsn(runGame, Opcodes.INVOKEVIRTUAL, onesixnotch ? (ForgeVersionProxy.minorVersion == 11 ? "lv" : ForgeVersionProxy.minorVersion == 10 ? "lu" : "ls") : "net/minecraft/profiler/Profiler", CoreUtils.getObfString("endSection", onesixnotch ? "b" : "func_76319_b"), "()V", false);
 			runGame.instructions.insert(spot, fspost);
 		}
 	}
 	
 	public void patchMaxResFix(String notch_mc, ClassNode classNode) 
 	{
-		if(!DpiFix.maximizeFix || ForgeVersionProxy.getMajorVersion() >= 10)
+		if(!DpiFix.maximizeFix || ForgeVersionProxy.majorVersion >= 10)
 			return;
 		
 		String mcClass = onesixnotch ? notch_mc : "net/minecraft/client/Minecraft";
@@ -301,7 +301,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		InsnList viewport = new InsnList();
 		viewport.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		viewport.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resize.instructions.insert(CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, CoreUtils.getObfString("displayHeight", onesixnotch ? (ForgeVersionProxy.getMinorVersion() == 11 ? "e" : ForgeVersionProxy.getMinorVersion() == 10 ? "e" : "d") : "field_71440_d"), "I"), viewport);
+		resize.instructions.insert(CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, CoreUtils.getObfString("displayHeight", onesixnotch ? (ForgeVersionProxy.minorVersion == 11 ? "e" : ForgeVersionProxy.minorVersion == 10 ? "e" : "d") : "field_71440_d"), "I"), viewport);
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
 		InsnList resizeList = new InsnList();
@@ -318,7 +318,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	
 	public void patchLoadingScreenRenderer(String name, ClassNode classNode)
 	{
-		if(!DpiFix.maximizeFix || ForgeVersionProxy.getMajorVersion() >= 10)
+		if(!DpiFix.maximizeFix || ForgeVersionProxy.majorVersion >= 10)
 			return;
 		
 		System.out.println("Patching: LoadingScreenRenderer");
@@ -360,13 +360,13 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void hookGui(ClassNode classNode)
 	{
 		//only apply this for forge 1.6x
-		if(!DpiFix.modLogoFix || ForgeVersionProxy.getMajorVersion() > 9)
+		if(!DpiFix.modLogoFix || ForgeVersionProxy.majorVersion > 9)
 			return;
 		
 		//gui = GuiHooks#hookGui(gui);
-		boolean onesixone = ForgeVersionProxy.getMajorVersion() == 8;
+		boolean onesixone = ForgeVersionProxy.majorVersion == 8;
 		String displayGuiScreen = CoreUtils.getObfString("displayGuiScreen", !onesixnotch ? "func_71373_a" : "a");
-		String desc = CoreUtils.getObfString("(Lnet/minecraft/client/gui/GuiScreen;)V", !onesixnotch ? "(Lnet/minecraft/client/gui/GuiScreen;)V" : (ForgeVersionProxy.getMinorVersion() == 11 ? "(Lawe;)V" : ForgeVersionProxy.getMinorVersion() == 10 ? "(Lawb;)V" : "(Lavv;)V") );
+		String desc = CoreUtils.getObfString("(Lnet/minecraft/client/gui/GuiScreen;)V", !onesixnotch ? "(Lnet/minecraft/client/gui/GuiScreen;)V" : (ForgeVersionProxy.minorVersion == 11 ? "(Lawe;)V" : ForgeVersionProxy.minorVersion == 10 ? "(Lawb;)V" : "(Lavv;)V") );
 		MethodNode m = CoreUtils.getMethodNode(classNode, displayGuiScreen, desc);
 		InsnList li = new InsnList();
 		LabelNode l0 = new LabelNode();
@@ -383,7 +383,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void patchGuiModList(ClassNode classNode)
 	{
 		//only apply this for forge 1.6x
-		if(!DpiFix.modLogoFix || ForgeVersionProxy.getMajorVersion() > 9)
+		if(!DpiFix.modLogoFix || ForgeVersionProxy.majorVersion > 9)
 			return;
 		
 		//AT the Class
@@ -420,13 +420,13 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void patchGuiMainMenu(ClassNode classNode)
 	{
 		//only apply this for forge 1.6x
-		if(!DpiFix.mainMenu || ForgeVersionProxy.getMajorVersion() > 9)
+		if(!DpiFix.mainMenu || ForgeVersionProxy.majorVersion > 9)
 			return;
 		
 		//GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		//GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("rotateAndBlurSkybox", !onesixnotch ? "func_73968_a" : "a" ), "(F)V");
-		MethodInsnNode targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, !onesixnotch ? "net/minecraft/client/renderer/texture/TextureManager" : (ForgeVersionProxy.getMinorVersion() == 11 ? "bim" : ForgeVersionProxy.getMinorVersion() == 10 ? "bij" : "bib"), CoreUtils.getObfString("bindTexture", !onesixnotch ? "func_110577_a" : "a"), !onesixnotch ? "(Lnet/minecraft/util/ResourceLocation;)V" : (ForgeVersionProxy.getMinorVersion() == 11 ? (ForgeVersionProxy.getBuildVersion() > 878 ? "(Lbjo;)V" : "(Lbjp;)V") : ForgeVersionProxy.getMinorVersion() == 10 ? "(Lbjl;)V" : "(Lbjd;)V"), false);
+		MethodInsnNode targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, !onesixnotch ? "net/minecraft/client/renderer/texture/TextureManager" : (ForgeVersionProxy.minorVersion == 11 ? "bim" : ForgeVersionProxy.minorVersion == 10 ? "bij" : "bib"), CoreUtils.getObfString("bindTexture", !onesixnotch ? "func_110577_a" : "a"), !onesixnotch ? "(Lnet/minecraft/util/ResourceLocation;)V" : (ForgeVersionProxy.minorVersion == 11 ? (ForgeVersionProxy.buildVersion > 878 ? "(Lbjo;)V" : "(Lbjp;)V") : ForgeVersionProxy.minorVersion == 10 ? "(Lbjl;)V" : "(Lbjd;)V"), false);
 		InsnList li = new InsnList();
 		li.add(new LabelNode());
 		li.add(new IntInsnNode(Opcodes.SIPUSH, 3553));

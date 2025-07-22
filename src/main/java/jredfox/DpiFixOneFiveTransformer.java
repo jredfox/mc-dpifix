@@ -122,7 +122,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 	public final String toggleFullScreenMethod = CoreUtils.getObfString("toggleFullscreen", "k");//func_71352_k
 	public final String resizeMethod = CoreUtils.getObfString("resize", "a");//func_71370_a
 	
-	public final String renderEngine = CoreUtils.getObfString("net/minecraft/client/renderer/RenderEngine", ForgeVersionProxy.getBuildVersion() <= 598 ? "bfy" : ForgeVersionProxy.getMinorVersion() < 8 ? "bgf" : "bge");
+	public final String renderEngine = CoreUtils.getObfString("net/minecraft/client/renderer/RenderEngine", ForgeVersionProxy.buildVersion <= 598 ? "bfy" : ForgeVersionProxy.minorVersion < 8 ? "bgf" : "bge");
 	
     /**
      * get De-AWT boolean based on the OS
@@ -347,7 +347,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		AbstractInsnNode sfsSpot = CoreUtils.getMethodInsnNode(startGame, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "setFullscreen", "(Z)V", false);
 		startGame.instructions.insert(sfsSpot, sfs);
 		
-		if(ForgeVersionProxy.getBuildVersion() <= 689 && OptifineCompat.hasOFAA)
+		if(ForgeVersionProxy.buildVersion <= 689 && OptifineCompat.hasOFAA)
 		{
 			//if(!DpiFixCoreMod.createOptifineDisplay())
 			AbstractInsnNode liOFAASpot = CoreUtils.prevLabelNode(CoreUtils.getMethodInsnNode(startGame, Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "create", "(Lorg/lwjgl/opengl/PixelFormat;)V", false));

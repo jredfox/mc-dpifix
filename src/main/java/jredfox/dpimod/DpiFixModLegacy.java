@@ -42,7 +42,7 @@ public class DpiFixModLegacy {
 	{
 		DpiFixModProxy.modInit(this.getClass().getClassLoader());
 		
-		if(ForgeVersionProxy.getMajorVersion() <= 7)
+		if(ForgeVersionProxy.majorVersion <= 7)
 		{
 			ModContainer container = (ModContainer) FMLCommonHandler.instance().findContainerFor(this);
 			ModMetadata meta = container.getMetadata();
@@ -54,7 +54,7 @@ public class DpiFixModLegacy {
 	public void modinit(FMLInitializationEvent e)
 	{
 		//Patch 1.6x Mod's Logo Path since they may still try to use the 1.5.2 format of prepending the "/"
-		if(DpiFix.modLogoFix && ForgeVersionProxy.getMajorVersion() > 7 && ForgeVersionProxy.getMajorVersion() < 10)
+		if(DpiFix.modLogoFix && ForgeVersionProxy.majorVersion > 7 && ForgeVersionProxy.majorVersion < 10)
 		{
 			for(ModContainer con : Loader.instance().getModList())
 			{
@@ -81,7 +81,7 @@ public class DpiFixModLegacy {
 	@Mod.EventHandler
 	public void modloadcomplete(FMLServerAboutToStartEvent e)
 	{
-		if(ForgeVersionProxy.getMajorVersion() < 10)
+		if(ForgeVersionProxy.majorVersion < 10)
 			DpiFixModProxy.modLoadComplete(this.getClass().getClassLoader());
 	}
 	
