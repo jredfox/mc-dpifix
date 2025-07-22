@@ -51,7 +51,7 @@ public class ForgeVersionProxy {
     public static String mcpVersion;
     /**
      * When false forge build numbers will be 0 {@link #majorVersion}, {@link #minorVersion}, {@link #revisionVersion}, {@link #buildVersion}
-     * {@link #mcVersion} will be "1.2.5" and the Extension booleans will be the best guess
+     * {@link #mcVersion} will be "1.0.0" and the Extension booleans will be the best guess
      * such as {@link #notchNames} will be true {@link #isObf} will be true and {@link #isClient} will be determined based on the Existence of the Main class and LWJGL
      */
     public static boolean hasForge;
@@ -210,7 +210,7 @@ public class ForgeVersionProxy {
 			{
 				System.err.println("Unable to Parse ForgeVersion.class via ClassNode! Either Forge isn't installed or your MC Version is isn't supported!");
 				hasForge = false;
-				mcVersion = "1.2.5";
+				mcVersion = "1.0.0";
 				notchNames = true;
 				isObf = true;
 				boolean client = (cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null || cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null)
