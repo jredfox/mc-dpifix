@@ -23,8 +23,8 @@ import jredfox.forgeversion.ForgeVersionProxy;
 
 public class DpiFixTransformer implements IDpiFixTransformer {
 	
-	public boolean mapOneSixTwo =   ForgeVersionProxy.minorVersion == 10;
 	public boolean mapOneSixThree = ForgeVersionProxy.minorVersion == 11;
+	public boolean mapOneSixTwo =   ForgeVersionProxy.minorVersion == 10;
 	
 	@Override
 	public void transform(String notch_mc, int index, ClassNode classNode)
