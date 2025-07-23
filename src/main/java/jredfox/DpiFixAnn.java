@@ -1,6 +1,8 @@
 package jredfox;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.ow2.asm.ClassWriter;
 import org.ow2.asm.tree.AnnotationNode;
@@ -85,17 +87,25 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 		//Add @cpw.mods.fml.common.Mod.ServerAboutToStart to modloadcomplete(FMLServerAboutToStartEvent e)
 		if(ForgeVersionProxy.onefive)
 		{
-			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.PreInit from DpiFixModLegacy#preinit");
-			MethodNode m1 = CoreUtils.getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");
-			m1.visibleAnnotations.remove(CoreUtils.getAnnotation(m1, "Lcpw/mods/fml/common/Mod$EventHandler;"));
-			AnnotationNode preinit = new AnnotationNode("Lcpw/mods/fml/common/Mod$PreInit;");
-			m1.visibleAnnotations.add(preinit);
+			//Removes @Mod$EventHandler
+			for(MethodNode m : classNode.methods)
+			{
+				List<AnnotationNode> arr = m.visibleAnnotations;
+				if(arr == null || arr.isEmpty())
+					continue;
+				Iterator<AnnotationNode> it = arr.iterator();
+				while(it.hasNext())
+					if(it.next().desc.equals("Lcpw/mods/fml/common/Mod$EventHandler;"))
+						it.remove();
+			}
 			
-			System.out.println("Replacing Annotation @Mod.EventHandler with @Mod.ServerAboutToStart from DpiFixModLegacy#modloadcomplete");
+			System.out.println("Adding Annotation @Mod.PreInit for DpiFixModLegacy#preinit");
+			MethodNode m1 = CoreUtils.getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");
+			m1.visibleAnnotations.add(new AnnotationNode("Lcpw/mods/fml/common/Mod$PreInit;"));
+			
+			System.out.println("Adding Annotation @Mod.ServerAboutToStart for DpiFixModLegacy#modloadcomplete");
 			MethodNode m2 = CoreUtils.getMethodNode(classNode, "modloadcomplete", "(Lcpw/mods/fml/common/event/FMLServerAboutToStartEvent;)V");
-			m2.visibleAnnotations.remove(CoreUtils.getAnnotation(m2, "Lcpw/mods/fml/common/Mod$EventHandler;"));
-			AnnotationNode lc = new AnnotationNode("Lcpw/mods/fml/common/Mod$ServerAboutToStart;");
-			m2.visibleAnnotations.add(lc);
+			m2.visibleAnnotations.add(new AnnotationNode("Lcpw/mods/fml/common/Mod$ServerAboutToStart;"));
 		}
 	}
 	

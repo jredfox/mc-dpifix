@@ -96,12 +96,12 @@ public class ForgeVersionProxy {
     /**
      * The ForgeVersionProxy Version
      * ChangeLog 1.0.1
-     * - Fixed isClient returning true for servers when java agent was present and the main(String[]) args had already started
-     * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false and print a RuntimeException during a java agent notifying the coder of their error
-     * - Added hasForgeASM to determine if Forge has CoreMod Capabilities reliable even in java agent
-     * - Added Support for Forge MC 1.1 - 1.2.5 when compiled with {@link #OLD_LEGACY_SUPP} is true
-     * - Added {@link #onesix}
-     * - Added {@link #onesevenPlus}
+     * - Fixed   isClient returning true for servers when java agent was present and the main(String[]) args had already started
+     * - Added   isClientAgent for use during a java agent as {@link #getIsClient()} will return false and print a RuntimeException during a java agent notifying the coder of their error
+     * - Added   hasForgeASM to determine if Forge has CoreMod Capabilities reliable even in java agent
+     * - Added   Support for Forge MC 1.1 - 1.2.5 when compiled with {@link #OLD_LEGACY_SUPP} is true
+     * - Added   {@link #onesix}
+     * - Added   {@link #onesevenPlus}
      * - Changed {@link #mcVersion} to "1.0.0" when {@link #hasForge} is false
      */
     public static final String PROXY_VERSION = "1.0.1";
