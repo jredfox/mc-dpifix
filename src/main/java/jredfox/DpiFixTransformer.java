@@ -23,11 +23,6 @@ import jredfox.forgeversion.ForgeVersionProxy;
 
 public class DpiFixTransformer implements IDpiFixTransformer {
 	
-	/**
-	 * check if notch names should be used without loading any minecraft classes
-	 */
-	public static boolean onesixnotch = ForgeVersionProxy.getNotchNames();
-	
 	@Override
 	public void transform(String notch_mc, int index, ClassNode classNode)
 	{
@@ -98,6 +93,8 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void patchFullScreen(String notch_mc, ClassNode classNode) 
 	{
 		int minor = ForgeVersionProxy.minorVersion;
+		boolean onesixnotch = ForgeVersionProxy.notchNames;
+		
 		//Universal AT 1.6 - 1.12.2
 		String notch_leftClickCounter = (minor == 11 ? "W" : minor == 10 ? "W" : "V");
 		String notch_fullscreen = (minor == 11 ? "P" : minor == 10 ? "P" : "O");
@@ -236,6 +233,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		if(!DpiFix.maximizeFix || ForgeVersionProxy.majorVersion >= 10)
 			return;
 		
+		boolean onesixnotch = ForgeVersionProxy.notchNames;
 		String mcClass = onesixnotch ? notch_mc : "net/minecraft/client/Minecraft";
 		
 		//DpiFixCoreMod#tickDisplay(this);
@@ -325,6 +323,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		
 		System.out.println("Patching: LoadingScreenRenderer");
 		
+		boolean onesixnotch = ForgeVersionProxy.notchNames;
 		String cname = onesixnotch ? name : "net/minecraft/client/gui/LoadingScreenRenderer";
 		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("setLoadingProgress", onesixnotch ? "a" : "func_73718_a"), "(I)V");
 		
@@ -368,6 +367,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		
 		//gui = GuiHooks#hookGui(gui);
 		int minor = ForgeVersionProxy.minorVersion;
+		boolean onesixnotch = ForgeVersionProxy.notchNames;
 		boolean onesixone = major == 8;
 		String displayGuiScreen = CoreUtils.getObfString("displayGuiScreen", !onesixnotch ? "func_71373_a" : "a");
 		String desc = CoreUtils.getObfString("(Lnet/minecraft/client/gui/GuiScreen;)V", !onesixnotch ? "(Lnet/minecraft/client/gui/GuiScreen;)V" : (minor == 11 ? "(Lawe;)V" : minor == 10 ? "(Lawb;)V" : "(Lavv;)V") );
@@ -430,6 +430,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		//GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		//GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		int minor = ForgeVersionProxy.minorVersion;
+		boolean onesixnotch = ForgeVersionProxy.notchNames;
 		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("rotateAndBlurSkybox", !onesixnotch ? "func_73968_a" : "a" ), "(F)V");
 		MethodInsnNode targ = CoreUtils.getMethodInsnNode(m, Opcodes.INVOKEVIRTUAL, !onesixnotch ? "net/minecraft/client/renderer/texture/TextureManager" : (minor == 11 ? "bim" : minor == 10 ? "bij" : "bib"), CoreUtils.getObfString("bindTexture", !onesixnotch ? "func_110577_a" : "a"), !onesixnotch ? "(Lnet/minecraft/util/ResourceLocation;)V" : (minor == 11 ? (ForgeVersionProxy.buildVersion > 878 ? "(Lbjo;)V" : "(Lbjp;)V") : minor == 10 ? "(Lbjl;)V" : "(Lbjd;)V"), false);
 		InsnList li = new InsnList();
