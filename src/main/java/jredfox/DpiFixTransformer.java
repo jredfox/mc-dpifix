@@ -192,7 +192,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		}
 		
 		//DpiFixCoreMod.patchSplash(this.mcDataDir);
-		if(DpiFix.fsSplashFix && ForgeVersionProxy.majorVersion >= 10 && ForgeVersionProxy.buildVersion >= 1389)
+		if(DpiFix.fsSplashFix && ForgeVersionProxy.onesevenPlus && ForgeVersionProxy.buildVersion >= 1389)
 		{
 			MethodNode in = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("init", "func_71384_a"), "()V");
 			if(in == null)
@@ -230,7 +230,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	
 	public void patchMaxResFix(String notch_mc, ClassNode classNode) 
 	{
-		if(!DpiFix.maximizeFix || ForgeVersionProxy.majorVersion >= 10)
+		if(!DpiFix.maximizeFix || ForgeVersionProxy.onesevenPlus)
 			return;
 		
 		boolean onesixnotch = ForgeVersionProxy.notchNames;
@@ -318,7 +318,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	
 	public void patchLoadingScreenRenderer(String name, ClassNode classNode)
 	{
-		if(!DpiFix.maximizeFix || ForgeVersionProxy.majorVersion >= 10)
+		if(!DpiFix.maximizeFix || ForgeVersionProxy.onesevenPlus)
 			return;
 		
 		System.out.println("Patching: LoadingScreenRenderer");
@@ -360,15 +360,14 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	 */
 	public void hookGui(ClassNode classNode)
 	{
-		int major = ForgeVersionProxy.majorVersion;
 		//only apply this for forge 1.6x
-		if(!DpiFix.modLogoFix || major > 9)
+		if(!DpiFix.modLogoFix || ForgeVersionProxy.onesevenPlus)
 			return;
 		
 		//gui = GuiHooks#hookGui(gui);
 		int minor = ForgeVersionProxy.minorVersion;
 		boolean onesixnotch = ForgeVersionProxy.notchNames;
-		boolean onesixone = major == 8;
+		boolean onesixone = ForgeVersionProxy.majorVersion == 8;
 		String displayGuiScreen = CoreUtils.getObfString("displayGuiScreen", !onesixnotch ? "func_71373_a" : "a");
 		String desc = CoreUtils.getObfString("(Lnet/minecraft/client/gui/GuiScreen;)V", !onesixnotch ? "(Lnet/minecraft/client/gui/GuiScreen;)V" : (minor == 11 ? "(Lawe;)V" : minor == 10 ? "(Lawb;)V" : "(Lavv;)V") );
 		MethodNode m = CoreUtils.getMethodNode(classNode, displayGuiScreen, desc);
@@ -387,7 +386,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void patchGuiModList(ClassNode classNode)
 	{
 		//only apply this for forge 1.6x
-		if(!DpiFix.modLogoFix || ForgeVersionProxy.majorVersion > 9)
+		if(!DpiFix.modLogoFix || ForgeVersionProxy.onesevenPlus)
 			return;
 		
 		//AT the Class
@@ -424,7 +423,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 	public void patchGuiMainMenu(ClassNode classNode)
 	{
 		//only apply this for forge 1.6x
-		if(!DpiFix.mainMenu || ForgeVersionProxy.majorVersion > 9)
+		if(!DpiFix.mainMenu || ForgeVersionProxy.onesevenPlus)
 			return;
 		
 		//GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);

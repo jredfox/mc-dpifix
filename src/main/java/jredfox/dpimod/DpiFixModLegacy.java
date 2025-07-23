@@ -11,6 +11,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import jml.gamemodelib.GameModeLib;
 import jredfox.DpiFix;
+import jredfox.DpiFixTransformer;
 import jredfox.forgeversion.ForgeVersionProxy;
 
 @Mod(
@@ -82,7 +83,7 @@ public class DpiFixModLegacy {
 	@Mod.EventHandler
 	public void modloadcomplete(FMLServerAboutToStartEvent e)
 	{
-		if(ForgeVersionProxy.majorVersion < 10)
+		if(ForgeVersionProxy.onesix)
 			DpiFixModProxy.modLoadComplete(this.getClass().getClassLoader());
 	}
 	

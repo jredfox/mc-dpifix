@@ -68,10 +68,6 @@ public class ForgeVersionProxy {
      */
     public static boolean isObf;
     /**
-     * Are We running on 1.5x or below
-     */
-    public static boolean onefive;
-    /**
      * Are we most likely running on the client (Main Client Class & LWJGL library exists)
      * Use {@link #getIsClient()} for Your ASM Plugin this is for the java agent and isn't guaranteed to be correct
      */
@@ -80,6 +76,18 @@ public class ForgeVersionProxy {
      * Are we running on the client or the server? DO NOT USE IN YOUR JAVA AGENT it will be false and cause java.awt.Component to load!
      */
     private static Boolean isClient;
+    /**
+     * Are We running on 1.5x or below
+     */
+    public static boolean onefive;
+	/**
+	 * Are We running on 1.6x or below
+	 */
+	public static boolean onesix;
+	/**
+	 * Are We running on 1.7x or above
+	 */
+	public static boolean onesevenPlus;
     /**
      * When Compiled with true ForgeVersionProxy Supports Forge for MC 1.1 - 1.2.5!
      * Set this to false when compiling if you don't want or need that support
@@ -92,6 +100,8 @@ public class ForgeVersionProxy {
      * - Added isClientAgent for use during a java agent as {@link #getIsClient()} will return false and print a RuntimeException during a java agent notifying the coder of their error
      * - Added hasForgeASM to determine if Forge has CoreMod Capabilities reliable even in java agent
      * - Added Support for Forge MC 1.1 - 1.2.5 when compiled with {@link #OLD_LEGACY_SUPP} is true
+     * - Added {@link #onesix}
+     * - Added {@link #onesevenPlus}
      * - Changed {@link #mcVersion} to "1.0.0" when {@link #hasForge} is false
      */
     public static final String PROXY_VERSION = "1.0.1";
@@ -294,7 +304,9 @@ public class ForgeVersionProxy {
 		hasForgeASM = major > 3;
 		notchNames = major < 9 || major == 9 && minorVersion <= 11 && build < 937;
 		isObf = (major < 7 && build < 448) ? (cl.getResource("net/minecraft/src/World.class") == null && cl.getResource("net/minecraft/world/World.class") == null) : (cl.getResource("net/minecraft/world/World.class") == null);
-		onefive = major < 8;
+		onefive = 		  major < 8;
+		onesix = 		  major < 10;
+		onesevenPlus =    major > 9;
 		isClientAgent = (onefive ? (cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null) : (cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null))
 				&& (cl.getResource("org/lwjgl/LWJGLException.class") != null || cl.getResource("org/lwjgl/Version.class") != null);
 	}
