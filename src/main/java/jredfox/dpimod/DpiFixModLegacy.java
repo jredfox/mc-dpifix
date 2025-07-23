@@ -11,7 +11,6 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import jml.gamemodelib.GameModeLib;
 import jredfox.DpiFix;
-import jredfox.DpiFixTransformer;
 import jredfox.forgeversion.ForgeVersionProxy;
 
 @Mod(
