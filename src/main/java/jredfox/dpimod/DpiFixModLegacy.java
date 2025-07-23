@@ -42,7 +42,7 @@ public class DpiFixModLegacy {
 	{
 		DpiFixModProxy.modInit(this.getClass().getClassLoader());
 		
-		if(ForgeVersionProxy.majorVersion <= 7)
+		if(ForgeVersionProxy.onefive)
 		{
 			ModContainer container = (ModContainer) FMLCommonHandler.instance().findContainerFor(this);
 			ModMetadata meta = container.getMetadata();
