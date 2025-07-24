@@ -34,16 +34,19 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 	public static File lcl = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/net/minecraft/launchwrapper/LaunchClassLoader.class").getAbsoluteFile();
 	public static File dm = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/jredfox/clfix/DummyMap.class").getAbsoluteFile();
 	public static File ds = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/jredfox/clfix/DummySet.class").getAbsoluteFile();
+	public static File mcl = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/net/technicpack/legacywrapper/MinecraftClassLoader.class").getAbsoluteFile();
 	
 	public static void init(Instrumentation inst)
 	{
 		lcl.delete();
 		dm.delete();
 		ds.delete();
+		mcl.delete();
 		inst.addTransformer(new LaunchWrapperTransformer());
 		GameModeLib.forName("net.minecraft.launchwrapper.LaunchClassLoader");//Force Load LaunchClassLoader Class
 		GameModeLib.forName("jredfox.clfix.DummyMap");//Force Load DummyMap
 		GameModeLib.forName("jredfox.clfix.DummySet");//Force Load DummySet
+		GameModeLib.forName("net.technicpack.legacywrapper.MinecraftClassLoader");//Force Load Technic's MinecraftClassLoader Class
 	}
 	
 	@Override
@@ -189,6 +192,62 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 				
 				byte[] clazzBytes = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS), className);
 				CoreUtils.toFile(clazzBytes, lcl);
+				return clazzBytes;
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
+			}
+		}
+		else if(className.equals("net/technicpack/legacywrapper/MinecraftClassLoader"))
+		{
+			try
+			{
+				System.out.println("Transforming " + className.replace("/", ".") + " to fix resources memory leak");
+				
+				if(mcl.exists())
+					return toByteArray(mcl);
+				
+				ClassNode classNode = CoreUtils.getClassNode(bytes);
+				for(MethodNode m : classNode.methods)
+				{
+					if(m.name.equals("<init>"))
+					{
+						//get the last put field before the first return
+						AbstractInsnNode spot = null;
+						for(AbstractInsnNode a : m.instructions.toArray())
+						{
+							if(a == null)
+								continue;
+							
+							int op = a.getOpcode();
+							if(op == Opcodes.PUTFIELD && a instanceof FieldInsnNode)
+								spot = a;
+							else if(CoreUtils.isReturnOpcode(op))
+								break;
+						}
+						
+						InsnList list = new InsnList();
+						//resources = DummyMap.get();
+						if(CoreUtils.hasFieldNode(classNode, "resources"))
+						{
+							list.add(new VarInsnNode(Opcodes.ALOAD, 0));
+							list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/clfix/DummyMap", "get", "()Ljredfox/clfix/DummyMap;", false));
+							list.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/technicpack/legacywrapper/MinecraftClassLoader", "resources", "Ljava/util/Map;"));
+						}
+						//pngResource = DummyMap.get();
+						if(CoreUtils.hasFieldNode(classNode, "pngResource"))
+						{
+							list.add(new VarInsnNode(Opcodes.ALOAD, 0));
+							list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/clfix/DummyMap", "get", "()Ljredfox/clfix/DummyMap;", false));
+							list.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/technicpack/legacywrapper/MinecraftClassLoader", "pngResource", "Ljava/util/Map;"));
+						}
+						m.instructions.insert(spot, list);
+					}
+				}
+				
+				byte[] clazzBytes = CoreUtils.toByteArray(CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES), className);
+				CoreUtils.toFile(clazzBytes, mcl);
 				return clazzBytes;
 			}
 			catch(Throwable t)
