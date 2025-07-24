@@ -30,6 +30,9 @@ public class LaunchClassLoaderFix {
 	/**
 	 * ChangeLog 2.0.1:
 	 * - Fixed {@link System#identityHashCode(Object)} collisions resulted in not setting class loader. object hashcode no longer represents the address and is no longer guaranteed since java 8 to be even unique per object instance
+	 * - Fixed Technic's resources and pngMap memory leak in LaunchWrapperTransformer only. For some reason RelaunchClassLoader#parent returns the class loader that's not technic's so we can't use reflection to fix it
+	 * - NOTE: RelaunchClassLoader & technic's MinecraftClassLoader cannot be fixed for 1.5x or below because findClass was public and the API basically said to use get cached classes quickly or load if needed which mods did in fact do. 
+	 * However the RAM Leak should be less then 40-80MB in a large modpack(1000+ mods) for both leaks. Unlike 1.6x+ where the ram leak was 150MB for 100 mods
 	 */
 	public static final String VERSION = "2.0.1";
 	
