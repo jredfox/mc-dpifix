@@ -229,18 +229,20 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 						
 						InsnList list = new InsnList();
 						//resources = DummyMap.get();
-						if(CoreUtils.hasFieldNode(classNode, "resources"))
+						FieldNode resources = CoreUtils.getFieldnode(classNode, "resources");
+						if(resources != null)
 						{
 							list.add(new VarInsnNode(Opcodes.ALOAD, 0));
 							list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/clfix/DummyMap", "get", "()Ljredfox/clfix/DummyMap;", false));
-							list.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/technicpack/legacywrapper/MinecraftClassLoader", "resources", "Ljava/util/Map;"));
+							list.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/technicpack/legacywrapper/MinecraftClassLoader", "resources", resources.desc));
 						}
 						//pngResource = DummyMap.get();
-						if(CoreUtils.hasFieldNode(classNode, "pngResource"))
+						FieldNode pngResource = CoreUtils.getFieldnode(classNode, "pngResource");
+						if(pngResource != null)
 						{
 							list.add(new VarInsnNode(Opcodes.ALOAD, 0));
 							list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/clfix/DummyMap", "get", "()Ljredfox/clfix/DummyMap;", false));
-							list.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/technicpack/legacywrapper/MinecraftClassLoader", "pngResource", "Ljava/util/Map;"));
+							list.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/technicpack/legacywrapper/MinecraftClassLoader", "pngResource", pngResource.desc));
 						}
 						m.instructions.insert(spot, list);
 					}

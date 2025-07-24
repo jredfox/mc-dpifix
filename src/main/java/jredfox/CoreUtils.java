@@ -495,5 +495,13 @@ public class CoreUtils {
 				return true;
 		return false;
 	}
+	
+	public static FieldNode getFieldnode(ClassNode classNode, String name)
+	{
+		for(FieldNode f : classNode.fields)
+			if(f.name.equals(name))
+				return f;
+		return null;
+	}
 
 }
