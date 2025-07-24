@@ -37,6 +37,7 @@ public class LaunchClassLoaderFix {
 	 * However the RAM Leak should be less then 40-80MB in a large modpack(1000+ mods) for both leaks. Unlike 1.6x+ where the ram leak was 150MB for 100 mods
 	 */
 	public static final String VERSION = "2.0.1";
+	
 	private static String[] libLoaders = new String[]
 	{
 		"java.",
