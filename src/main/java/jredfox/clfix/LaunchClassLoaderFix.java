@@ -46,7 +46,7 @@ public class LaunchClassLoaderFix {
 		"javax."
 	};
 	
-	private static boolean isLibClassLoader(String[] libs, String name) 
+	public static boolean isLibClassLoader(String[] libs, String name) 
 	{
 		for(String lib : libs)
 			if(name.startsWith(lib))
@@ -267,10 +267,6 @@ public class LaunchClassLoaderFix {
 		}
 		return null;
 	}
-	
-    public static String toNString(Object o) {
-        return o == null ? "0" : (o.getClass().getName() + "@" + System.identityHashCode(o));
-    }
 	
 	public static Field modifiersField;
 	static

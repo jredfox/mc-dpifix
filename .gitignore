@@ -4,3 +4,4 @@ src/main/java/net/minecraft/client/*
 src/main/java/jredfox/DpiFixDeAWT.java
 src/main/java/jredfox/dpimod/gui/*
 src/main/java/net/minecraft/launchwrapper/LaunchClassLoader.java
+src/main/java/jredfox/Test.java
