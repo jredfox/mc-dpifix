@@ -621,7 +621,7 @@ public class ForgeVersionProxy {
 	
 	public static void copy(InputStream in, OutputStream out) throws IOException
 	{
-		byte[] buffer = new byte[1048576/2];
+		byte[] buffer = new byte[1048576/4];
 		int length;
    	 	while ((length = in.read(buffer)) >= 0)
 		{
