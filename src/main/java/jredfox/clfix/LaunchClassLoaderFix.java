@@ -185,28 +185,39 @@ public class LaunchClassLoaderFix {
 			Class launch = forName("net.minecraft.launchwrapper.Launch");
 			if(launch == null)
 				return;
-			Class clazzLoaderClazz = forName("net.minecraft.launchwrapper.LaunchClassLoader");
 			Set<ClassLoader> cls = getClassLoaders(launch, clforge);
 			for(ClassLoader classLoader : cls)
 			{
 				if(classLoader == null)
 					continue;
 				System.out.println("Verifying ClassLoader:" + classLoader);
-				Class actualClClazz = classLoader.getClass();
-				Class clClazz = instanceOf(clazzLoaderClazz, actualClClazz) ? clazzLoaderClazz : actualClClazz;
-				Map cachedClasses = (Map) getPrivate(classLoader, clClazz, "cachedClasses");
-				Map resourceCache = (Map) getPrivate(classLoader, clClazz, "resourceCache");
-				Map packageManifests = (Map) getPrivate(classLoader, clClazz, "packageManifests");
-				Set negativeResourceCache = (Set) getPrivate(classLoader, clClazz, "negativeResourceCache");
 				
-				if(cachedClasses != null && !(cachedClasses instanceof DummyMap))
-					System.err.println("LaunchClassLoader#cachedClasses is Unoptimized! size:" + cachedClasses.size() + " Class:" + cachedClasses.getClass());
-				if(resourceCache != null && !(resourceCache instanceof DummyMap))
-					System.err.println("LaunchClassLoader#resourceCache is Unoptimized! size:" + resourceCache.size() + " Class:" + resourceCache.getClass());
-				if(packageManifests != null && !(packageManifests instanceof DummyMap))
-					System.err.println("LaunchClassLoader#packageManifests is Unoptimized! size:" + packageManifests.size() + " Class:" + packageManifests.getClass());
-				if(negativeResourceCache != null && !(negativeResourceCache instanceof DummySet))
-					System.err.println("LaunchClassLoader#negativeResourceCache is Unoptimized! size:" + negativeResourceCache.size() + " Class:" + negativeResourceCache.getClass());
+				Class actualClazz = classLoader.getClass();
+				String actualName = actualClazz.getName();
+				
+				while(actualClazz != null && !isLibClassLoader(libLoaders, actualName))
+				{
+					Map cachedClasses = (Map) getPrivate(classLoader, actualClazz, "cachedClasses");
+					Map resourceCache = (Map) getPrivate(classLoader, actualClazz, "resourceCache");
+					Map packageManifests = (Map) getPrivate(classLoader, actualClazz, "packageManifests");
+					Set negativeResourceCache = (Set) getPrivate(classLoader, actualClazz, "negativeResourceCache");
+					boolean flag = actualName.equals("net.minecraft.launchwrapper.LaunchClassLoader");
+					
+					if(cachedClasses != null && !(cachedClasses instanceof DummyMap))
+						System.err.println((flag ? "LaunchClassLoader" : actualName) + "#cachedClasses is Unoptimized! size:" + cachedClasses.size() + " Class:" + cachedClasses.getClass());
+					if(resourceCache != null && !(resourceCache instanceof DummyMap))
+						System.err.println((flag ? "LaunchClassLoader" : actualName) + "#resourceCache is Unoptimized! size:" + resourceCache.size() + " Class:" + resourceCache.getClass());
+					if(packageManifests != null && !(packageManifests instanceof DummyMap))
+						System.err.println((flag ? "LaunchClassLoader" : actualName) + "#packageManifests is Unoptimized! size:" + packageManifests.size() + " Class:" + packageManifests.getClass());
+					if(negativeResourceCache != null && !(negativeResourceCache instanceof DummySet))
+						System.err.println((flag ? "LaunchClassLoader" : actualName) + "#negativeResourceCache is Unoptimized! size:" + negativeResourceCache.size() + " Class:" + negativeResourceCache.getClass());
+					
+					if(flag)
+						break;
+					actualClazz = actualClazz.getSuperclass();
+					if(actualClazz != null)
+						actualName = actualClazz.getName();
+				}
 			}
 		}
 		catch(Throwable t)
