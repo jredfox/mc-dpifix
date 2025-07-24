@@ -193,10 +193,11 @@ public class LaunchClassLoaderFix {
 				System.out.println("Verifying ClassLoader:" + classLoader);
 				
 				Class actualClazz = classLoader.getClass();
-				String actualName = actualClazz.getName();
+				String actualName = "";
 				
 				while(actualClazz != null && !isLibClassLoader(libLoaders, actualName))
 				{
+					actualName = actualClazz.getName();
 					Map cachedClasses = (Map) getPrivate(classLoader, actualClazz, "cachedClasses");
 					Map resourceCache = (Map) getPrivate(classLoader, actualClazz, "resourceCache");
 					Map packageManifests = (Map) getPrivate(classLoader, actualClazz, "packageManifests");
@@ -215,8 +216,6 @@ public class LaunchClassLoaderFix {
 					if(flag)
 						break;
 					actualClazz = actualClazz.getSuperclass();
-					if(actualClazz != null)
-						actualName = actualClazz.getName();
 				}
 			}
 		}
