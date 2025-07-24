@@ -31,10 +31,28 @@ public class LaunchClassLoaderFix {
 	 * ChangeLog 2.0.1:
 	 * - Fixed {@link System#identityHashCode(Object)} collisions resulted in not setting class loader. object hashcode no longer represents the address and is no longer guaranteed since java 8 to be even unique per object instance
 	 * - Fixed Technic's resources and pngMap memory leak in LaunchWrapperTransformer only. For some reason RelaunchClassLoader#parent returns the class loader that's not technic's so we can't use reflection to fix it
+	 * - Fixed Verify not working for non instances of LaunchClassLoader
+	 * - Added Support for more Library ClassLoaders to stop the while loop from
 	 * - NOTE: RelaunchClassLoader & technic's MinecraftClassLoader cannot be fixed for 1.5x or below because findClass was public and the API basically said to use get cached classes quickly or load if needed which mods did in fact do. 
 	 * However the RAM Leak should be less then 40-80MB in a large modpack(1000+ mods) for both leaks. Unlike 1.6x+ where the ram leak was 150MB for 100 mods
 	 */
 	public static final String VERSION = "2.0.1";
+	private static String[] libLoaders = new String[]
+	{
+		"java.",
+		"sun.",
+		"com.sun.",
+		"jdk.",
+		"javax."
+	};
+	
+	private static boolean isLibClassLoader(String[] libs, String name) 
+	{
+		for(String lib : libs)
+			if(name.startsWith(lib))
+				return true;
+		return false;
+	}
 	
 	/**
 	 * can be called at any time
@@ -71,7 +89,7 @@ public class LaunchClassLoaderFix {
 						break;//Regardless of what LaunchClassLoader extends break after as we are done
 					actualClassLoader = actualClassLoader.getSuperclass();
 				}
-				while(flag ? true : !actualClassLoader.getName().startsWith("java.") );
+				while(flag ? true : !isLibClassLoader(libLoaders, actualClassLoader.getName()) );
 			}
 		}
 		catch(Throwable t)
@@ -174,10 +192,12 @@ public class LaunchClassLoaderFix {
 				if(classLoader == null)
 					continue;
 				System.out.println("Verifying ClassLoader:" + classLoader);
-				Map cachedClasses = (Map) getPrivate(classLoader, clazzLoaderClazz, "cachedClasses");
-				Map resourceCache = (Map) getPrivate(classLoader, clazzLoaderClazz, "resourceCache");
-				Map packageManifests = (Map) getPrivate(classLoader, clazzLoaderClazz, "packageManifests");
-				Set negativeResourceCache = (Set) getPrivate(classLoader, clazzLoaderClazz, "negativeResourceCache");
+				Class actualClClazz = classLoader.getClass();
+				Class clClazz = instanceOf(clazzLoaderClazz, actualClClazz) ? clazzLoaderClazz : actualClClazz;
+				Map cachedClasses = (Map) getPrivate(classLoader, clClazz, "cachedClasses");
+				Map resourceCache = (Map) getPrivate(classLoader, clClazz, "resourceCache");
+				Map packageManifests = (Map) getPrivate(classLoader, clClazz, "packageManifests");
+				Set negativeResourceCache = (Set) getPrivate(classLoader, clClazz, "negativeResourceCache");
 				
 				if(cachedClasses != null && !(cachedClasses instanceof DummyMap))
 					System.err.println("LaunchClassLoader#cachedClasses is Unoptimized! size:" + cachedClasses.size() + " Class:" + cachedClasses.getClass());
