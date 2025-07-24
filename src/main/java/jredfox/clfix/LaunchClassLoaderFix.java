@@ -14,7 +14,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +27,11 @@ import java.util.Set;
  */
 public class LaunchClassLoaderFix {
 	
-	public static final String VERSION = "2.0.0";
+	/**
+	 * ChangeLog 2.0.1:
+	 * - Fixed {@link System#identityHashCode(Object)} collisions resulted in not setting class loader. object hashcode no longer represents the address and is no longer guaranteed since java 8 to be even unique per object instance
+	 */
+	public static final String VERSION = "2.0.1";
 	
 	/**
 	 * can be called at any time
@@ -44,8 +49,8 @@ public class LaunchClassLoaderFix {
 			
 			String clazzLoaderName = "net.minecraft.launchwrapper.LaunchClassLoader";
 			Class clazzLoaderClazz = forName(clazzLoaderName);
-			Map<String, ClassLoader> loaders = getClassLoaders(launch, clforge);
-			for(ClassLoader cl : loaders.values())
+			Set<ClassLoader> loaders = getClassLoaders(launch, clforge);
+			for(ClassLoader cl : loaders)
 			{
 				if(cl == null)
 					continue;
@@ -160,8 +165,8 @@ public class LaunchClassLoaderFix {
 			if(launch == null)
 				return;
 			Class clazzLoaderClazz = forName("net.minecraft.launchwrapper.LaunchClassLoader");
-			Map<String, ClassLoader> cls = getClassLoaders(launch, clforge);
-			for(ClassLoader classLoader : cls.values())
+			Set<ClassLoader> cls = getClassLoaders(launch, clforge);
+			for(ClassLoader classLoader : cls)
 			{
 				if(classLoader == null)
 					continue;
@@ -212,17 +217,17 @@ public class LaunchClassLoaderFix {
 		setPrivate(classLoader, new DummySet(), clazzLoaderClazz, setName);
 	}
 	
-	public static Map<String, ClassLoader> getClassLoaders(Class launch, ClassLoader clforge) 
+	public static Set<ClassLoader> getClassLoaders(Class launch, ClassLoader clforge) 
 	{
-		Map<String, ClassLoader> loaders = new HashMap(5);
+		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(5));
 		ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
 		ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
 		ClassLoader contextLoader = getContextClassLoader();
 		
-		loaders.put(toNString(classLoader), classLoader);
-		loaders.put(toNString(clforge), clforge);
-		loaders.put(toNString(currentLoader), currentLoader);
-		loaders.put(toNString(contextLoader), contextLoader);
+		loaders.add(classLoader);
+		loaders.add(clforge);
+		loaders.add(currentLoader);
+		loaders.add(contextLoader);
 		
 		return loaders;
 	}
