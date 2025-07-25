@@ -235,6 +235,7 @@ public class LaunchClassLoaderFix {
 	}
 	
 	public static boolean strictMode = Boolean.parseBoolean(System.getProperty("clfix.strict", "false"));
+
 	/**
 	 * Gets a 1D array of Parent ClassLoaders & Itself Excluding RelaunchClassLoader and Technic's MinecraftClassLoader
 	 */
@@ -244,11 +245,12 @@ public class LaunchClassLoaderFix {
 		ClassLoader cl = root;
 		String[] badClazzes = new String[]{"cpw.mods.fml.relauncher.RelaunchClassLoader", "net.technicpack.legacywrapper.MinecraftClassLoader"};
 		String[] strict = new String[]{"net.minecraft.launchwrapper.LaunchClassLoader"};
+		boolean strictMode = LaunchClassLoaderFix.strictMode;
 		boolean first = true;
 		do
 		{
 			Class clClazz = cl.getClass();
-			if(strictMode && instanceOf(strict, clClazz) || !strictMode && !instanceOf(badClazzes, clClazz) && (first || !isLibClassLoader(libLoaders, clClazz.getName())))
+			if(strictMode ? (instanceOf(strict, clClazz)) : (!instanceOf(badClazzes, clClazz) && (first || !isLibClassLoader(libLoaders, clClazz.getName()))))
 				loaders.add(cl);
 			first = false;
 			ClassLoader parent = (ClassLoader) getPrivate(cl, clClazz, "parent");
