@@ -177,7 +177,7 @@ public class LaunchClassLoaderFix {
 	}
 	
 	/**
-	 * Verifies that LaunchClassLoader Map / Set are instances of the Dummy Version. Only Checks LaunchClassLoader.class values
+	 * Verifies that LaunchClassLoader Map / Set are instances of the Dummy Version. Doesn't Check Parent Class Loaders for performance reasons
 	 */
 	public static void verify(ClassLoader clforge)
 	{
