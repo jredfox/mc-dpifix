@@ -70,15 +70,7 @@ public class LaunchClassLoaderFix {
 				return;
 			}
 			
-			Set<ClassLoader> l = getClassLoaders(launch, clforge);
-			Set<ClassLoader> allLoaders = Collections.newSetFromMap(new IdentityHashMap(16));
-			for(ClassLoader root : l)
-			{
-				if(root == null)
-					continue;
-				allLoaders.addAll(getParents(root));
-			}
-			
+			Set<ClassLoader> allLoaders = getAllClassLoaders(launch, clforge);
 			for(ClassLoader cl : allLoaders)
 			{
 				System.out.println("Fixing RAM Leak of:" + cl);
@@ -182,7 +174,7 @@ public class LaunchClassLoaderFix {
 	}
 	
 	/**
-	 * Verifies that LaunchClassLoader Map / Set are instances of the Dummy Version. Doesn't Check Parent Class Loaders for performance reasons
+	 * Verifies that LaunchClassLoader Map / Set are instances of the Dummy Version.
 	 */
 	public static void verify(ClassLoader clforge)
 	{
@@ -191,11 +183,10 @@ public class LaunchClassLoaderFix {
 			Class launch = forName("net.minecraft.launchwrapper.Launch");
 			if(launch == null)
 				return;
-			Set<ClassLoader> cls = getClassLoaders(launch, clforge);
-			for(ClassLoader classLoader : cls)
+			long ms = System.currentTimeMillis();
+			Set<ClassLoader> allLoaders = getAllClassLoaders(launch, clforge);
+			for(ClassLoader classLoader : allLoaders)
 			{
-				if(classLoader == null)
-					continue;
 				System.out.println("Verifying ClassLoader:" + classLoader);
 				
 				Class actualClazz = classLoader.getClass();
@@ -226,6 +217,8 @@ public class LaunchClassLoaderFix {
 				}
 				while(actualClazz != null && !isLibClassLoader(libLoaders, actualName));
 			}
+			long end = System.currentTimeMillis();
+			System.out.println("Time:" + (end - ms));
 		}
 		catch(Throwable t)
 		{
@@ -233,6 +226,43 @@ public class LaunchClassLoaderFix {
 			t.printStackTrace();
 		}
 	}
+
+	public static Set<ClassLoader> getAllClassLoaders(Class launch, ClassLoader clforge) 
+	{
+		Set<ClassLoader> allLoaders = Collections.newSetFromMap(new IdentityHashMap(16));
+		ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
+		ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
+		ClassLoader contextLoader = getContextClassLoader();
+		
+		if(classLoader != null)
+			allLoaders.addAll(getParents(classLoader));
+		if(clforge != null)
+			allLoaders.addAll(getParents(clforge));
+		if(currentLoader != null)
+			allLoaders.addAll(getParents(currentLoader));
+		if(contextLoader != null)
+			allLoaders.addAll(getParents(contextLoader));
+		return allLoaders;
+	}
+	
+	/**
+	 * Gets a 1D array of Parent ClassLoaders & Itself
+	 */
+	public static Set<ClassLoader> getParents(ClassLoader root) 
+	{
+		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(8));
+		ClassLoader cl = root;
+		do
+		{
+			loaders.add(cl);
+			ClassLoader parent = (ClassLoader) getPrivate(cl, cl.getClass(), "parent");
+			cl = (parent != null && !loaders.contains(parent)) ? parent : cl.getParent();
+		}
+		while(cl != null && !loaders.contains(cl) && !isLibClassLoader(libLoaders, cl.getClass().getName()));
+		
+		return loaders;
+	}
+
 
 	private static void setDummyMap(Object classLoader, Class clazzLoaderClazz, String mapName)
 	{
@@ -273,24 +303,6 @@ public class LaunchClassLoaderFix {
 		return loaders;
 	}
 	
-	/**
-	 * Gets a 1D array of Parent ClassLoaders & Itself
-	 */
-	public static Set<ClassLoader> getParents(ClassLoader root) 
-	{
-		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(8));
-		ClassLoader cl = root;
-		do
-		{
-			loaders.add(cl);
-			ClassLoader parent = (ClassLoader) getPrivate(cl, cl.getClass(), "parent");
-			cl = (parent != null && !loaders.contains(parent)) ? parent : cl.getParent();
-		}
-		while(cl != null && !loaders.contains(cl) && !isLibClassLoader(libLoaders, cl.getClass().getName()));
-		
-		return loaders;
-	}
-
 	public static ClassLoader getContextClassLoader() 
 	{
 		try
