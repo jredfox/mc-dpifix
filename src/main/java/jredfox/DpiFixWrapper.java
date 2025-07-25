@@ -44,6 +44,7 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 		try
 		{
 			ClassLoader cl = this.getClass().getClassLoader();
+			Thread.currentThread().setContextClassLoader(cl);
 			Class clClazz = LaunchClassLoaderFix.forName("net.minecraft.launchwrapper.LaunchClassLoader");
 			if(clClazz == null || !LaunchClassLoaderFix.instanceOf(clClazz, cl.getClass()))
 				clClazz = LaunchClassLoaderFix.forName("cpw.mods.fml.relauncher.RelaunchClassLoader");
