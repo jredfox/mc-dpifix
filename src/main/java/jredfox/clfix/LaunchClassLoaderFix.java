@@ -93,7 +93,7 @@ public class LaunchClassLoaderFix {
 							break;//Regardless of what LaunchClassLoader extends break after as we are done
 						actualClassLoader = actualClassLoader.getSuperclass();
 					}
-					while(!isLibClassLoader(libLoaders, actualClassLoader.getName()) );
+					while(actualClassLoader != null && !isLibClassLoader(libLoaders, actualClassLoader.getName()) );
 				}
 			}
 		}
@@ -108,15 +108,17 @@ public class LaunchClassLoaderFix {
 	 * Gets a 1D array of Parent ClassLoaders & Itself
 	 */
 	public static Set<ClassLoader> getParents(ClassLoader root) 
-	{	
-		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(10));
+	{
+		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(8));
 		ClassLoader cl = root;
-		while(cl != null && !loaders.contains(cl) && !isLibClassLoader(libLoaders, cl.getClass().getName()))
+		do
 		{
 			loaders.add(cl);
 			ClassLoader parent = (ClassLoader) getPrivate(cl, cl.getClass(), "parent");
 			cl = (parent != null && !loaders.contains(parent)) ? parent : cl.getParent();
 		}
+		while(cl != null && !loaders.contains(cl) && !isLibClassLoader(libLoaders, cl.getClass().getName()));
+		
 		return loaders;
 	}
 
@@ -214,11 +216,10 @@ public class LaunchClassLoaderFix {
 				System.out.println("Verifying ClassLoader:" + classLoader);
 				
 				Class actualClazz = classLoader.getClass();
-				String actualName = "";
+				String actualName = actualClazz.getName();
 				
-				while(actualClazz != null && !isLibClassLoader(libLoaders, actualName))
+				do
 				{
-					actualName = actualClazz.getName();
 					Map cachedClasses = (Map) getPrivate(classLoader, actualClazz, "cachedClasses");
 					Map resourceCache = (Map) getPrivate(classLoader, actualClazz, "resourceCache");
 					Map packageManifests = (Map) getPrivate(classLoader, actualClazz, "packageManifests");
@@ -237,7 +238,10 @@ public class LaunchClassLoaderFix {
 					if(flag)
 						break;
 					actualClazz = actualClazz.getSuperclass();
+					if(actualClazz != null)
+						actualName = actualClazz.getName();
 				}
+				while(actualClazz != null && !isLibClassLoader(libLoaders, actualName));
 			}
 		}
 		catch(Throwable t)
