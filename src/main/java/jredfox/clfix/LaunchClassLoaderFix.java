@@ -235,21 +235,43 @@ public class LaunchClassLoaderFix {
 	}
 	
 	/**
-	 * Gets a 1D array of Parent ClassLoaders & Itself
+	 * Gets a 1D array of Parent ClassLoaders & Itself Excluding RelaunchClassLoader and Technic's MinecraftClassLoader
 	 */
 	public static Set<ClassLoader> getParents(ClassLoader root) 
 	{
 		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(8));
 		ClassLoader cl = root;
+		String[] badClazzes = new String[]{"cpw.mods.fml.relauncher.RelaunchClassLoader", "net.technicpack.legacywrapper.MinecraftClassLoader"};
+		boolean first = true;
 		do
 		{
-			loaders.add(cl);
-			ClassLoader parent = (ClassLoader) getPrivate(cl, cl.getClass(), "parent");
+			Class clClazz = cl.getClass();
+			if(!instanceOf(badClazzes, clClazz) && (first || !isLibClassLoader(libLoaders, clClazz.getName())))
+				loaders.add(cl);
+			first = false;
+			ClassLoader parent = (ClassLoader) getPrivate(cl, clClazz, "parent");
 			cl = (parent != null && !loaders.contains(parent)) ? parent : cl.getParent();
 		}
-		while(cl != null && !loaders.contains(cl) && !isLibClassLoader(libLoaders, cl.getClass().getName()));
+		while(cl != null && !loaders.contains(cl));
 		
 		return loaders;
+	}
+	
+	/**
+	 * @return true when the compared class is the base class or extends it
+	 * @WARNING: doesn't support interfaces
+	 */
+	private static boolean instanceOf(String[] clazzes, Class c) 
+	{
+		while(c != null)
+		{
+			String name = c.getName();
+			for(String base : clazzes)
+				if(base.equals(name))
+					return true;
+			c = c.getSuperclass();
+		}
+		return false;
 	}
 
 	private static void setDummyMap(Object classLoader, Class clazzLoaderClazz, String mapName)
