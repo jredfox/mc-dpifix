@@ -69,32 +69,33 @@ public class LaunchClassLoaderFix {
 				return;
 			}
 			
+			long ms = System.currentTimeMillis();
 			String clazzLoaderName = "net.minecraft.launchwrapper.LaunchClassLoader";
 			Class clazzLoaderClazz = forName(clazzLoaderName);
-			Set<ClassLoader> loaders = getClassLoaders(launch, clforge);
-			for(ClassLoader root : loaders)
+			Set<ClassLoader> l = getClassLoaders(launch, clforge);
+			Set<ClassLoader> allLoaders = Collections.newSetFromMap(new IdentityHashMap(16));
+			for(ClassLoader root : l)
 			{
 				if(root == null)
 					continue;
-				Set<ClassLoader> cls = getParents(root);
-				for(ClassLoader cl : cls)
+				allLoaders.addAll(getParents(root));
+			}
+			
+			for(ClassLoader cl : allLoaders)
+			{
+				//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
+				Class actualClassLoader = cl.getClass();
+				do
 				{
-					System.out.println("Fixing RAM Leak of:" + cl);
-					
-					//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
-					Class actualClassLoader = cl.getClass();
-					do
-					{
-						setDummyMap(cl, actualClassLoader, "cachedClasses");
-						setDummyMap(cl, actualClassLoader, "resourceCache");
-						setDummyMap(cl, actualClassLoader, "packageManifests");
-						setDummySet(cl, actualClassLoader, "negativeResourceCache");
-						if(actualClassLoader.getName().equals(clazzLoaderName))
-							break;//Regardless of what LaunchClassLoader extends break after as we are done
-						actualClassLoader = actualClassLoader.getSuperclass();
-					}
-					while(actualClassLoader != null && !isLibClassLoader(libLoaders, actualClassLoader.getName()) );
+					setDummyMap(cl, actualClassLoader, "cachedClasses");
+					setDummyMap(cl, actualClassLoader, "resourceCache");
+					setDummyMap(cl, actualClassLoader, "packageManifests");
+					setDummySet(cl, actualClassLoader, "negativeResourceCache");
+					if(actualClassLoader.getName().equals(clazzLoaderName))
+						break;//Regardless of what LaunchClassLoader extends break after as we are done
+					actualClassLoader = actualClassLoader.getSuperclass();
 				}
+				while(actualClassLoader != null && !isLibClassLoader(libLoaders, actualClassLoader.getName()) );
 			}
 		}
 		catch(Throwable t)
@@ -102,24 +103,6 @@ public class LaunchClassLoaderFix {
 			System.err.println("FATAL ERROR HAS OCCURED PATCHING THE LaunchClassLoader Memory Leaks!");
 			t.printStackTrace();
 		}
-	}
-	
-	/**
-	 * Gets a 1D array of Parent ClassLoaders & Itself
-	 */
-	public static Set<ClassLoader> getParents(ClassLoader root) 
-	{
-		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(8));
-		ClassLoader cl = root;
-		do
-		{
-			loaders.add(cl);
-			ClassLoader parent = (ClassLoader) getPrivate(cl, cl.getClass(), "parent");
-			cl = (parent != null && !loaders.contains(parent)) ? parent : cl.getParent();
-		}
-		while(cl != null && !loaders.contains(cl) && !isLibClassLoader(libLoaders, cl.getClass().getName()));
-		
-		return loaders;
 	}
 
 	/**
@@ -286,6 +269,24 @@ public class LaunchClassLoaderFix {
 		loaders.add(clforge);
 		loaders.add(currentLoader);
 		loaders.add(contextLoader);
+		
+		return loaders;
+	}
+	
+	/**
+	 * Gets a 1D array of Parent ClassLoaders & Itself
+	 */
+	public static Set<ClassLoader> getParents(ClassLoader root) 
+	{
+		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(8));
+		ClassLoader cl = root;
+		do
+		{
+			loaders.add(cl);
+			ClassLoader parent = (ClassLoader) getPrivate(cl, cl.getClass(), "parent");
+			cl = (parent != null && !loaders.contains(parent)) ? parent : cl.getParent();
+		}
+		while(cl != null && !loaders.contains(cl) && !isLibClassLoader(libLoaders, cl.getClass().getName()));
 		
 		return loaders;
 	}
