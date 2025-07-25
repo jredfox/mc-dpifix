@@ -35,6 +35,7 @@ public class LaunchClassLoaderFix {
 	 * - Fixed Not Supporting Parent ClassLoaders on {@link #stopMemoryOverflow(ClassLoader)} and {@link #verify(ClassLoader)}
 	 * - Fixed ClassLoader weirdness causing unintended behavior for {@link #stopMemoryOverflow(ClassLoader)} and {@link #verify(ClassLoader)}
 	 * - Added Support for more Library ClassLoaders to stop the while loop from
+	 * - Added -Dclfix.strict=true when true we only apply the patches to LaunchClassLoader If your using it with DPI-FIX mod you can simply use the config
 	 * - NOTE: RelaunchClassLoader & technic's MinecraftClassLoader cannot be fixed for 1.5x or below because findClass was public and the API basically said to use get cached classes quickly or load if needed which mods did in fact do. 
 	 * However the RAM Leak should be less then 40-80MB in a large modpack(1000+ mods) for both leaks. Unlike 1.6x+ where the ram leak was 150MB for 100 mods
 	 */
@@ -71,6 +72,7 @@ public class LaunchClassLoaderFix {
 				return;
 			}
 			
+			long ms = System.currentTimeMillis();
 			Set<ClassLoader> allLoaders = getAllClassLoaders(launch, clforge);
 			for(ClassLoader cl : allLoaders)
 			{
@@ -90,6 +92,8 @@ public class LaunchClassLoaderFix {
 				}
 				while(actualClassLoader != null && !isLibClassLoader(libLoaders, actualClassLoader.getName()) );
 			}
+			long end = System.currentTimeMillis();
+			System.out.println("Time Took:" + (end - ms) + " strict:" + strictMode);
 		}
 		catch(Throwable t)
 		{
@@ -250,7 +254,7 @@ public class LaunchClassLoaderFix {
 		do
 		{
 			Class clClazz = cl.getClass();
-			if(strictMode ? (instanceOf(strict, clClazz)) : (!instanceOf(badClazzes, clClazz) && (first || !isLibClassLoader(libLoaders, clClazz.getName()))))
+			if(strictMode && instanceOf(strict, clClazz) || !strictMode && !instanceOf(badClazzes, clClazz) && (first || !isLibClassLoader(libLoaders, clClazz.getName())))
 				loaders.add(cl);
 			first = false;
 			ClassLoader parent = (ClassLoader) getPrivate(cl, clClazz, "parent");
