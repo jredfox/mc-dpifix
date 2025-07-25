@@ -227,19 +227,10 @@ public class LaunchClassLoaderFix {
 
 	public static Set<ClassLoader> getAllClassLoaders(Class launch, ClassLoader clforge) 
 	{
+		Set<ClassLoader> l = getClassLoaders(launch, clforge);
 		Set<ClassLoader> allLoaders = Collections.newSetFromMap(new IdentityHashMap(16));
-		ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
-		ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
-		ClassLoader contextLoader = getContextClassLoader();
-		
-		if(classLoader != null)
-			allLoaders.addAll(getParents(classLoader));
-		if(clforge != null)
-			allLoaders.addAll(getParents(clforge));
-		if(currentLoader != null)
-			allLoaders.addAll(getParents(currentLoader));
-		if(contextLoader != null)
-			allLoaders.addAll(getParents(contextLoader));
+		for(ClassLoader root : l)
+			allLoaders.addAll(getParents(root));
 		return allLoaders;
 	}
 	
@@ -293,10 +284,14 @@ public class LaunchClassLoaderFix {
 		ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
 		ClassLoader contextLoader = getContextClassLoader();
 		
-		loaders.add(classLoader);
-		loaders.add(clforge);
-		loaders.add(currentLoader);
-		loaders.add(contextLoader);
+		if(classLoader != null)
+			loaders.add(classLoader);
+		if(clforge != null)
+			loaders.add(clforge);
+		if(currentLoader != null)
+			loaders.add(currentLoader);
+		if(contextLoader != null)
+			loaders.add(contextLoader);
 		
 		return loaders;
 	}
