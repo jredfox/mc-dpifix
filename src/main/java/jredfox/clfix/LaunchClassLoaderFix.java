@@ -72,25 +72,29 @@ public class LaunchClassLoaderFix {
 			String clazzLoaderName = "net.minecraft.launchwrapper.LaunchClassLoader";
 			Class clazzLoaderClazz = forName(clazzLoaderName);
 			Set<ClassLoader> loaders = getClassLoaders(launch, clforge);
-			for(ClassLoader cl : loaders)
+			for(ClassLoader root : loaders)
 			{
-				if(cl == null)
+				if(root == null)
 					continue;
-				System.out.println("Fixing RAM Leak of:" + cl);
-				//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
-				Class actualClassLoader = cl.getClass();
-				boolean flag = instanceOf(clazzLoaderClazz, actualClassLoader);
-				do
+				Set<ClassLoader> cls = getParents(root);
+				for(ClassLoader cl : cls)
 				{
-					setDummyMap(cl, actualClassLoader, "cachedClasses");
-					setDummyMap(cl, actualClassLoader, "resourceCache");
-					setDummyMap(cl, actualClassLoader, "packageManifests");
-					setDummySet(cl, actualClassLoader, "negativeResourceCache");
-					if(flag && actualClassLoader.getName().equals(clazzLoaderName))
-						break;//Regardless of what LaunchClassLoader extends break after as we are done
-					actualClassLoader = actualClassLoader.getSuperclass();
+					System.out.println("Fixing RAM Leak of:" + cl);
+					
+					//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
+					Class actualClassLoader = cl.getClass();
+					do
+					{
+						setDummyMap(cl, actualClassLoader, "cachedClasses");
+						setDummyMap(cl, actualClassLoader, "resourceCache");
+						setDummyMap(cl, actualClassLoader, "packageManifests");
+						setDummySet(cl, actualClassLoader, "negativeResourceCache");
+						if(actualClassLoader.getName().equals(clazzLoaderName))
+							break;//Regardless of what LaunchClassLoader extends break after as we are done
+						actualClassLoader = actualClassLoader.getSuperclass();
+					}
+					while(!isLibClassLoader(libLoaders, actualClassLoader.getName()) );
 				}
-				while(flag ? true : !isLibClassLoader(libLoaders, actualClassLoader.getName()) );
 			}
 		}
 		catch(Throwable t)
@@ -98,6 +102,22 @@ public class LaunchClassLoaderFix {
 			System.err.println("FATAL ERROR HAS OCCURED PATCHING THE LaunchClassLoader Memory Leaks!");
 			t.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Gets a 1D array of Parent ClassLoaders & Itself
+	 */
+	public static Set<ClassLoader> getParents(ClassLoader root) 
+	{	
+		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(10));
+		ClassLoader cl = root;
+		while(cl != null && !loaders.contains(cl) && !isLibClassLoader(libLoaders, cl.getClass().getName()))
+		{
+			loaders.add(cl);
+			ClassLoader parent = (ClassLoader) getPrivate(cl, cl.getClass(), "parent");
+			cl = (parent != null && !loaders.contains(parent)) ? parent : cl.getParent();
+		}
+		return loaders;
 	}
 
 	/**
