@@ -70,8 +70,6 @@ public class LaunchClassLoaderFix {
 				return;
 			}
 			
-			String clazzLoaderName = "net.minecraft.launchwrapper.LaunchClassLoader";
-			Class clazzLoaderClazz = forName(clazzLoaderName);
 			Set<ClassLoader> l = getClassLoaders(launch, clforge);
 			Set<ClassLoader> allLoaders = Collections.newSetFromMap(new IdentityHashMap(16));
 			for(ClassLoader root : l)
@@ -93,7 +91,7 @@ public class LaunchClassLoaderFix {
 					setDummyMap(cl, actualClassLoader, "resourceCache");
 					setDummyMap(cl, actualClassLoader, "packageManifests");
 					setDummySet(cl, actualClassLoader, "negativeResourceCache");
-					if(actualClassLoader.getName().equals(clazzLoaderName))
+					if(actualClassLoader.getName().equals("net.minecraft.launchwrapper.LaunchClassLoader"))
 						break;//Regardless of what LaunchClassLoader extends break after as we are done
 					actualClassLoader = actualClassLoader.getSuperclass();
 				}
