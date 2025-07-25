@@ -252,7 +252,6 @@ public class LaunchClassLoaderFix {
 		return loaders;
 	}
 
-
 	private static void setDummyMap(Object classLoader, Class clazzLoaderClazz, String mapName)
 	{
 		Map init = (Map) getPrivate(classLoader, clazzLoaderClazz, mapName);
