@@ -32,6 +32,7 @@ public class LaunchClassLoaderFix {
 	 * - Fixed {@link System#identityHashCode(Object)} collisions resulted in not setting class loader. object hashcode no longer represents the address and is no longer guaranteed since java 8 to be even unique per object instance
 	 * - Fixed Technic's resources and pngMap memory leak in LaunchWrapperTransformer only. For some reason RelaunchClassLoader#parent returns the class loader that's not technic's so we can't use reflection to fix it
 	 * - Fixed Verify not working for non instances of LaunchClassLoader
+	 * - Fixed Not Patching Parent ClassLoaders
 	 * - Added Support for more Library ClassLoaders to stop the while loop from
 	 * - NOTE: RelaunchClassLoader & technic's MinecraftClassLoader cannot be fixed for 1.5x or below because findClass was public and the API basically said to use get cached classes quickly or load if needed which mods did in fact do. 
 	 * However the RAM Leak should be less then 40-80MB in a large modpack(1000+ mods) for both leaks. Unlike 1.6x+ where the ram leak was 150MB for 100 mods
@@ -69,7 +70,6 @@ public class LaunchClassLoaderFix {
 				return;
 			}
 			
-			long ms = System.currentTimeMillis();
 			String clazzLoaderName = "net.minecraft.launchwrapper.LaunchClassLoader";
 			Class clazzLoaderClazz = forName(clazzLoaderName);
 			Set<ClassLoader> l = getClassLoaders(launch, clforge);

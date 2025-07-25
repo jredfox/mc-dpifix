@@ -244,7 +244,8 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 							list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/clfix/DummyMap", "get", "()Ljredfox/clfix/DummyMap;", false));
 							list.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/technicpack/legacywrapper/MinecraftClassLoader", "pngResource", pngResource.desc));
 						}
-						m.instructions.insert(spot, list);
+						if(list.getFirst() != null)
+							m.instructions.insert(spot, list);
 					}
 				}
 				
