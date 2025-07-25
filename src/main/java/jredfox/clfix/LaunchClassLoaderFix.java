@@ -72,7 +72,6 @@ public class LaunchClassLoaderFix {
 				return;
 			}
 			
-			long ms = System.currentTimeMillis();
 			Set<ClassLoader> allLoaders = getAllClassLoaders(launch, clforge);
 			for(ClassLoader cl : allLoaders)
 			{
@@ -92,8 +91,6 @@ public class LaunchClassLoaderFix {
 				}
 				while(actualClassLoader != null && !isLibClassLoader(libLoaders, actualClassLoader.getName()) );
 			}
-			long end = System.currentTimeMillis();
-			System.out.println("Time Took:" + (end - ms) + " strict:" + strictMode);
 		}
 		catch(Throwable t)
 		{
@@ -241,7 +238,8 @@ public class LaunchClassLoaderFix {
 	public static boolean strictMode = Boolean.parseBoolean(System.getProperty("clfix.strict", "false"));
 
 	/**
-	 * Gets a 1D array of Parent ClassLoaders & Itself Excluding RelaunchClassLoader and Technic's MinecraftClassLoader
+	 * Gets a 1D array of Parent ClassLoaders & Itself Excluding RelaunchClassLoader and Technic's MinecraftClassLoader or Libraries
+	 * Unless {@link #strictMode} is true then it must be an instanceof LaunchClassLoader and checks it with string names to ensure it doesn't return false when it's true
 	 */
 	public static Set<ClassLoader> getParents(ClassLoader root) 
 	{
