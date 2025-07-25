@@ -83,6 +83,8 @@ public class LaunchClassLoaderFix {
 			
 			for(ClassLoader cl : allLoaders)
 			{
+				System.out.println("Fixing RAM Leak of:" + cl);
+				
 				//Support Shadow Variables for Dumb Mods Replacing Launch#classLoader
 				Class actualClassLoader = cl.getClass();
 				do
