@@ -35,11 +35,16 @@ public class LaunchClassLoaderFix {
 	 * - Fixed Not Supporting Parent ClassLoaders on {@link #stopMemoryOverflow(ClassLoader)} and {@link #verify(ClassLoader)}
 	 * - Fixed ClassLoader weirdness causing unintended behavior for {@link #stopMemoryOverflow(ClassLoader)} and {@link #verify(ClassLoader)}
 	 * - Added Support for more Library ClassLoaders to stop the while loop from
-	 * - Added -Dclfix.strict=true when true we only apply the patches to LaunchClassLoader If your using it with DPI-FIX mod you can simply use the config
+	 * - Added -Dclfix.strict=true {@link #strictMode} when true we only apply the patches to LaunchClassLoader If your using it with DPI-FIX mod you can simply use the config
 	 * - NOTE: RelaunchClassLoader & technic's MinecraftClassLoader cannot be fixed for 1.5x or below because findClass was public and the API basically said to use get cached classes quickly or load if needed which mods did in fact do. 
 	 * However the RAM Leak should be less then 40-80MB in a large modpack(1000+ mods) for both leaks. Unlike 1.6x+ where the ram leak was 150MB for 100 mods
 	 */
 	public static final String VERSION = "2.0.1";
+	
+	/**
+	 * When true only allows patching of LaunchClassLoader instances regardless of memory leaks of the other custom class loaders that are not libraries nor blacklisted
+	 */
+	public static boolean strictMode = Boolean.parseBoolean(System.getProperty("clfix.strict", "false"));
 	
 	private static String[] libLoaders = new String[]
 	{
@@ -234,8 +239,6 @@ public class LaunchClassLoaderFix {
 			allLoaders.addAll(getParents(root));
 		return allLoaders;
 	}
-	
-	public static boolean strictMode = Boolean.parseBoolean(System.getProperty("clfix.strict", "false"));
 
 	/**
 	 * Gets a 1D array of Parent ClassLoaders & Itself Excluding RelaunchClassLoader and Technic's MinecraftClassLoader or Libraries
