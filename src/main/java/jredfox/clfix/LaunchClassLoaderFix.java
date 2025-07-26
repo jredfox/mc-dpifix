@@ -30,14 +30,12 @@ public class LaunchClassLoaderFix {
 	/**
 	 * ChangeLog 2.0.1:
 	 * - Fixed {@link System#identityHashCode(Object)} collisions resulted in not setting class loader. object hashcode no longer represents the address and is no longer guaranteed since java 8 to be even unique per object instance
-	 * - Fixed Technic's resources and pngMap memory leak in LaunchWrapperTransformer only. For some reason RelaunchClassLoader#parent returns the class loader that's not technic's so we can't use reflection to fix it
+	 * - Fixed Technic's resources and pngMap memory leak in LaunchWrapperTransformer only.
 	 * - Fixed Verify not working for non instances of LaunchClassLoader
 	 * - Fixed Not Supporting Parent ClassLoaders on {@link #stopMemoryOverflow(ClassLoader)} and {@link #verify(ClassLoader)}
 	 * - Fixed ClassLoader weirdness causing unintended behavior for {@link #stopMemoryOverflow(ClassLoader)} and {@link #verify(ClassLoader)}
 	 * - Added Support for more Library ClassLoaders to stop the while loop from
 	 * - Added -Dclfix.strict=true {@link #strictMode} when true we only apply the patches to LaunchClassLoader If your using it with DPI-FIX mod you can simply use the config
-	 * - NOTE: RelaunchClassLoader & technic's MinecraftClassLoader cannot be fixed for 1.5x or below because findClass was public and the API basically said to use get cached classes quickly or load if needed which mods did in fact do. 
-	 * However the RAM Leak should be less then 40-80MB in a large modpack(1000+ mods) for both leaks. Unlike 1.6x+ where the ram leak was 150MB for 100 mods
 	 */
 	public static final String VERSION = "2.0.1";
 	
@@ -71,7 +69,7 @@ public class LaunchClassLoaderFix {
 		try
 		{
 			Class launch = forName("net.minecraft.launchwrapper.Launch");
-			if(launch == null)
+			if(strictMode && launch == null)
 			{
 				System.err.println("LaunchWrapper is Missing!");
 				return;
@@ -188,7 +186,7 @@ public class LaunchClassLoaderFix {
 		try
 		{
 			Class launch = forName("net.minecraft.launchwrapper.Launch");
-			if(launch == null)
+			if(strictMode && launch == null)
 				return;
 			Set<ClassLoader> allLoaders = getAllClassLoaders(launch, clforge);
 			for(ClassLoader classLoader : allLoaders)
@@ -248,14 +246,13 @@ public class LaunchClassLoaderFix {
 	{
 		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(8));
 		ClassLoader cl = root;
-		String[] badClazzes = new String[]{"cpw.mods.fml.relauncher.RelaunchClassLoader", "net.technicpack.legacywrapper.MinecraftClassLoader"};
 		String[] strict = new String[]{"net.minecraft.launchwrapper.LaunchClassLoader"};
 		boolean strictMode = LaunchClassLoaderFix.strictMode;
 		boolean first = true;
 		do
 		{
 			Class clClazz = cl.getClass();
-			if(strictMode && instanceOf(strict, clClazz) || !strictMode && !instanceOf(badClazzes, clClazz) && (first || !isLibClassLoader(libLoaders, clClazz.getName())))
+			if(strictMode && instanceOf(strict, clClazz) || !strictMode && (first || !isLibClassLoader(libLoaders, clClazz.getName())))
 				loaders.add(cl);
 			first = false;
 			ClassLoader parent = (ClassLoader) getPrivate(cl, clClazz, "parent");
@@ -310,7 +307,7 @@ public class LaunchClassLoaderFix {
 	public static Set<ClassLoader> getClassLoaders(Class launch, ClassLoader clforge) 
 	{
 		Set<ClassLoader> loaders = Collections.newSetFromMap(new IdentityHashMap(5));
-		ClassLoader classLoader = (ClassLoader) getPrivate(null, launch, "classLoader", false);
+		ClassLoader classLoader = launch != null ? ((ClassLoader) getPrivate(null, launch, "classLoader", false)) : null;
 		ClassLoader currentLoader = LaunchClassLoaderFix.class.getClassLoader();
 		ClassLoader contextLoader = getContextClassLoader();
 		
