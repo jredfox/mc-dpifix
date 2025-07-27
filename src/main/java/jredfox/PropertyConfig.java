@@ -97,7 +97,7 @@ public class PropertyConfig
 		return this.getKey(key, "");
 	}
 	
-	protected String getKey(String key, String def) 
+	public String getKey(String key, String def) 
 	{
 		String prop = this.properties.getProperty(key);
 		if(prop == null) 

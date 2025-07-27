@@ -28,6 +28,9 @@ import org.ow2.asm.tree.VarInsnNode;
 
 import jml.gamemodelib.GameModeLib;
 import jredfox.CoreUtils;
+import jredfox.DpiFix;
+import jredfox.PropertyConfig;
+import jredfox.forgeversion.ForgeVersionProxy;
 
 public class LaunchWrapperTransformer implements ClassFileTransformer {
 	
@@ -35,6 +38,7 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 	public static File dm = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/jredfox/clfix/DummyMap.class").getAbsoluteFile();
 	public static File ds = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/jredfox/clfix/DummySet.class").getAbsoluteFile();
 	public static File mcl = new File(System.getProperty("user.dir"), "asm/cache/dpi-fix/net/technicpack/legacywrapper/MinecraftClassLoader.class").getAbsoluteFile();
+	public static boolean pcc = Boolean.parseBoolean(System.getProperty("clfixtransformer.cc", "false"));
 	
 	public static void init(Instrumentation inst)
 	{
@@ -42,11 +46,22 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 		dm.delete();
 		ds.delete();
 		mcl.delete();
+		pcc = patchCachedClasses();
 		inst.addTransformer(new LaunchWrapperTransformer());
 		GameModeLib.forName("net.minecraft.launchwrapper.LaunchClassLoader");//Force Load LaunchClassLoader Class
 		GameModeLib.forName("jredfox.clfix.DummyMap");//Force Load DummyMap
 		GameModeLib.forName("jredfox.clfix.DummySet");//Force Load DummySet
 		GameModeLib.forName("net.technicpack.legacywrapper.MinecraftClassLoader");//Force Load Technic's MinecraftClassLoader Class
+	}
+	
+	public static boolean patchCachedClasses()
+	{
+		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
+		cfg.load();
+		String cc = cfg.getKey("LaunchClassLoaderFix.patchCachedClasses", "auto").trim();
+		boolean pcc = cc.equalsIgnoreCase("auto") ? (ForgeVersionProxy.minorVersion > 22) : Boolean.parseBoolean(cc);
+		System.setProperty("clfixtransformer.cc", String.valueOf(pcc));
+		return pcc;
 	}
 	
 	@Override
@@ -84,6 +99,7 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 				ClassNode classNode = CoreUtils.getClassNode(bytes);
 				CoreUtils.addFieldNodeIf(classNode, new FieldNode(Opcodes.ACC_PUBLIC, "dm", "Ljava/util/Map;", null, null));
 				CoreUtils.addFieldNodeIf(classNode, new FieldNode(Opcodes.ACC_PUBLIC, "ds", "Ljava/util/Set;", null, null));
+				boolean pcc = LaunchWrapperTransformer.pcc;
 				
 				MethodNode m = CoreUtils.getMethodNode(classNode, "<init>", "([Ljava/net/URL;)V");
 				
@@ -106,7 +122,7 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 		        //resourceCache = new DummyMap();
 		        //packageManifests = new DummyMap();
 		        //negativeResourceCache = new DummySet();
-				if(CoreUtils.hasFieldNode(classNode, "cachedClasses"))
+				if(pcc && CoreUtils.hasFieldNode(classNode, "cachedClasses"))
 				{
 					l.add(new LabelNode());
 					l.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -170,7 +186,7 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 							}
 							
 							FieldInsnNode insn = (FieldInsnNode) ab;
-							if(CoreUtils.equals(cachedClassesInsn, insn) || CoreUtils.equals(packageManifestsInsn, insn) || CoreUtils.equals(resourceCache, insn))
+							if(pcc && CoreUtils.equals(cachedClassesInsn, insn) || CoreUtils.equals(packageManifestsInsn, insn) || CoreUtils.equals(resourceCache, insn))
 								insn.name = "dm";
 							else if(CoreUtils.equals(negativeResourceCache, insn))
 								insn.name = "ds";

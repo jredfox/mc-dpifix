@@ -142,10 +142,10 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		}
 		if(System.getProperty("clfix.cachedClasses") == null)
 		{
-			String cc = cfg.getKey("LaunchClassLoaderFix.cachedClasses", "auto").trim();
+			String cc = cfg.getKey("LaunchClassLoaderFix.patchCachedClasses", "auto").trim();
 			LaunchClassLoaderFix.patchCachedClasses = cc.equalsIgnoreCase("auto") ? (ForgeVersionProxy.minorVersion > 22) : Boolean.parseBoolean(cc);
 		}
-		System.out.println("LaunchClassLoaderFix#strictMode " + LaunchClassLoaderFix.strictMode + " cachedClasses:" + LaunchClassLoaderFix.patchCachedClasses);
+		System.out.println("LaunchClassLoaderFix#strictMode " + LaunchClassLoaderFix.strictMode + " patchCachedClasses:" + LaunchClassLoaderFix.patchCachedClasses);
 		cfg.get("Coremod.OneFive.DeAWT.Compat.Technic");//Make this generate even when the agent isn't active
 		cfg.save();
 	}

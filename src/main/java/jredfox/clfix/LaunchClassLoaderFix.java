@@ -48,7 +48,7 @@ public class LaunchClassLoaderFix {
 	/**
 	 * When true allows patching of cachedClasses for LaunchClassLoader or any class loader if strict mode isn't on
 	 */
-	public static boolean patchCachedClasses = Boolean.parseBoolean(System.getProperty("clfix.cachedClasses", "false"));
+	public static boolean patchCachedClasses = Boolean.parseBoolean(System.getProperty("clfix.patchCachedClasses", "false"));
 	
 	private static String[] libLoaders = new String[]
 	{
