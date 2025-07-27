@@ -411,7 +411,7 @@ public class ForgeVersionProxy {
 		switch(majorVersion)
 		{
 			case 1:
-				if(build < 30)
+				if(minorVersion < 4)
 					mcVersion = "1.1";
 				else
 					mcVersion = "1.2.3";
