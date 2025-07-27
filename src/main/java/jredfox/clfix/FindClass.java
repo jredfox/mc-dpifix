@@ -19,8 +19,6 @@ import org.ow2.asm.tree.ClassNode;
 import org.ow2.asm.tree.MethodInsnNode;
 import org.ow2.asm.tree.MethodNode;
 
-import jredfox.CoreUtils;
-
 /**
  * Print all findClass instance calls probable and absolute
  * @author jredfox
@@ -29,6 +27,7 @@ public class FindClass {
 	
 	public static void main(String[] args)
 	{
+		long start = System.currentTimeMillis();
 		File mcDir = new File(args[0].trim()).getAbsoluteFile();
 		boolean possible = args.length > 1 ? Boolean.parseBoolean(args[1].trim()) : true;
 		if(!mcDir.exists() || !mcDir.isDirectory())
@@ -45,6 +44,9 @@ public class FindClass {
 		getDirFiles(modDir, fileList, exts);
 		getDirFiles(coremodDir, fileList, exts);
 		getDirFiles(jarModDir, fileList, exts);
+		long scannedClasses = 0;
+		long scannedMethods = 0;
+		long scannedInsn = 0;
 		for(File fileJar : fileList)
 		{
 			ZipFile jar = null;
@@ -55,15 +57,18 @@ public class FindClass {
 	            {
 	            	if(ze.getName().endsWith(".class"))
 	            	{
+	            		scannedClasses++;
 	            		InputStream stream = null;
 	            		try
 	            		{
 	            			stream = jar.getInputStream(ze);
-	            			ClassNode c = CoreUtils.getClassNode(toByteArray(stream));
+	            			ClassNode c = getClassNode(stream);
 	            			for(MethodNode m : c.methods)
 	            			{
+	            				scannedMethods++;
 	            				for(AbstractInsnNode a : m.instructions.toArray())
 	            				{
+	            					scannedInsn++;
 	            					if(a instanceof MethodInsnNode && a.getOpcode() != Opcodes.INVOKESTATIC)
 	            					{
 	            						MethodInsnNode insn = (MethodInsnNode) a;
@@ -85,9 +90,6 @@ public class FindClass {
 	            		catch(Throwable t)
 	            		{
 	            			t.printStackTrace();
-	            		}
-	            		finally
-	            		{
 	            			close(stream);
 	            		}
 	            	}
@@ -102,6 +104,8 @@ public class FindClass {
 				close(jar);
 			}
 		}
+		long end = System.currentTimeMillis();
+		System.out.println("Finished In:" + (end - start) + "MS Scanned Mods:" + fileList.size() + " Classes:" + scannedClasses + " Methods:" + scannedMethods + " Instructions:" + scannedInsn);
 	}
 
 	public static void getDirFiles(File dir, Set<File> files, String[] exts) 
@@ -190,9 +194,9 @@ public class FindClass {
         return output.toByteArray();
     }
 	
+    private static byte[] buffer = new byte[1048576/4];
 	public static void copy(InputStream in, OutputStream out) throws IOException
 	{
-		byte[] buffer = new byte[1048576/4];
 		int length;
    	 	while ((length = in.read(buffer)) >= 0)
 		{
