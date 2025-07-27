@@ -81,6 +81,10 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 			atnet.values.add("serverSideRequired");
 			atnet.values.add(false);
 			classNode.visibleAnnotations.add(atnet);
+			
+			//Remove @Mod$EventHandler from method modloadcomplete(FMLLoadCompleteEvent e)
+			MethodNode lc = CoreUtils.getMethodNode(classNode, "modloadcomplete", "(Lcpw/mods/fml/common/event/FMLLoadCompleteEvent;)V");
+			lc.visibleAnnotations.remove(CoreUtils.getAnnotation(lc, "Lcpw/mods/fml/common/Mod$EventHandler;"));
 		}
 		
 		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent e)

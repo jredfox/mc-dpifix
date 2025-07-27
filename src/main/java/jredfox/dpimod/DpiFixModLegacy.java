@@ -79,11 +79,15 @@ public class DpiFixModLegacy {
 	
 	//1.5 - 1.6.4's load complete doesn't exist use server start event instead while annoying you have to load a world to find out if it theoretically no mods from 1.5-1.6.4 messes with it
 	//replaced @Mod.EventHandler with @Mod.FMLServerAboutToStartEvent at runtime if needed
+	private static boolean loadComplete = false;
 	@Mod.EventHandler
 	public void modloadcomplete(FMLServerAboutToStartEvent e)
 	{
-		if(ForgeVersionProxy.onesix)
+		if(ForgeVersionProxy.onesix && !loadComplete)
+		{
 			DpiFixModProxy.modLoadComplete(this.getClass().getClassLoader());
+			loadComplete = true;
+		}
 	}
 	
 	//1.7.2 - 1.7.10's LoadComplete Method earlier versions uses FMLServerAboutToStartEvent
