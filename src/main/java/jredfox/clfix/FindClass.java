@@ -27,6 +27,13 @@ public class FindClass {
 	
 	public static void main(String[] args)
 	{
+		if(args.length == 0 || args[0].startsWith("/help"))
+		{
+			System.out.println("java -cp <dpifix.jar> jredfox.clfix.FindClass \"<.minecraft>\"");
+			System.out.println("Command with Probable boolean turned off");
+			System.out.println("java -cp <dpifix.jar> jredfox.clfix.FindClass \"<.minecraft>\" false");
+			return;
+		}
 		long start = System.currentTimeMillis();
 		File mcDir = new File(args[0].trim()).getAbsoluteFile();
 		boolean possible = args.length > 1 ? Boolean.parseBoolean(args[1].trim()) : true;
