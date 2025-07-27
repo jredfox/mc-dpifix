@@ -1,9 +1,11 @@
 package jredfox.clfix;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,14 +13,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.objectweb.asm.Opcodes;
+import org.ow2.asm.ClassReader;
 import org.ow2.asm.tree.AbstractInsnNode;
 import org.ow2.asm.tree.ClassNode;
 import org.ow2.asm.tree.MethodInsnNode;
 import org.ow2.asm.tree.MethodNode;
 
 import jredfox.CoreUtils;
-import jredfox.forgeversion.ForgeVersionProxy;
-import net.minecraft.launchwrapper.Launch;
 
 /**
  * Print all findClass instance calls probable and absolute
@@ -58,7 +59,7 @@ public class FindClass {
 	            		try
 	            		{
 	            			stream = jar.getInputStream(ze);
-	            			ClassNode c = CoreUtils.getClassNode(ForgeVersionProxy.toByteArray(stream));
+	            			ClassNode c = CoreUtils.getClassNode(toByteArray(stream));
 	            			for(MethodNode m : c.methods)
 	            			{
 	            				for(AbstractInsnNode a : m.instructions.toArray())
@@ -146,6 +147,59 @@ public class FindClass {
 	    }
 	}
 	
+	public static ClassNode getClassNode(InputStream in) 
+	{
+		if(in == null)
+			return null;
+		
+		try
+		{
+			byte[] basicClass = toByteArray(in);
+			ClassNode classNode = new ClassNode();
+	        ClassReader classReader = new ClassReader(basicClass);
+	        classReader.accept(classNode, 0);
+	        return classNode;
+		}
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
+		finally
+		{
+			if(in != null)
+			{
+				try
+				{
+					in.close();
+				}
+				catch(Throwable t)
+				{
+					t.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
 	
+	/**
+	 * Converts the InputStream into byte[] then closes the InputStream
+	 * @throws IOException 
+	 */
+    public static byte[] toByteArray(final InputStream input) throws IOException
+    {
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        copy(input, output);
+        return output.toByteArray();
+    }
+	
+	public static void copy(InputStream in, OutputStream out) throws IOException
+	{
+		byte[] buffer = new byte[1048576/4];
+		int length;
+   	 	while ((length = in.read(buffer)) >= 0)
+		{
+			out.write(buffer, 0, length);
+		}
+	}
 	
 }
