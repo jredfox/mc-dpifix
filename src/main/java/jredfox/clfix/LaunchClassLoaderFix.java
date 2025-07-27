@@ -37,7 +37,7 @@ public class LaunchClassLoaderFix {
 	 * - Fixed Patching LaunchClassLoader#cachedClasses when it wasn't safe to do so MC < 1.12.2! This resulted in ClassNotFoundException caused by a duplicate class exception
 	 * - Added Support for more Library ClassLoaders to stop the while loop from
 	 * - Added -Dclfix.strict {@link #strictMode} when true we only apply the patches to LaunchClassLoader If your using it with DPI-FIX mod you can simply use the config
-	 * - Added -Dclfix.cachedClasses when true patches LaunchClassLoader or a Custom Class Loader's Field of cachedClasses. It's disabled by default but will get turned on by DPI-Fix or EvilNotchLib in MC 1.12.2
+	 * - Added -Dclfix.patchCachedClasses when true patches LaunchClassLoader or a Custom Class Loader's Field of cachedClasses. It's disabled by default but will get turned on by DPI-Fix or EvilNotchLib in MC 1.12.2
 	 */
 	public static final String VERSION = "2.1.0";
 	

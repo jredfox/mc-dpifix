@@ -28,7 +28,6 @@ import org.ow2.asm.tree.VarInsnNode;
 
 import jml.gamemodelib.GameModeLib;
 import jredfox.CoreUtils;
-import jredfox.DpiFix;
 import jredfox.PropertyConfig;
 import jredfox.forgeversion.ForgeVersionProxy;
 
@@ -56,6 +55,9 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 	
 	public static boolean patchCachedClasses()
 	{
+		if(System.getProperty("clfix.patchCachedClasses") != null)
+			return LaunchClassLoaderFix.patchCachedClasses;
+		
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
 		cfg.load();
 		String cc = cfg.getKey("LaunchClassLoaderFix.patchCachedClasses", "auto").trim();

@@ -140,7 +140,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 			String strictMode = cfg.getKey("LaunchClassLoaderFix.StrictMode", "auto").trim();
 			LaunchClassLoaderFix.strictMode = strictMode.equalsIgnoreCase("auto") ? ForgeVersionProxy.onefive : Boolean.parseBoolean(strictMode);
 		}
-		if(System.getProperty("clfix.cachedClasses") == null)
+		if(System.getProperty("clfix.patchCachedClasses") == null)
 		{
 			String cc = cfg.getKey("LaunchClassLoaderFix.patchCachedClasses", "auto").trim();
 			LaunchClassLoaderFix.patchCachedClasses = cc.equalsIgnoreCase("auto") ? (ForgeVersionProxy.minorVersion > 22) : Boolean.parseBoolean(cc);
