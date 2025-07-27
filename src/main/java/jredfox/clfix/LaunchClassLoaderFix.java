@@ -276,7 +276,7 @@ public class LaunchClassLoaderFix {
 	 * @return true when the compared class is the base class or extends it
 	 * @WARNING: doesn't support interfaces
 	 */
-	private static boolean instanceOf(String[] clazzes, Class c) 
+	public static boolean instanceOf(String[] clazzes, Class c) 
 	{
 		while(c != null)
 		{
