@@ -284,7 +284,7 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
         return output.toByteArray();
     }
     
-	public static void copy(InputStream in, OutputStream out) throws IOException
+    public static void copy(InputStream in, OutputStream out) throws IOException
 	{
 		byte[] buffer = new byte[1048576/2];
 		int length;
@@ -294,7 +294,7 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 		}
 	}
 	
-	public static void closeQuietly(Closeable clos)
+    public static void closeQuietly(Closeable clos)
 	{
 		try 
 		{

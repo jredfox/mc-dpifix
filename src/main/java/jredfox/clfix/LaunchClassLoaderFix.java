@@ -28,21 +28,26 @@ import java.util.Set;
 public class LaunchClassLoaderFix {
 	
 	/**
-	 * ChangeLog 2.0.1:
+	 * ChangeLog 2.1.0:
 	 * - Fixed {@link System#identityHashCode(Object)} collisions resulted in not setting class loader. object hashcode no longer represents the address and is no longer guaranteed since java 8 to be even unique per object instance
 	 * - Fixed Technic's resources and pngMap memory leak in LaunchWrapperTransformer only.
 	 * - Fixed Verify not working for non instances of LaunchClassLoader
 	 * - Fixed Not Supporting Parent ClassLoaders on {@link #stopMemoryOverflow(ClassLoader)} and {@link #verify(ClassLoader)}
 	 * - Fixed ClassLoader weirdness causing unintended behavior for {@link #stopMemoryOverflow(ClassLoader)} and {@link #verify(ClassLoader)}
+	 * - Fixed Patching LaunchClassLoader#cachedClasses when it wasn't safe to do so MC < 1.12.2! This resulted in ClassNotFoundException caused by a duplicate class exception
 	 * - Added Support for more Library ClassLoaders to stop the while loop from
 	 * - Added -Dclfix.strict=true {@link #strictMode} when true we only apply the patches to LaunchClassLoader If your using it with DPI-FIX mod you can simply use the config
 	 */
-	public static final String VERSION = "2.0.1";
+	public static final String VERSION = "2.1.0";
 	
 	/**
 	 * When true only allows patching of LaunchClassLoader instances regardless of memory leaks of the other custom class loaders that are not libraries nor blacklisted
 	 */
 	public static boolean strictMode = Boolean.parseBoolean(System.getProperty("clfix.strict", "false"));
+	/**
+	 * When true allows patching of cachedClasses for LaunchClassLoader or any class loader if strict mode isn't on
+	 */
+	public static boolean patchCachedClasses = Boolean.parseBoolean(System.getProperty("clfix.cachedClasses", "false"));
 	
 	private static String[] libLoaders = new String[]
 	{
@@ -75,6 +80,7 @@ public class LaunchClassLoaderFix {
 				return;
 			}
 			
+			boolean cache = patchCachedClasses;
 			Set<ClassLoader> allLoaders = getAllClassLoaders(launch, clforge);
 			for(ClassLoader cl : allLoaders)
 			{
@@ -84,7 +90,8 @@ public class LaunchClassLoaderFix {
 				Class actualClassLoader = cl.getClass();
 				do
 				{
-					setDummyMap(cl, actualClassLoader, "cachedClasses");
+					if(cache)
+						setDummyMap(cl, actualClassLoader, "cachedClasses");
 					setDummyMap(cl, actualClassLoader, "resourceCache");
 					setDummyMap(cl, actualClassLoader, "packageManifests");
 					setDummySet(cl, actualClassLoader, "negativeResourceCache");
@@ -188,6 +195,7 @@ public class LaunchClassLoaderFix {
 			Class launch = forName("net.minecraft.launchwrapper.Launch");
 			if(strictMode && launch == null)
 				return;
+			boolean cache = patchCachedClasses;
 			Set<ClassLoader> allLoaders = getAllClassLoaders(launch, clforge);
 			for(ClassLoader classLoader : allLoaders)
 			{
@@ -198,7 +206,7 @@ public class LaunchClassLoaderFix {
 				
 				do
 				{
-					Map cachedClasses = (Map) getPrivate(classLoader, actualClazz, "cachedClasses");
+					Map cachedClasses = cache ? ((Map) getPrivate(classLoader, actualClazz, "cachedClasses")) : null;
 					Map resourceCache = (Map) getPrivate(classLoader, actualClazz, "resourceCache");
 					Map packageManifests = (Map) getPrivate(classLoader, actualClazz, "packageManifests");
 					Set negativeResourceCache = (Set) getPrivate(classLoader, actualClazz, "negativeResourceCache");
