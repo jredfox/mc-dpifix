@@ -168,17 +168,7 @@ public class FindClass {
 		}
 		finally
 		{
-			if(in != null)
-			{
-				try
-				{
-					in.close();
-				}
-				catch(Throwable t)
-				{
-					t.printStackTrace();
-				}
-			}
+			close(in);
 		}
 		return null;
 	}

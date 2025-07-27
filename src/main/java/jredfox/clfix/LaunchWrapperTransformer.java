@@ -56,7 +56,11 @@ public class LaunchWrapperTransformer implements ClassFileTransformer {
 	public static boolean patchCachedClasses()
 	{
 		if(System.getProperty("clfix.patchCachedClasses") != null)
-			return LaunchClassLoaderFix.patchCachedClasses;
+		{
+			boolean pcc = LaunchClassLoaderFix.patchCachedClasses;
+			System.setProperty("clfixtransformer.cc", String.valueOf(pcc));
+			return pcc;
+		}
 		
 		PropertyConfig cfg = new PropertyConfig(new File("config", "DpiFix.cfg"));
 		cfg.load();
