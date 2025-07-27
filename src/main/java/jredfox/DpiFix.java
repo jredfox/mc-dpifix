@@ -135,7 +135,7 @@ public class DpiFix implements IFMLLoadingPlugin, net.minecraftforge.fml.relaunc
 		deawt_linux = cfg.get("Coremod.OneFive.DeAWT.Linux");
 		fixResourceThread = cfg.get("Coremod.OneFive.ThreadResourcesFix");
 		//Sync LaunchClassLoaderFix Settings via the config if it's not found in the command line
-		if(System.getProperty("clfix.strict") == null)
+		if(System.getProperty("clfix.strictMode") == null)
 		{
 			String strictMode = cfg.getKey("LaunchClassLoaderFix.StrictMode", "auto").trim();
 			LaunchClassLoaderFix.strictMode = strictMode.equalsIgnoreCase("auto") ? ForgeVersionProxy.onefive : Boolean.parseBoolean(strictMode);
