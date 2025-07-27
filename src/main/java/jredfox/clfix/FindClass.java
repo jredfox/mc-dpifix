@@ -88,10 +88,7 @@ public class FindClass {
 	            		}
 	            		finally
 	            		{
-	            			if(stream != null)
-	            			{
-	            				close(stream);
-	            			}
+	            			close(stream);
 	            		}
 	            	}
 	            }
@@ -104,19 +101,6 @@ public class FindClass {
 			{
 				close(jar);
 			}
-		}
-	}
-
-	private static void close(Closeable in)
-	{
-		try 
-		{
-			if(in != null)
-				in.close();
-		} 
-		catch (Throwable e) 
-		{
-			e.printStackTrace();
 		}
 	}
 
@@ -145,6 +129,20 @@ public class FindClass {
 		    	}
 	    	}
 	    }
+	}
+	
+	private static void close(Closeable in)
+	{
+		if(in == null)
+			return;
+		try 
+		{
+			in.close();
+		} 
+		catch (Throwable e) 
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public static ClassNode getClassNode(InputStream in) 
