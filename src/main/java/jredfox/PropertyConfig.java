@@ -17,6 +17,7 @@ public class PropertyConfig
 {
 	public Properties properties = new Properties();
 	public File property_file;
+	private boolean dirty;
 	
 	public PropertyConfig(File f)
 	{
@@ -25,10 +26,16 @@ public class PropertyConfig
 	
 	public void load()
 	{
+		if(!this.property_file.exists())
+		{
+			this.dirty = true;
+			return;
+		}
+		this.dirty = false;
+		
 		BufferedReader input = null;
 		try
 		{
-			this.createFile();
 			input = new BufferedReader(new InputStreamReader(new FileInputStream(this.property_file), Charset.forName("UTF-8") ) );
 			properties.load(input);
 		}
@@ -51,6 +58,7 @@ public class PropertyConfig
 		StringBuilder sb = new StringBuilder();
 		try
 		{
+			this.createFile();
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.property_file), Charset.forName("UTF-8") ) );
 			for(Map.Entry<Object, Object> entry : new TreeMap<Object, Object>(this.properties).entrySet())
 			{
@@ -70,8 +78,9 @@ public class PropertyConfig
 	
 	protected void createFile() throws IOException
 	{
-		if(!this.property_file.exists())
+		if(this.dirty || !this.property_file.exists())
 		{
+			this.dirty = false;
 			this.property_file.getParentFile().mkdirs();
 			this.property_file.createNewFile();
 		}
