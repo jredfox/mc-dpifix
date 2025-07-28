@@ -17,7 +17,6 @@ public class PropertyConfig
 {
 	public Properties properties = new Properties();
 	public File property_file;
-	private boolean dirty;
 	
 	public PropertyConfig(File f)
 	{
@@ -27,11 +26,7 @@ public class PropertyConfig
 	public void load()
 	{
 		if(!this.property_file.exists())
-		{
-			this.dirty = true;
 			return;
-		}
-		this.dirty = false;
 		
 		BufferedReader input = null;
 		try
@@ -78,7 +73,7 @@ public class PropertyConfig
 	
 	protected void createFile() throws IOException
 	{
-		if(this.dirty || !this.property_file.exists())
+		if(!this.property_file.exists())
 		{
 			this.dirty = false;
 			this.property_file.getParentFile().mkdirs();
