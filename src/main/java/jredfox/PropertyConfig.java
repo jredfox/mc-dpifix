@@ -75,7 +75,6 @@ public class PropertyConfig
 	{
 		if(!this.property_file.exists())
 		{
-			this.dirty = false;
 			this.property_file.getParentFile().mkdirs();
 			this.property_file.createNewFile();
 		}
