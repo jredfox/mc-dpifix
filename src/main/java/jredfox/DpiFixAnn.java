@@ -74,18 +74,22 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 			}
 			
 			//Append @cpw.mods.fml.common.network.NetworkMod(clientSideRequired = false, serverSideRequired = false)
-			System.out.println("Adding Annotation @NetworkMod(clientSideRequired = false, serverSideRequired = false) to DpiFixModLegacy");
-			AnnotationNode atnet = new AnnotationNode("Lcpw/mods/fml/common/network/NetworkMod;");
-			atnet.values = new ArrayList(5);
-			atnet.values.add("clientSideRequired");
-			atnet.values.add(false);
-			atnet.values.add("serverSideRequired");
-			atnet.values.add(false);
-			classNode.visibleAnnotations.add(atnet);
+			if(CoreUtils.getAnnotation(classNode, "Lcpw/mods/fml/common/network/NetworkMod;") == null)
+			{
+				System.out.println("Adding Annotation @NetworkMod(clientSideRequired = false, serverSideRequired = false) to DpiFixModLegacy");
+				AnnotationNode atnet = new AnnotationNode("Lcpw/mods/fml/common/network/NetworkMod;");
+				atnet.values = new ArrayList(5);
+				atnet.values.add("clientSideRequired");
+				atnet.values.add(false);
+				atnet.values.add("serverSideRequired");
+				atnet.values.add(false);
+				classNode.visibleAnnotations.add(atnet);
+			}
 			
 			//Remove @Mod$EventHandler from method modloadcomplete(FMLLoadCompleteEvent e)
 			MethodNode lc = CoreUtils.getMethodNode(classNode, "modloadcomplete", "(Lcpw/mods/fml/common/event/FMLLoadCompleteEvent;)V");
-			lc.visibleAnnotations.remove(CoreUtils.getAnnotation(lc, "Lcpw/mods/fml/common/Mod$EventHandler;"));
+			if(lc.visibleAnnotations != null)
+				lc.visibleAnnotations.remove(CoreUtils.getAnnotation(lc, "Lcpw/mods/fml/common/Mod$EventHandler;"));
 		}
 		
 		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent e)
@@ -104,13 +108,19 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 						it.remove();
 			}
 			
-			System.out.println("Adding Annotation @Mod.PreInit to DpiFixModLegacy#preinit");
 			MethodNode m1 = CoreUtils.getMethodNode(classNode, "preinit", "(Lcpw/mods/fml/common/event/FMLPreInitializationEvent;)V");
-			m1.visibleAnnotations.add(new AnnotationNode("Lcpw/mods/fml/common/Mod$PreInit;"));
+			if(CoreUtils.getAnnotation(m1, "Lcpw/mods/fml/common/Mod$PreInit;") == null)
+			{
+				System.out.println("Adding Annotation @Mod.PreInit to DpiFixModLegacy#preinit");
+				m1.visibleAnnotations.add(new AnnotationNode("Lcpw/mods/fml/common/Mod$PreInit;"));
+			}
 			
-			System.out.println("Adding Annotation @Mod.ServerAboutToStart to DpiFixModLegacy#modloadcomplete");
 			MethodNode m2 = CoreUtils.getMethodNode(classNode, "modloadcomplete", "(Lcpw/mods/fml/common/event/FMLServerAboutToStartEvent;)V");
-			m2.visibleAnnotations.add(new AnnotationNode("Lcpw/mods/fml/common/Mod$ServerAboutToStart;"));
+			if(CoreUtils.getAnnotation(m2, "Lcpw/mods/fml/common/Mod$ServerAboutToStart;") == null)
+			{
+				System.out.println("Adding Annotation @Mod.ServerAboutToStart to DpiFixModLegacy#modloadcomplete");
+				m2.visibleAnnotations.add(new AnnotationNode("Lcpw/mods/fml/common/Mod$ServerAboutToStart;"));
+			}
 		}
 	}
 	

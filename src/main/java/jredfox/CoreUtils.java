@@ -312,6 +312,9 @@ public class CoreUtils {
 	
 	private static AnnotationNode getAnnotation(List<AnnotationNode> visibleAnnotations, String... descs) 
 	{
+		if(visibleAnnotations == null)
+			return null;
+		
 		for(AnnotationNode a : visibleAnnotations)
 			for(String desc : descs)
 				if(a.desc.equals(desc))
