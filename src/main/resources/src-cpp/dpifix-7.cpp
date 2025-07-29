@@ -1,4 +1,3 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include "jni.h"
 #include <windows.h>
@@ -25,9 +24,3 @@ extern "C" JNIEXPORT void JNICALL Java_jredfox_DpiFix_setHighPriority(JNIEnv*, j
     std::cout << "Setting High Priority " << std::endl;
     setHigh();
 }
-
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
-{
-    return TRUE;
-}
-
