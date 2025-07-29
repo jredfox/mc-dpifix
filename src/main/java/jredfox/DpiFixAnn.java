@@ -69,6 +69,7 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 				{
 					atmod.values.remove(i + 1);
 					atmod.values.remove(i);
+					break;
 				}
 			}
 			
