@@ -123,33 +123,5 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 			}
 		}
 	}
-	
-//	private void makeDeAWTProxy(String name, byte[] basicClass)
-//	{
-//		if(name.equals("jredfox.DeAWTProxy"))
-//		{
-//			ClassNode classNode = CoreUtils.getClassNode(basicClass);
-//			for(MethodNode m : classNode.methods)
-//			{
-//				for(AbstractInsnNode a : m.instructions.toArray())
-//				{
-//					if(a instanceof FieldInsnNode)
-//					{
-//						FieldInsnNode f = (FieldInsnNode)a;
-//						if(f.owner.equals("jredfox/DeAWTProxy") && !f.name.equals("hasField"))
-//						{
-//							f.owner = "java/awt/Component";
-//						}
-//					}
-//				}
-//			}
-//			ClassWriter cw = CoreUtils.getClassWriter(classNode, ClassWriter.COMPUTE_MAXS);
-//			try {
-//				CoreUtils.dumpFile(name + "_make", cw.toByteArray());
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//	}
 
 }
