@@ -90,6 +90,9 @@ public class DpiFixAnn implements net.minecraft.launchwrapper.IClassTransformer 
 			MethodNode lc = CoreUtils.getMethodNode(classNode, "modloadcomplete", "(Lcpw/mods/fml/common/event/FMLLoadCompleteEvent;)V");
 			if(lc.visibleAnnotations != null)
 				lc.visibleAnnotations.remove(CoreUtils.getAnnotation(lc, "Lcpw/mods/fml/common/Mod$EventHandler;"));
+			
+			//Remove MethodNode modloadcomplete(FMLLoadCompleteEvent e) as FMLLoadCompleteEvent Class does not exist
+			classNode.methods.remove(lc);
 		}
 		
 		//Add @cpw.mods.fml.common.Mod.PreInit to preinit(FMLPreInitializationEvent e)
