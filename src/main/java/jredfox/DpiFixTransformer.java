@@ -72,7 +72,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		}
 	}
 
-	public void patchGameSettings(ClassNode classNode) 
+	public static void patchGameSettings(ClassNode classNode) 
 	{
 		String fieldMc = CoreUtils.getObfString("mc", "field_74317_L");
 		String fieldPlayer = CoreUtils.getObfString("player", "field_71439_g");

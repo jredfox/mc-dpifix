@@ -84,6 +84,10 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			case 14:
 				CoreUtils.pubMinusFinal(classNode);
 			break;
+			
+			case 15:
+				DpiFixTransformer.patchGameSettings(classNode);
+			break;
 
 			default:
 				break;
