@@ -506,5 +506,19 @@ public class CoreUtils {
 				return f;
 		return null;
 	}
+	
+	public static String genMethodName(ClassNode classNode, String base, String desc)
+	{
+		int index = 0;
+		String name = null;
+		do
+		{
+			name = base + index;
+			index++;
+		}
+		while(CoreUtils.getMethodNode(classNode, name, desc) != null);
+		
+		return name;
+	}
 
 }

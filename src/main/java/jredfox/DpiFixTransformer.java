@@ -80,7 +80,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		String playerClazz = ForgeVersionProxy.majorVersion >= 11 ? "net/minecraft/client/entity/EntityPlayerSP" : "net/minecraft/client/entity/EntityClientPlayerMP";
 		String connClazz = ForgeVersionProxy.onesevenPlus ? "net/minecraft/client/network/NetHandlerPlayClient" : "net/minecraft/client/multiplayer/NetClientHandler";
 
-		MethodNode s = new MethodNode(Opcodes.ACC_PUBLIC, "canSendSettings_1", "()Z", null, null);
+		MethodNode s = new MethodNode(Opcodes.ACC_PUBLIC, CoreUtils.genMethodName(classNode, "canSendSettings_", "()Z"), "()Z", null, null);
 		InsnList l = new InsnList();
 		LabelNode l0 = new LabelNode();
 		l.add(l0);
@@ -140,7 +140,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		InsnList li = new InsnList();
 		li.add(new LabelNode());
 		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
-		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/settings/GameSettings", "canSendSettings_1", "()Z", false));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/settings/GameSettings", s.name, "()Z", false));
 		LabelNode label1 = new LabelNode();
 		li.add(new JumpInsnNode(Opcodes.IFNE, label1));
 		LabelNode label2 = new LabelNode();
