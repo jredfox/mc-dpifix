@@ -129,19 +129,26 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		s.visitMaxs(1, 3);
 		s.visitEnd();
 		
+		//Add the method
+		classNode.methods.add(s);
 		
-//		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("sendSettingsToServer", "func_82879_c"), "()V");//TODO: notch names
-//		InsnList l = new InsnList();
-//		l.add(new LabelNode());
-//		l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "canSendOptions", "()Z", false));
-//		LabelNode l1 = new LabelNode();
-//		l.add(new JumpInsnNode(Opcodes.IFNE, l1));
-//		LabelNode l2 = new LabelNode();
-//		l.add(l2);
-//		l.add(new InsnNode(Opcodes.RETURN));
-//		l.add(l1);
-//		l.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-//		m.instructions.insert(l);
+		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("sendSettingsToServer", "func_82879_c"), "()V");//TODO: notch names
+		/**
+		 * if(!this.canSendSettings_1())
+		 * 		return;
+		 */
+		InsnList li = new InsnList();
+		li.add(new LabelNode());
+		li.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		li.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/settings/GameSettings", "canSendSettings_1", "()Z", false));
+		LabelNode label1 = new LabelNode();
+		li.add(new JumpInsnNode(Opcodes.IFNE, label1));
+		LabelNode label2 = new LabelNode();
+		li.add(label2);
+		li.add(new InsnNode(Opcodes.RETURN));
+		li.add(label1);
+		li.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+		m.instructions.insert(li);
 	}
 
 	public void patchMemCache(String mcClazz, ClassNode classNode)
