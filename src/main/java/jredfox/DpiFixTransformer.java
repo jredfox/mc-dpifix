@@ -134,7 +134,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		
 		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("sendSettingsToServer", !ForgeVersionProxy.notchNames ? "func_82879_c" : "c"), "()V");
 		/**
-		 * if(!this.canSendSettings_1())
+		 * if(!this.canSendSettings_<int>())
 		 * 		return;
 		 */
 		InsnList li = new InsnList();
