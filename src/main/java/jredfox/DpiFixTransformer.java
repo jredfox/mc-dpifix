@@ -63,9 +63,85 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 				patchOptifineNonWindows(classNode);
 			break;
 			
+			case 7:
+				patchGameSettings(classNode);
+			break;
+			
 			default:
 				break;
 		}
+	}
+
+	public void patchGameSettings(ClassNode classNode) 
+	{
+		String fieldMc = CoreUtils.getObfString("mc", "field_74317_L");
+		String fieldPlayer = CoreUtils.getObfString("player", "field_71439_g");
+		String fieldConnection = CoreUtils.getObfString("connection", "field_71174_a");
+		String playerClazz = ForgeVersionProxy.majorVersion >= 11 ? "net/minecraft/client/entity/EntityPlayerSP" : "net/minecraft/client/entity/EntityClientPlayerMP";
+		String connClazz = ForgeVersionProxy.onesevenPlus ? "net/minecraft/client/network/NetHandlerPlayClient" : "net/minecraft/client/multiplayer/NetClientHandler";
+
+		MethodNode s = new MethodNode(Opcodes.ACC_PUBLIC, "canSendSettings_1", "()Z", null, null);
+		InsnList l = new InsnList();
+		LabelNode l0 = new LabelNode();
+		l.add(l0);
+		l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		l.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/settings/GameSettings", fieldMc, "Lnet/minecraft/client/Minecraft;"));
+		l.add(new VarInsnNode(Opcodes.ASTORE, 1));
+		LabelNode l1 = new LabelNode();
+		l.add(l1);
+		l.add(new VarInsnNode(Opcodes.ALOAD, 1));
+		LabelNode l2 = new LabelNode();
+		l.add(new JumpInsnNode(Opcodes.IFNONNULL, l2));
+		LabelNode l3 = new LabelNode();
+		l.add(l3);
+		l.add(new InsnNode(Opcodes.ICONST_0));
+		l.add(new InsnNode(Opcodes.IRETURN));
+		l.add(l2);
+		l.add(new FrameNode(Opcodes.F_APPEND, 1, new Object[] {"net/minecraft/client/Minecraft"}, 0, null));
+		l.add(new VarInsnNode(Opcodes.ALOAD, 1));
+		l.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", fieldPlayer, "L" + playerClazz + ";"));
+		l.add(new VarInsnNode(Opcodes.ASTORE, 2));
+		LabelNode l4 = new LabelNode();
+		l.add(l4);
+		l.add(new VarInsnNode(Opcodes.ALOAD, 2));
+		LabelNode l5 = new LabelNode();
+		l.add(new JumpInsnNode(Opcodes.IFNULL, l5));
+		l.add(new VarInsnNode(Opcodes.ALOAD, 2));
+		l.add(new FieldInsnNode(Opcodes.GETFIELD, playerClazz, fieldConnection, "L" + connClazz + ";"));
+		l.add(new JumpInsnNode(Opcodes.IFNULL, l5));
+		l.add(new InsnNode(Opcodes.ICONST_1));
+		l.add(new InsnNode(Opcodes.IRETURN));
+		l.add(l5);
+		l.add(new FrameNode(Opcodes.F_APPEND,1, new Object[] {playerClazz}, 0, null));
+		l.add(new InsnNode(Opcodes.ICONST_0));
+		l.add(new InsnNode(Opcodes.IRETURN));
+		LabelNode l6 = new LabelNode();
+		l.add(l6);
+		//Set the methods instruction list
+		s.instructions = l;
+		
+		//Append local varaibles
+		s.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/client/settings/GameSettings;", null, l0, l6, 0));
+		s.localVariables.add(new LocalVariableNode("mc", "Lnet/minecraft/client/Minecraft;", null, l1, l6, 1));
+		s.localVariables.add(new LocalVariableNode("p", "L" + playerClazz + ";", null, l4, l6, 2));
+		
+		//max & end
+		s.visitMaxs(1, 3);
+		s.visitEnd();
+		
+		
+//		MethodNode m = CoreUtils.getMethodNode(classNode, CoreUtils.getObfString("sendSettingsToServer", "func_82879_c"), "()V");//TODO: notch names
+//		InsnList l = new InsnList();
+//		l.add(new LabelNode());
+//		l.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "canSendOptions", "()Z", false));
+//		LabelNode l1 = new LabelNode();
+//		l.add(new JumpInsnNode(Opcodes.IFNE, l1));
+//		LabelNode l2 = new LabelNode();
+//		l.add(l2);
+//		l.add(new InsnNode(Opcodes.RETURN));
+//		l.add(l1);
+//		l.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+//		m.instructions.insert(l);
 	}
 
 	public void patchMemCache(String mcClazz, ClassNode classNode)

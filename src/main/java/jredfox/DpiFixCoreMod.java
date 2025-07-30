@@ -78,7 +78,8 @@ public class DpiFixCoreMod implements IClassTransformer {
 				"net.minecraftforge.client.ForgeHooksClient",
 				"cpw.mods.fml.client.GuiModList",
 				"net.minecraft.client.renderer.RenderEngine",
-				"cpw.mods.fml.client.TextureFXManager"//END Optifine Compat
+				"cpw.mods.fml.client.TextureFXManager",//END Optifine Compat
+				"net.minecraft.client.settings.GameSettings"
 			};
 		}
 		return new String[] {
@@ -88,7 +89,8 @@ public class DpiFixCoreMod implements IClassTransformer {
 			"net.minecraft.client.renderer.texture.TextureManager",
 			"cpw.mods.fml.client.GuiModList",
 			"net.minecraft.client.gui.GuiMainMenu",
-			"Config"//Optifine Support for macOS
+			"Config",//Optifine Support for macOS
+			"net.minecraft.client.settings.GameSettings"
 		};
 	}
 
