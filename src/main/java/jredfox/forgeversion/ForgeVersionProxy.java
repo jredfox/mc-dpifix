@@ -325,9 +325,6 @@ public class ForgeVersionProxy {
 	{
 		try
 		{
-			//Reduce GETFIELD calls
-			int major = majorVersion;
-			
 			//1.8 - 1.12.2
 			if(oneeightPlus)
 				return SideCheckModern.checkClient();
@@ -335,7 +332,7 @@ public class ForgeVersionProxy {
 			else if(!onefive)
 				return SideCheckOld.checkClient();
 			//1.3.2 - 1.5.2
-			else if(major > 3)
+			else if(majorVersion > 3)
 				return SideCheckLegacy.checkClient();
 			//1.1 - 1.2.5
 			else
