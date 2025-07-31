@@ -442,7 +442,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		}
 		
 		//DpiFixDeAWT.setDisplayMode(this);
-		FieldInsnNode fsWidth =  CoreUtils.nextFieldInsnNode(CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayWidthF, "I"), Opcodes.PUTFIELD, mcClazz, displayWidthF, "I");
+		FieldInsnNode fsWidth =  CoreUtils.nextFieldInsnNode(CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayWidthF,  "I"), Opcodes.PUTFIELD, mcClazz, displayWidthF,  "I");
 		FieldInsnNode fsHeight = CoreUtils.nextFieldInsnNode(CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayHeightF, "I"), Opcodes.PUTFIELD, mcClazz, displayHeightF, "I");
 		AbstractInsnNode fsSpot = (fsWidth != null && nodeFS.instructions.indexOf(fsWidth) > nodeFS.instructions.indexOf(fsHeight)) ? fsWidth : fsHeight;
 		System.out.println("heightIndex:" + nodeFS.instructions.indexOf(fsHeight) + " fsWidth:" + nodeFS.instructions.indexOf(fsWidth));
