@@ -519,7 +519,11 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		InsnList viewport = new InsnList();
 		viewport.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		viewport.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resize.instructions.insert(CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClazz, displayHeightF, "I"), viewport);//TODO fragile injection point
+		FieldInsnNode insnWidth =  CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClazz, CoreUtils.getObfString("displayWidth",  displayWidthF), "I");
+		FieldInsnNode insnHeight = CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClazz, CoreUtils.getObfString("displayHeight", displayHeightF), "I");
+		AbstractInsnNode targView = (insnWidth != null && resize.instructions.indexOf(insnWidth) > resize.instructions.indexOf(insnHeight)) ? insnWidth : insnHeight;
+		System.out.println("insnWidth:" + resize.instructions.indexOf(insnWidth) + " insnHeight:" + resize.instructions.indexOf(insnHeight));
+		resize.instructions.insert(targView, viewport);
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
 		InsnList resizeList = new InsnList();
