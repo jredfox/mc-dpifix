@@ -445,7 +445,6 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		FieldInsnNode fsWidth =  CoreUtils.nextFieldInsnNode(CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayWidthF,  "I"), Opcodes.PUTFIELD, mcClazz, displayWidthF,  "I");
 		FieldInsnNode fsHeight = CoreUtils.nextFieldInsnNode(CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayHeightF, "I"), Opcodes.PUTFIELD, mcClazz, displayHeightF, "I");
 		AbstractInsnNode fsSpot = (fsWidth != null && nodeFS.instructions.indexOf(fsWidth) > nodeFS.instructions.indexOf(fsHeight)) ? fsWidth : fsHeight;
-		System.out.println("heightIndex:" + nodeFS.instructions.indexOf(fsHeight) + " fsWidth:" + nodeFS.instructions.indexOf(fsWidth));
 		InsnList fsSpotList = new InsnList();
 		fsSpotList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		fsSpotList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "setDisplayMode", "(Lnet/minecraft/client/Minecraft;)V", false));
