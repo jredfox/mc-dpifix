@@ -74,6 +74,9 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 
 	public static void patchGameSettings(ClassNode classNode) 
 	{
+		if(!DpiFix.fsSaveFix)
+			return;
+		
 		String fieldMc = CoreUtils.getObfString("mc", "field_74317_L");
 		String fieldPlayer = CoreUtils.getObfString("player", "field_71439_g");
 		String fieldConnection = CoreUtils.getObfString("connection", "field_71174_a");
