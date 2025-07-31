@@ -439,11 +439,16 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			fsIfList.add(new InsnNode(Opcodes.ICONST_0));
 			fsIfList.add(new JumpInsnNode(Opcodes.IFEQ, CoreUtils.nextJumpInsnNode(canvasInsnNode).label));
 			nodeFS.instructions.insertBefore(canvasInsnNode.getPrevious(), fsIfList);//inject before ALOAD 0 we can't use prevLabel as there is a frame and we can't recompute frames
-			//TODO: possible errored injection point
 		}
 		
 		//DpiFixDeAWT.setDisplayMode(this);
-		FieldInsnNode fsSpot = CoreUtils.nextFieldInsnNode(CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayHeightF, "I"), Opcodes.PUTFIELD, mcClazz, displayHeightF, "I");
+		FieldInsnNode fsWidth = CoreUtils.nextFieldInsnNode(
+				CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayWidthF, "I"), Opcodes.PUTFIELD,
+				mcClazz, displayWidthF, "I");
+		FieldInsnNode fsHeight = CoreUtils.nextFieldInsnNode(
+				CoreUtils.getFieldInsnNode(nodeFS, Opcodes.GETFIELD, mcClazz, tempDisplayHeightF, "I"),
+				Opcodes.PUTFIELD, mcClazz, displayHeightF, "I");
+		AbstractInsnNode fsSpot = (fsWidth != null && nodeFS.instructions.indexOf(fsWidth) > nodeFS.instructions.indexOf(fsHeight)) ? fsWidth : fsHeight;
 		InsnList fsSpotList = new InsnList();
 		fsSpotList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		fsSpotList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "setDisplayMode", "(Lnet/minecraft/client/Minecraft;)V", false));
