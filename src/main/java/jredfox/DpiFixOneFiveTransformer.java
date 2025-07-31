@@ -439,6 +439,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 			fsIfList.add(new InsnNode(Opcodes.ICONST_0));
 			fsIfList.add(new JumpInsnNode(Opcodes.IFEQ, CoreUtils.nextJumpInsnNode(canvasInsnNode).label));
 			nodeFS.instructions.insertBefore(canvasInsnNode.getPrevious(), fsIfList);//inject before ALOAD 0 we can't use prevLabel as there is a frame and we can't recompute frames
+			//TODO: possible errored injection point
 		}
 		
 		//DpiFixDeAWT.setDisplayMode(this);
@@ -446,7 +447,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		InsnList fsSpotList = new InsnList();
 		fsSpotList.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		fsSpotList.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixDeAWT", "setDisplayMode", "(Lnet/minecraft/client/Minecraft;)V", false));
-		nodeFS.instructions.insert(fsSpot, fsSpotList);
+		nodeFS.instructions.insert(fsSpot, fsSpotList);//TODO fragile injection point
 		
 		//DpiFixCoreMod#tickDisplay(this);
 		InsnList fsli = new InsnList();
@@ -518,7 +519,7 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		InsnList viewport = new InsnList();
 		viewport.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		viewport.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resize.instructions.insert(CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClazz, displayHeightF, "I"), viewport);
+		resize.instructions.insert(CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClazz, displayHeightF, "I"), viewport);//TODO fragile injection point
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
 		InsnList resizeList = new InsnList();

@@ -308,7 +308,12 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		InsnList viewport = new InsnList();
 		viewport.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		viewport.add(CoreUtils.newMethodInsnNode(Opcodes.INVOKESTATIC, "jredfox/DpiFixCoreMod", "updateViewPort", "(Lnet/minecraft/client/Minecraft;)V", false));
-		resize.instructions.insert(CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, CoreUtils.getObfString("displayHeight", onesixnotch ? (mapOneSixThree ? "e" : mapOneSixTwo ? "e" : "d") : "field_71440_d"), "I"), viewport);
+		boolean notOneSixOne = mapOneSixThree || mapOneSixTwo;
+		FieldInsnNode insnWidth =  CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, CoreUtils.getObfString("displayWidth",  !onesixnotch ? "field_71443_c" : (notOneSixOne ? "d" : "c")), "I");
+		FieldInsnNode insnHeight = CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClass, CoreUtils.getObfString("displayHeight", !onesixnotch ? "field_71440_d" : (notOneSixOne ? "e" : "d")), "I");
+		AbstractInsnNode targView = (insnWidth != null && resize.instructions.indexOf(insnWidth) > resize.instructions.indexOf(insnHeight)) ? insnWidth : insnHeight;
+		System.out.println("targViewport isHeight:" + (targView == insnHeight) + " insnWidth:" + insnWidth);
+		resize.instructions.insert(targView, viewport);
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
 		InsnList resizeList = new InsnList();
