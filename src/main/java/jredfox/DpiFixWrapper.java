@@ -38,7 +38,7 @@ public class DpiFixWrapper implements IFMLLoadingPlugin, net.minecraftforge.fml.
 		//setup booleans
 		boolean onefive = ForgeVersionProxy.onefive;
 		boolean onesixnotch = ForgeVersionProxy.notchNames;
-		boolean oneeight = ForgeVersionProxy.majorVersion >= 11;
+		boolean oneeight = ForgeVersionProxy.oneeightPlus;
 		
 		//Add Exclusion List 1.3.2 - 1.12.2
 		try

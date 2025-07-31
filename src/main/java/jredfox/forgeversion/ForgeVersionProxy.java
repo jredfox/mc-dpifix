@@ -88,6 +88,10 @@ public class ForgeVersionProxy {
 	 * Are We running on 1.7x or above
 	 */
 	public static boolean onesevenPlus;
+	/**
+	 * Are We running on 1.8x or above
+	 */
+	public static boolean oneeightPlus;
     /**
      * When Compiled with true ForgeVersionProxy Supports Forge for MC 1.1 - 1.2.5!
      * Set this to false when compiling if you don't want or need that support
@@ -307,6 +311,7 @@ public class ForgeVersionProxy {
 		onefive = 		  major < 8;
 		onesix = 		  major < 10;
 		onesevenPlus =    major > 9;
+		oneeightPlus = major > 10;
 		isClientAgent = (onefive ? (cl.getSystemClassLoader().getResource("net/minecraft/client/Minecraft.class") != null) : (cl.getSystemClassLoader().getResource("net/minecraft/client/main/Main.class") != null))
 				&& (cl.getResource("org/lwjgl/LWJGLException.class") != null || cl.getResource("org/lwjgl/Version.class") != null);
 	}
@@ -324,7 +329,7 @@ public class ForgeVersionProxy {
 			int major = majorVersion;
 			
 			//1.8 - 1.12.2
-			if(major > 10)
+			if(oneeightPlus)
 				return SideCheckModern.checkClient();
 			//1.6.1 - 1.7.10
 			else if(!onefive)

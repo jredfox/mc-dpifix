@@ -77,7 +77,7 @@ public class DpiFixTransformer implements IDpiFixTransformer {
 		String fieldMc = CoreUtils.getObfString("mc", "field_74317_L");
 		String fieldPlayer = CoreUtils.getObfString("player", "field_71439_g");
 		String fieldConnection = CoreUtils.getObfString("connection", "field_71174_a");
-		String playerClazz = ForgeVersionProxy.majorVersion >= 11 ? "net/minecraft/client/entity/EntityPlayerSP" : "net/minecraft/client/entity/EntityClientPlayerMP";
+		String playerClazz = ForgeVersionProxy.oneeightPlus ? "net/minecraft/client/entity/EntityPlayerSP" : "net/minecraft/client/entity/EntityClientPlayerMP";
 		String connClazz = ForgeVersionProxy.onesevenPlus ? "net/minecraft/client/network/NetHandlerPlayClient" : "net/minecraft/client/multiplayer/NetClientHandler";
 
 		MethodNode s = new MethodNode(Opcodes.ACC_PUBLIC, CoreUtils.genMethodName(classNode, "canSendSettings_", "()Z"), "()Z", null, null);
