@@ -522,7 +522,6 @@ public class DpiFixOneFiveTransformer implements IDpiFixTransformer {
 		FieldInsnNode insnWidth =  CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClazz, CoreUtils.getObfString("displayWidth",  displayWidthF), "I");
 		FieldInsnNode insnHeight = CoreUtils.getFieldInsnNode(resize, Opcodes.PUTFIELD, mcClazz, CoreUtils.getObfString("displayHeight", displayHeightF), "I");
 		AbstractInsnNode targView = (insnWidth != null && resize.instructions.indexOf(insnWidth) > resize.instructions.indexOf(insnHeight)) ? insnWidth : insnHeight;
-		System.out.println("insnWidth:" + resize.instructions.indexOf(insnWidth) + " insnHeight:" + resize.instructions.indexOf(insnHeight));
 		resize.instructions.insert(targView, viewport);
 		
 		//this.loadingScreen = new LoadingScreenRenderer(this);
